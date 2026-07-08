@@ -1,0 +1,2649 @@
+﻿<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>L-SHOGI</title><meta name="theme-color" content="#263c70"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="L-SHOGI"><link rel="manifest" href="manifest.json"><link rel="icon" type="image/svg+xml" href="icon.svg"><link rel="apple-touch-icon" href="icon.svg"><style>
+:root{--ink:#171b34;--paper:#fffaf0;--gold:#ffd35a;--line:#252b4f;--blue:#4d8eea;--red:#e75b54;--panel:#f8f2df}
+*{box-sizing:border-box;margin:0;padding:0;user-select:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#070a16;color:var(--ink);font-family:"Segoe UI","Yu Gothic UI","Meiryo",sans-serif}
+button{font:inherit}
+#fit{position:fixed;inset:0;overflow:hidden;background:radial-gradient(circle at 50% 20%,#263c70,#090e20 68%)}
+#stage{--stage-scale:1;position:absolute;left:50%;top:50%;width:1920px;height:1080px;overflow:hidden;transform-origin:center;transform:translate(-50%,-50%) scale(var(--stage-scale));background:radial-gradient(90% 75% at 85% 105%,rgba(234,111,82,.2),transparent 62%),linear-gradient(145deg,#243b72,#28234e 58%,#3c2248);box-shadow:inset 0 0 180px #070a16}
+@media(max-width:1600px),(max-height:900px){#stage{--stage-scale:.833333}}
+@media(max-width:1366px),(max-height:768px){#stage{--stage-scale:.711111}}
+@media(max-width:1280px),(max-height:720px){#stage{--stage-scale:.666667}}
+@media(max-height:675px){#stage{--stage-scale:.625}}
+@media(max-height:650px){#stage{--stage-scale:.6}}
+#stage:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.25;background-image:linear-gradient(#fff2 1px,transparent 1px),linear-gradient(90deg,#fff2 1px,transparent 1px);background-size:72px 72px}
+.screen{display:none;position:absolute;inset:0;z-index:1}.screen.active{display:block}
+.topbar{height:104px;display:flex;align-items:center;padding:0 40px;color:#fff;background:linear-gradient(#121a3bea,#0d132ed8);border-bottom:4px solid #ffd35a66}
+.topbar h2{font-size:44px}.topbar .grow{flex:1}.topbar .status{font-size:28px;font-weight:900;color:#ffe59a}
+.btn{min-height:76px;padding:0 34px;border:5px solid var(--line);border-radius:20px;background:linear-gradient(#fff,#e7eaff);box-shadow:0 6px 0 #151a35;color:var(--ink);font-size:30px;font-weight:900;cursor:pointer}
+.btn:active,.btn.focused{transform:translateY(3px);box-shadow:0 3px 0 #151a35;outline:6px solid var(--gold);outline-offset:4px}.btn.primary{background:linear-gradient(#ffe991,#ffc53f)}.btn.red{background:linear-gradient(#ff887e,#dc443e);color:#fff}.btn.small{min-height:62px;font-size:26px;padding:0 25px}
+.title-logo{position:absolute;top:126px;left:0;right:0;text-align:center;color:#fff}.title-logo h1{font-size:126px;line-height:1;text-shadow:0 8px 0 #111936,0 18px 34px #0009;letter-spacing:5px}.title-logo h1 span{color:var(--gold)}.title-logo p{font-size:34px;font-weight:900;letter-spacing:8px;margin-top:24px;color:#dbe6ff}
+.menu{position:absolute;top:480px;left:50%;width:760px;transform:translateX(-50%);display:grid;grid-template-columns:1fr 1fr;gap:24px}.menu .primary{grid-column:1/-1;min-height:112px;font-size:42px}
+.menu .mode-on{background:#dff8e9;border-color:#2d9b62;color:#195c3d}
+.content{position:absolute;inset:120px 34px 30px;display:flex;gap:30px}
+.panel{background:linear-gradient(#f7f9ff,#dce3f3);border:5px solid var(--line);border-radius:24px;box-shadow:0 12px 0 #141a36,0 20px 40px #0006}
+.setup-side{width:490px;padding:28px;display:flex;flex-direction:column}.setup-side h3{font-size:38px}.setup-side p{font-size:27px;font-weight:800;line-height:1.4;margin:14px 0 22px}.tray{display:grid;grid-template-columns:1fr 1fr;gap:13px}.tray-piece{height:92px;border:4px solid var(--line);border-radius:16px;background:#fff7db;display:flex;align-items:center;padding:10px 18px;gap:18px;font-size:27px;font-weight:900;cursor:grab}.tray-piece .glyph{font-size:47px}.tray-piece.placed{opacity:.35}.setup-actions{margin-top:auto;display:flex;gap:14px}.setup-actions .btn{flex:1}
+.board-wrap{flex:1;display:grid;place-items:center;position:relative;background:linear-gradient(145deg,#18213c,#0c1227)}.board{width:820px;height:820px;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(7,1fr);background:#11182e;border:10px solid #53658f;box-shadow:0 16px 0 #080d1d,0 24px 45px #0009,inset 0 0 40px #0008}
+.cell{position:relative;border:2px solid #344465;display:grid;place-items:center;background:linear-gradient(135deg,#1e2a49,#151e37);cursor:pointer}.cell:nth-child(even){background:linear-gradient(135deg,#202f52,#17213d)}.cell.allowed{background:linear-gradient(135deg,#304b68,#20364e)}.cell.allowed:after{content:"";position:absolute;width:22px;height:22px;border-radius:50%;background:#66e4ff;border:3px solid #d5f9ff;box-shadow:0 0 18px #5ee8ff}.cell.legal{background:linear-gradient(135deg,#244e52,#173c3f)}.cell.legal:after{content:"";position:absolute;width:31px;height:31px;border-radius:50%;background:#8fffc8aa;border:4px solid #baffdc;box-shadow:0 0 18px #62ffb4}.cell.last{box-shadow:inset 0 0 0 7px #ffd35a}.cell.coord:before{content:attr(data-coord);position:absolute;top:3px;left:5px;font-size:24px;font-weight:900;color:#a9badb88}
+.cell.territory-0{background:linear-gradient(135deg,#173b57,#13243d);border-color:#3da9d5}.cell.territory-1{background:linear-gradient(135deg,#522334,#321b2a);border-color:#c84f6b}.cell.territory-2{background:linear-gradient(135deg,#17422c,#142d25);border-color:#43ae69}.cell.territory-3{background:linear-gradient(135deg,#52451c,#332d19);border-color:#c6a534}
+.cell.zone-warn{box-shadow:inset 0 0 0 7px #ffb84abb,0 0 14px #ffb84a77}.cell.zone-warn:before{content:"警";position:absolute;left:4px;top:3px;z-index:6;border:3px solid #fff;border-radius:8px;background:#ffb84a;color:#241100;padding:0 7px;font-size:22px;font-weight:1000;text-shadow:0 1px 0 #fff8}
+.cell.zone-danger{background:#050711!important;border-color:#050711!important;box-shadow:none!important;cursor:default}.cell.zone-danger:before{content:""}.cell.zone-danger:after{display:none!important}.cell.zone-danger .piece{display:none!important}
+.cell.swap-legal{background:linear-gradient(135deg,#4b3b72,#29254f);box-shadow:inset 0 0 0 6px #c691ff}.cell.swap-legal:after{content:"⇄";position:absolute;right:3px;bottom:1px;z-index:5;color:#fff;font-size:30px;font-weight:1000;text-shadow:0 0 9px #bb74ff}
+.cell.attack-target{box-shadow:inset 0 0 0 7px #ffb84a,0 0 18px #ff9f2e}.cell.attack-target:after{content:"撃";position:absolute;right:4px;bottom:0;z-index:7;color:#241100;background:#ffca5b;border:3px solid #fff;border-radius:10px;padding:0 8px;font-size:28px;font-weight:1000}.cell.attack-king{box-shadow:inset 0 0 0 8px #ff2f5f,0 0 25px #ff2f5fcc!important}.cell.attack-king:after{content:"王";position:absolute;right:4px;bottom:0;z-index:7;color:#fff;background:#ff2f5f;border:3px solid #fff;border-radius:10px;padding:0 8px;font-size:30px;font-weight:1000;text-shadow:0 2px 0 #8a1028}.cell.own-threat:not(.king-check){box-shadow:inset 0 0 0 6px #ff5d4a,0 0 16px #ff5d4a88}.cell.own-threat:not(.king-check):before{content:"危";position:absolute;left:4px;top:3px;z-index:7;border:3px solid #fff;border-radius:8px;background:#ff5d4a;color:#fff;padding:0 7px;font-size:22px;font-weight:1000;text-shadow:0 2px 0 #882015}
+.cell.king-check{background:linear-gradient(135deg,#6a1824,#2a0d18)!important;box-shadow:inset 0 0 0 8px #ff416d,0 0 24px #ff416dcc;animation:checkPulse .72s infinite alternate}.cell.king-check:before{content:"王手";position:absolute;left:4px;top:3px;z-index:8;border:3px solid #fff;border-radius:8px;background:#ff2f5f;color:#fff;padding:1px 7px;font-size:23px;font-weight:1000;text-shadow:0 2px 0 #8a1028}.cell.king-check .piece{animation:kingShake .24s infinite alternate;filter:drop-shadow(0 0 16px #ffec6a)}
+.piece{position:relative;width:92%;height:92%;display:grid;place-items:center;border-radius:22px;border:4px solid #fff;box-shadow:0 5px 0 #28334e,0 0 18px #fff6;font-family:"Segoe UI Emoji","Yu Gothic UI",sans-serif;font-weight:900;color:#10182c;z-index:2}.piece.owner-0{background:linear-gradient(145deg,#e7f8ff,#559aca);border-color:#9ce8ff;box-shadow:0 5px 0 #23516f,0 0 18px #4edbff99}.piece.owner-1{background:linear-gradient(145deg,#ffe9ee,#c65c72);border-color:#ff9cb1;box-shadow:0 5px 0 #732c3c,0 0 18px #ff527899}.piece.owner-2{background:linear-gradient(145deg,#e6ffe9,#55aa70);border-color:#8dffaa;box-shadow:0 5px 0 #24613a,0 0 18px #55ef8599}.piece.owner-3{background:linear-gradient(145deg,#fff8cf,#d7a82d);border-color:#ffe878;box-shadow:0 5px 0 #765a16,0 0 18px #ffd84eaa}.piece.king{outline:5px double #fff2a4;outline-offset:-9px}.piece.selected{outline:8px solid #fff;outline-offset:4px;filter:drop-shadow(0 0 14px #fff)}.piece.reserved{filter:drop-shadow(0 0 13px #fff)}
+.move-map{position:absolute;inset:3px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);align-items:center;justify-items:center}.move-arrow{font-family:"Segoe UI Symbol",sans-serif;font-size:25px;line-height:1;font-weight:1000;text-shadow:0 0 3px #fff,0 0 9px currentColor}.owner-0 .move-arrow{color:#004b70}.owner-1 .move-arrow{color:#76132b}.owner-2 .move-arrow{color:#075b2b}.owner-3 .move-arrow{color:#694c00}.move-avatar{font-size:43px;line-height:1;filter:drop-shadow(0 2px 1px #fff)}.king .move-arrow{text-shadow:0 0 3px #fff,0 0 8px #fff0a0}
+.direction-key{border:4px solid #4d638c;border-radius:16px;background:#101a33;color:#fff;padding:12px 15px;font-size:24px;font-weight:900;line-height:1.32}.faction-key{display:grid;grid-template-columns:1fr 1fr;gap:5px}.faction-key span,.faction-pill{border-radius:8px;padding:5px 8px;color:#10182c;font-weight:1000}.f0{background:#73d9ff}.f1{background:#ff7995}.f2{background:#70e995}.f3{background:#ffe063}.faction-status{display:grid;grid-template-columns:1fr 1fr;gap:8px}.faction-pill{position:relative;min-height:104px;border:3px solid #ffffffaa;cursor:pointer;text-align:left;display:grid;grid-template-rows:auto auto 1fr;gap:2px}.faction-pill .fp-name{font-size:22px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.faction-pill .fp-state{font-size:24px;line-height:1.1}.faction-pill .fp-metrics{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:3px}.faction-pill .fp-metrics span{background:#ffffff99;border-radius:7px;padding:2px 5px;font-size:18px;text-align:center}.faction-pill.active{outline:5px solid #fff;box-shadow:0 0 15px #fff}.faction-pill.dead{filter:grayscale(1);opacity:.45}.faction-pill.input-ready{outline:5px solid #73ff9a;box-shadow:0 0 18px #50ff84}.faction-pill.input-ready:before{content:"入力済";position:absolute;left:6px;top:-12px;border:3px solid #fff;border-radius:10px;background:#26c95d;color:#fff;padding:1px 7px;font-size:20px;font-weight:1000;text-shadow:0 2px 0 #0d682b}.faction-pill.check{background:linear-gradient(#ffec70,#ff315f)!important;color:#fff;text-shadow:0 2px 0 #8a1028;border-color:#fff;box-shadow:0 0 22px #ff416d;animation:checkPulse .72s infinite alternate}.faction-pill.check .fp-metrics span{background:#ffffffcc;color:#771328;text-shadow:none}.faction-pill.check:after{content:"王手!";position:absolute;right:6px;top:-12px;border:3px solid #fff;border-radius:10px;background:#ff2f5f;color:#fff;padding:1px 7px;font-size:22px;font-weight:1000}
+.game-layout{position:absolute;inset:112px 30px 24px;display:grid;grid-template-columns:420px minmax(820px,1fr) 420px;gap:26px}.hud{padding:22px;display:flex;flex-direction:column;gap:15px;min-height:0}.hud h3{font-size:38px}.hud-box{border:4px solid var(--line);border-radius:17px;background:#fff9;padding:14px 17px}.hud-label{font-size:28px;font-weight:900;color:#626887}.hud-value{font-size:35px;font-weight:900;margin-top:4px}.hand-hud{padding:16px!important}.hand-head{display:flex;align-items:center;justify-content:space-between;min-height:56px}.hand-title{font-size:30px;font-weight:1000}.hand-count{font-size:24px;font-weight:1000;color:#243b65}.hand-back{display:none;border:3px solid #394765;border-radius:10px;background:#fff;padding:7px 12px;font-size:22px;font-weight:1000}.hand-back.show{display:block}.hand-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:6px 0}.hand-tab{border:3px solid #52617e;border-radius:10px;padding:5px 3px;font-size:20px;font-weight:1000;cursor:pointer}.hand-tab.active{outline:4px solid #fff;box-shadow:0 0 12px #fff}.hands{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:84px;gap:7px;margin-top:9px}.hands.big{grid-template-columns:repeat(3,1fr);grid-auto-rows:104px}.hands.big .hand-piece{height:104px}.hands.big .move-arrow{font-size:22px}.hands.big .move-avatar{font-size:43px}.hand-piece{width:100%;height:84px;border:3px solid var(--line);border-radius:11px;background:#111a30;padding:2px;cursor:pointer}.hand-piece .piece{width:100%;height:100%;box-shadow:none;border-width:3px;border-radius:10px}.hand-piece .move-map{inset:1px}.hand-piece .move-arrow{font-size:18px}.hand-piece .move-avatar{font-size:34px}.hand-piece.selected{outline:5px solid var(--blue)}.hand-overview{display:flex;flex-direction:column;gap:8px;min-height:0}.hand-shelf{border:3px solid #52617e;border-radius:12px;background:#e8eef9;padding:6px}.shelf-head{width:100%;border:0;border-radius:8px;padding:5px 9px;text-align:left;font-size:21px;font-weight:1000;cursor:pointer}.shelf-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:66px;gap:4px;margin-top:5px}.shelf-grid .hand-piece{height:66px}.shelf-grid .move-arrow{font-size:14px}.shelf-grid .move-avatar{font-size:27px}.hand-more{height:66px;border:3px dashed #52617e;border-radius:10px;background:#fff;font-size:23px;font-weight:1000;cursor:pointer}.empty{grid-column:1/-1;font-size:25px;font-weight:800;color:#777;padding:10px}.battle-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto}.battle-actions .btn{margin:0!important}.compact-log{font-size:23px!important;line-height:1.3!important}
+.timer{height:190px;display:grid;place-items:center;text-align:center;background:linear-gradient(#192750,#101830);border-color:#fff;color:#fff}.timer .num{font-size:100px;line-height:.9;color:var(--gold);font-weight:1000}.timer .label{font-size:28px;font-weight:900}.turn-badge{font-size:31px;font-weight:900;text-align:center;background:#172144;color:#fff;border-radius:16px;padding:14px}.log{font-size:28px;line-height:1.42;font-weight:800}.event-summary{display:flex;flex-direction:column;gap:6px}.event-main{font-size:24px;font-weight:1000;color:#172144}.event-lines{display:flex;flex-direction:column;gap:4px}.event-line{border-left:7px solid #52617e;background:#ffffff99;border-radius:7px;padding:3px 8px;font-size:19px;line-height:1.25;font-weight:900}.event-line.important{border-color:#ff416d;background:#ffe4ec}.event-line.system{border-color:#111827;background:#e5e7eb}.event-more{font-size:18px;color:#5b647d;font-weight:1000;text-align:right}.hud .btn{margin-top:auto}
+.battle-board{width:810px;height:810px;position:relative}.reserve-arrow{position:absolute;z-index:12;pointer-events:none;height:12px;border-radius:999px;background:linear-gradient(90deg,#ffffff,#ffe27a);transform-origin:0 50%;box-shadow:0 0 18px #ffe27acc,0 4px 0 #111936aa}.reserve-arrow:after{content:"";position:absolute;right:-20px;top:50%;transform:translateY(-50%);border-left:26px solid #ffe27a;border-top:17px solid transparent;border-bottom:17px solid transparent;filter:drop-shadow(0 0 8px #ffe27a)}.reserve-arrow.swap{background:linear-gradient(90deg,#ffffff,#c691ff);box-shadow:0 0 18px #c691ffcc,0 4px 0 #111936aa}.reserve-arrow.swap:after{border-left-color:#c691ff}.reserve-badge{position:absolute;z-index:13;pointer-events:none;min-width:56px;height:46px;display:grid;place-items:center;border:4px solid #fff;border-radius:14px;background:#ffe27a;color:#151a35;font-size:26px;font-weight:1000;box-shadow:0 0 16px #ffe27acc,0 5px 0 #111936aa}.reserve-badge.swap{background:#c691ff;color:#fff;text-shadow:0 2px 0 #4d257f}.reserve-badge.drop{background:#70eaff;color:#07344a}.cell.reserved-from{box-shadow:inset 0 0 0 7px #ffffffcc,0 0 16px #ffffff99}.cell.reserved-to{box-shadow:inset 0 0 0 8px #ffe27a,0 0 22px #ffe27acc!important}.cell.reserved-to.swap-dest{box-shadow:inset 0 0 0 8px #c691ff,0 0 22px #c691ffcc!important}.event-layer{position:absolute;inset:0;z-index:18;pointer-events:none}.event-trace{position:absolute;height:10px;border-radius:999px;background:linear-gradient(90deg,#fff8,#fff,#ffe27a);transform-origin:0 50%;box-shadow:0 0 18px #fff,0 0 24px #ffe27a;animation:eventTrace .72s ease-out both}.event-trace:after{content:"";position:absolute;right:-15px;top:50%;transform:translateY(-50%);border-left:20px solid #fff2a4;border-top:13px solid transparent;border-bottom:13px solid transparent}.event-ping{position:absolute;width:92px;height:92px;margin:-46px 0 0 -46px;border:7px solid #fff;border-radius:50%;box-shadow:0 0 24px #fff,0 0 34px #ffd35a;animation:eventPing 1.25s ease-out both}.event-ping.capture,.event-ping.king{border-color:#ff416d;box-shadow:0 0 24px #fff,0 0 38px #ff416d}.event-ping.collision{border-color:#ffcf4d;box-shadow:0 0 24px #fff,0 0 38px #ff9f2e}.event-ping.annihilation{border-color:#ffffff;background:#ff315f55;box-shadow:0 0 30px #fff,0 0 46px #ff315f}.event-ping.swap{border-color:#c691ff;box-shadow:0 0 24px #fff,0 0 38px #c691ff}.event-ping.compression{border-color:#050711;background:#050711aa;box-shadow:0 0 24px #fff,0 0 38px #050711}.event-chip{position:absolute;min-width:76px;min-height:44px;margin:-22px 0 0 -38px;display:grid;place-items:center;border:5px solid #fff;border-radius:14px;background:#15264b;color:#fff;font-size:25px;font-weight:1000;text-shadow:0 2px 0 #0008;box-shadow:0 7px 0 #050918,0 0 24px #ffffffaa;animation:eventChip 1.35s ease-out both}.event-chip.capture,.event-chip.king{background:#ff315f}.event-chip.collision{background:#ffb84a;color:#231100;text-shadow:0 1px 0 #fff8}.event-chip.annihilation{background:#22112f}.event-chip.swap{background:#7d45c8}.event-chip.drop{background:#1aa6c6}.event-chip.compression{background:#050711}.event-feed{position:absolute;right:12px;bottom:12px;z-index:19;display:flex;flex-direction:column;gap:6px;align-items:flex-end;pointer-events:none}.event-feed-item{max-width:430px;border:4px solid #fff;border-radius:12px;background:#0c1530ee;color:#fff;padding:6px 12px;font-size:21px;font-weight:1000;box-shadow:0 5px 0 #050918,0 0 18px #ffffff55;animation:eventFeed .9s ease-out both}.event-feed-item.important{background:#4b1630ee;border-color:#ffe27a}
+.result-overlay,.modal{display:none;position:absolute;inset:0;z-index:50;background:#080c1dcc;place-items:center}.result-overlay.show,.modal.show{display:grid}.result-card,.modal-card{width:900px;padding:34px;text-align:center}.result-card h2,.modal-card h2{font-size:64px}.result-card p,.modal-card p{font-size:30px;line-height:1.35;font-weight:800;margin:16px 0}.result-card .btn{margin:8px}.result-research{border:4px solid #4a5d86;border-radius:18px;background:#101a33;color:#fff;padding:14px;margin:12px 0;text-align:left}.result-research h3{font-size:30px;margin-bottom:8px;text-align:center}.rr-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rr-item{border:3px solid #6d7fa5;border-radius:12px;background:#eef3ff;color:#16213b;padding:8px 10px;font-size:22px;font-weight:1000;min-height:62px}.rr-item b{display:block;color:#235f91;font-size:24px}.rr-empty{font-size:24px;text-align:center;font-weight:900;color:#cbd7f2}.rr-note{font-size:21px;text-align:center;color:#ffe27a;font-weight:1000;margin-top:8px}
+.modal-card{width:1160px;max-height:850px;text-align:left}.modal-card h2{text-align:center}.guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:25px 0}.guide-item{padding:20px;border:4px solid var(--line);border-radius:16px;background:#fff;font-size:28px;line-height:1.35;font-weight:800}.guide-item b{display:block;font-size:32px;color:#315da1;margin-bottom:5px}.modal-actions{text-align:center}.setting-row{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #d2c5a7;padding:24px 10px;font-size:30px;font-weight:900}.setting-stepper{display:flex;align-items:center;gap:14px}.setting-stepper .btn{width:70px;min-height:58px;padding:0;font-size:34px}.setting-stepper .setting-value{min-width:150px;text-align:center;font-size:35px;font-weight:1000;color:#172144}
+.count-flash{display:none;position:absolute;inset:0;z-index:40;place-items:center;background:#060a18aa;color:#fff;font-size:210px;font-weight:1000;text-shadow:0 10px 0 #17244e}.count-flash.show{display:grid;animation:pop .32s ease-out}.research-toast{display:none;position:absolute;z-index:46;top:132px;left:50%;transform:translateX(-50%);min-width:520px;max-width:760px;border:5px solid #fff;border-radius:20px;background:linear-gradient(135deg,#15264b,#0d172e);box-shadow:0 12px 0 #080d1d,0 0 28px #57dfff99;color:#fff;padding:14px 24px;text-align:center;font-weight:1000;pointer-events:none}.research-toast.show{display:block;animation:toastPop .28s ease-out}.research-toast b{display:block;color:#ffe27a;font-size:30px}.research-toast span{display:block;font-size:25px;margin-top:2px}
+.draw-card{min-height:360px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;border:5px solid #52658c;border-radius:22px;background:linear-gradient(145deg,#1a2748,#10182f);color:#fff;text-align:center}.draw-avatar{font-size:112px;line-height:1}.draw-name{font-size:38px;font-weight:1000}.draw-dirs{font-size:30px;font-weight:900;color:#98eaff}.draw-progress{display:flex;gap:10px;justify-content:center;margin-top:12px}.draw-dot{width:42px;height:18px;border-radius:10px;background:#69728b}.draw-dot.done{background:#59e6ff;box-shadow:0 0 12px #59e6ff}
+.custom-wrap{position:absolute;inset:118px 28px 28px;display:grid;grid-template-columns:930px 1fr;gap:26px}.roster-panel,.edit-panel{padding:24px}.roster-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:16px}.roster-card{height:228px;border:5px solid #334261;border-radius:18px;background:linear-gradient(#f9fbff,#d7e2f5);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer}.roster-card.active{outline:8px solid #57dfff;outline-offset:2px}.roster-card .avatar{font-size:69px}.roster-card .name{font-size:27px;font-weight:1000}.roster-card .dirs{font-size:24px;font-weight:900;color:#36517d;min-height:31px}.edit-panel{display:grid;grid-template-rows:190px 210px minmax(0,1fr) 72px;gap:10px;overflow:hidden}.stockbar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;min-height:0;overflow:hidden}.stock{background:#14203d;color:#fff;border-radius:12px;padding:4px;text-align:center;font-size:19px;font-weight:900;line-height:1.05}.stock b{color:#62e9ff;font-size:25px}.deck-score{grid-column:1/-1;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;border:4px solid #35486e;border-radius:14px;background:#101a33;padding:6px}.score-item{color:#fff;font-size:18px;font-weight:1000}.score-bar{height:10px;border-radius:999px;background:#25314d;overflow:hidden;margin-top:3px}.score-bar i{display:block;height:100%;background:linear-gradient(90deg,#57dfff,#ffcf4d)}.score-risk i{background:linear-gradient(90deg,#ffcf4d,#ff416d)}.score-note{grid-column:1/-1;color:#cbd7f2;font-size:18px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dirpad{width:380px;height:210px;margin:auto;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:7px}.dirbtn{border:4px solid #344466;border-radius:15px;background:#e8eefb;font-size:40px;font-weight:1000;color:#1c2948;cursor:pointer}.dirbtn.on{background:linear-gradient(#8ff7ff,#45cce2);box-shadow:0 0 18px #4ee6ff}.dirbtn.center{background:#182442;color:#fff;font-size:56px;cursor:default}.avatar-section{min-height:0;overflow:hidden;display:flex;flex-direction:column}.avatar-section h3{font-size:30px!important;margin-bottom:8px!important;flex:0 0 auto}.avatar-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;min-height:0;overflow:hidden;align-content:start}.avatar-btn{height:51px;border:3px solid #394765;border-radius:11px;background:#fff;font-size:31px;cursor:pointer}.avatar-btn.on{outline:5px solid #ffcf4d}.editor-actions{display:flex;gap:14px;align-self:end}.editor-actions .btn{flex:1;height:72px;padding:8px 12px;font-size:25px}
+.net-wrap{position:absolute;inset:140px 250px 70px;display:grid;grid-template-columns:1fr 1fr;gap:30px}.net-card{padding:38px;display:flex;flex-direction:column;gap:22px}.net-card h3{font-size:42px}.net-card p{font-size:28px;font-weight:800;line-height:1.45}.net-field{display:flex;flex-direction:column;gap:8px;font-size:29px;font-weight:900}.net-field input{height:72px;border:5px solid var(--line);border-radius:16px;padding:0 18px;font-size:31px;font-weight:900}.net-msg{min-height:42px;color:#b53535;font-size:27px;font-weight:900;text-align:center}.lobby-wrap{position:absolute;inset:145px 170px 70px;display:flex;flex-direction:column;align-items:center;gap:30px}.room-code{font-size:40px;font-weight:1000;color:#ffe27a}.seat-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;width:1100px}.seat-card{height:260px;padding:28px;text-align:center}.seat-card h3{font-size:40px}.seat-card .seat-name{font-size:34px;font-weight:1000;margin:20px 0}.seat-state{display:inline-block;border-radius:13px;padding:8px 20px;background:#59617f;color:#fff;font-size:27px;font-weight:900}.seat-state.ready{background:#27845a}.seat-state.off{background:#a43a45}.lobby-actions{display:flex;gap:22px}.online-badge{font-size:28px;font-weight:900;color:#8fffd0}.net-overlay{display:none;position:absolute;inset:0;z-index:100;background:#050918e8;place-items:center}.net-overlay.show{display:grid}.net-overlay-card{width:900px;padding:42px;text-align:center}.net-overlay-card h2{font-size:55px}.net-overlay-card p{font-size:30px;font-weight:800;line-height:1.5;margin:24px}.net-overlay-actions{display:flex;gap:18px;justify-content:center}
+.research-wrap{position:absolute;inset:122px 30px 28px;display:grid;grid-template-columns:1fr 500px;gap:25px}.research-main,.research-side{padding:24px}.research-side{display:flex;flex-direction:column}.research-summary{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.research-summary h3{font-size:38px}.research-total{font-size:35px;font-weight:1000;color:#285b8c}.research-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.research-unit{height:244px;border:5px solid #344465;border-radius:18px;background:linear-gradient(#fbfdff,#dce6f7);padding:13px;text-align:center}.research-unit .ru-avatar{font-size:62px;line-height:1}.research-unit .ru-name{font-size:25px;font-weight:1000}.research-unit .ru-title{font-size:23px;font-weight:1000;color:#39618d;margin:3px}.research-unit .ru-dots{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:9px}.research-unit .ru-dot{height:28px;border-radius:7px;background:#aeb8ca;color:#fff;font-size:18px;font-weight:1000;line-height:28px}.research-unit .ru-dot.on{background:#28a978;box-shadow:0 0 8px #52e6b3}.research-rewards{display:flex;flex-direction:column;gap:8px;margin-top:12px}.research-reward{border:4px solid #44577e;border-radius:15px;background:#eef3ff;padding:8px 14px;font-size:23px;font-weight:900}.research-reward.on{background:#dff8e9;border-color:#2d9b62}.research-reward b{display:block;font-size:26px}.research-legend{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}.research-legend span{border-radius:8px;background:#dbe4f3;padding:5px 8px;font-size:20px;font-weight:900}.research-help{font-size:22px;font-weight:800;line-height:1.3;margin-top:10px;color:#35415e}
+.mastery-1{box-shadow:0 5px 0 #344668,0 0 0 4px #a66b37,0 0 18px #d8934d!important}.mastery-2{box-shadow:0 5px 0 #344668,0 0 0 4px #55cfe8,0 0 20px #5ce6ff!important}.mastery-3{box-shadow:0 5px 0 #344668,0 0 0 5px #d2a62f,0 0 24px #ffe36b!important}.mastery-4{box-shadow:0 5px 0 #344668,0 0 0 5px #b873ff,0 0 30px #c992ff!important}.roster-card.mastery-1{border-color:#a66b37}.roster-card.mastery-2{border-color:#39b8d1}.roster-card.mastery-3{border-color:#d2a62f}.roster-card.mastery-4{border-color:#9d55e4}.avatar-btn.locked{background:#424b61;color:#fff;font-size:19px;font-weight:1000;cursor:not-allowed;opacity:.72}
+
+/* Lightweight visual polish: brighter console-like toy-board feel without extra assets. */
+:root{--ink:#17223f;--gold:#ffd852;--line:#203054;--blue:#2fa8f4;--red:#f35b74;--panel:#f7fbff}
+#fit{background:linear-gradient(180deg,#74d7ff 0%,#5879d8 48%,#43336f 100%)}
+#stage{background:linear-gradient(160deg,#54c7f4 0%,#5e78dc 45%,#7549b4 72%,#f06f83 100%);box-shadow:inset 0 0 0 12px #ffffff18,inset 0 0 90px #16204688}
+#stage:before{opacity:.16;background-image:linear-gradient(#fff 2px,transparent 2px),linear-gradient(90deg,#fff 2px,transparent 2px);background-size:96px 96px}
+.topbar{background:linear-gradient(180deg,#ffffff2e,#102555cf),linear-gradient(90deg,#1aa9e8,#6a55d8 58%,#ef6f86);border-bottom:5px solid #ffe978;box-shadow:0 8px 0 #14234f66}
+.topbar h2{text-shadow:0 4px 0 #102044,0 0 12px #ffffff55}.topbar .status{color:#fff0a8;text-shadow:0 3px 0 #3b2c4a}
+.title-logo h1{text-shadow:0 7px 0 #17305f,0 16px 24px #1c244d66}.title-logo h1 span{color:#ffe978}.title-logo p{color:#ffffff;opacity:.92;text-shadow:0 3px 0 #26325f}
+.btn{border-color:#203054;border-radius:16px;background:linear-gradient(180deg,#fff 0%,#f7fbff 48%,#d9e6ff 100%);box-shadow:0 7px 0 #17264c,0 12px 18px #10204455,inset 0 3px 0 #ffffff;color:#1a2442;text-shadow:0 1px 0 #fff}
+.btn.primary{background:linear-gradient(180deg,#fff6a8 0%,#ffd852 58%,#ffb13d 100%);box-shadow:0 7px 0 #9a611c,0 13px 18px #3a260f44,inset 0 3px 0 #fff9d0}
+.btn.red{background:linear-gradient(180deg,#ff9aa7,#f35b74 62%,#c73755);box-shadow:0 7px 0 #7a2036,0 13px 18px #3a102044;color:#fff;text-shadow:0 2px 0 #7a2036}
+.btn:active,.btn.focused{box-shadow:0 3px 0 #17264c,0 7px 12px #10204444;outline-color:#fff176}
+.panel{background:linear-gradient(180deg,#ffffff 0%,#f7fbff 48%,#e3efff 100%);border-color:#203054;border-radius:18px;box-shadow:0 10px 0 #17264c,0 20px 30px #16204645,inset 0 3px 0 #ffffff}
+.hud-box,.direction-key,.research-reward,.hand-shelf{border-color:#58709d;background:linear-gradient(180deg,#ffffff,#eef6ff);box-shadow:inset 0 2px 0 #ffffff}
+.board-wrap{background:linear-gradient(160deg,#7bdff8,#5e78dc 52%,#44316d);border-radius:18px;box-shadow:inset 0 0 0 5px #ffffff22}
+.board{background:#355d90;border-color:#f6f0bd;border-radius:12px;box-shadow:0 14px 0 #24396a,0 26px 34px #16204666,inset 0 0 0 6px #24396a,inset 0 0 28px #ffffff4d;overflow:hidden}
+.cell{border:2px solid #6f8ab7;background:linear-gradient(145deg,#bfe8ff 0%,#8ec8f2 48%,#6fa4dc 100%);box-shadow:inset 0 2px 0 #ffffff66}
+.cell:nth-child(even){background:linear-gradient(145deg,#d7f3ff 0%,#a8d8f6 48%,#7eb5e6 100%)}
+.cell.territory-0{background:linear-gradient(145deg,#bff0ff,#76c9ee);border-color:#35a9df}.cell.territory-1{background:linear-gradient(145deg,#ffd3dd,#f58ca2);border-color:#df5672}.cell.territory-2{background:linear-gradient(145deg,#d8ffd8,#8ddf9d);border-color:#42b665}.cell.territory-3{background:linear-gradient(145deg,#fff3bf,#f0cd62);border-color:#c89d25}
+.cell.allowed{background:linear-gradient(145deg,#fff0a8,#78ddff)}.cell.legal{background:linear-gradient(145deg,#dfffe7,#91efb1)}.cell.last{box-shadow:inset 0 0 0 7px #fff176,0 0 16px #fff176aa}
+.cell.coord:before{color:#2e477288;text-shadow:0 1px 0 #fff}
+.piece{border-radius:18px;border:5px solid #ffffff;box-shadow:0 7px 0 #2b3e66,0 12px 14px #10204455,inset 0 4px 0 #ffffffaa;color:#13213d;transform:translateY(-1px)}
+.piece.owner-0{background:linear-gradient(160deg,#ffffff 0%,#93e7ff 45%,#2fa8f4 100%);border-color:#dbf8ff;box-shadow:0 7px 0 #1d6995,0 12px 16px #124b6a55,inset 0 4px 0 #fff}
+.piece.owner-1{background:linear-gradient(160deg,#ffffff 0%,#ffb1c0 45%,#f35b74 100%);border-color:#ffe5eb;box-shadow:0 7px 0 #9d2f48,0 12px 16px #6d173055,inset 0 4px 0 #fff}
+.piece.owner-2{background:linear-gradient(160deg,#ffffff 0%,#aef5b4 45%,#47c76b 100%);border-color:#e8ffe8;box-shadow:0 7px 0 #2d7b44,0 12px 16px #1b613055,inset 0 4px 0 #fff}
+.piece.owner-3{background:linear-gradient(160deg,#ffffff 0%,#ffe78a 45%,#e6b533 100%);border-color:#fff6c9;box-shadow:0 7px 0 #997122,0 12px 16px #60491555,inset 0 4px 0 #fff}
+.piece.king{outline:5px solid #fff176;outline-offset:-10px;box-shadow:0 7px 0 #8d6b20,0 0 0 4px #ffec6a,0 13px 18px #5c481d55,inset 0 4px 0 #fff}
+.move-avatar{font-size:46px;filter:drop-shadow(0 3px 0 #ffffffaa)}.move-arrow{font-size:26px;text-shadow:0 2px 0 #fff,0 0 6px #fff}
+.timer{background:linear-gradient(180deg,#234c9c,#182a62);border-color:#ffe978;border-radius:16px;box-shadow:inset 0 3px 0 #ffffff22,0 8px 0 #14234f}.timer .num{color:#ffe978;text-shadow:0 5px 0 #8a5d10,0 0 16px #ffe978aa}.turn-badge{background:linear-gradient(180deg,#274fa5,#17316f);box-shadow:inset 0 2px 0 #ffffff2e}
+.faction-pill,.hand-tab,.shelf-head,.seat-state{border-radius:10px;box-shadow:inset 0 2px 0 #ffffff55}
+.draw-card{background:linear-gradient(180deg,#294f9d,#18306c);border-color:#ffe978;box-shadow:inset 0 3px 0 #ffffff33,0 8px 0 #14234f}.draw-avatar{filter:drop-shadow(0 6px 0 #0f1e45aa)}
+.roster-card,.research-unit,.rr-item,.avatar-btn,.dirbtn{border-color:#45618e;background:linear-gradient(180deg,#ffffff,#edf6ff);box-shadow:0 5px 0 #31466e,inset 0 3px 0 #ffffff}
+.roster-card.active,.avatar-btn.on,.dirbtn.on{box-shadow:0 5px 0 #1d6995,0 0 0 5px #ffe978,inset 0 3px 0 #ffffff}
+.event-line{background:#ffffffdd;border-left-color:#2fa8f4}.event-line.important{background:#ffeaf0;border-left-color:#f35b74}
+.battle-info{display:flex;flex-direction:column;gap:6px}.info-main{font-size:24px;font-weight:1000;color:#172144}.info-sub{font-size:19px;font-weight:900;line-height:1.25;color:#43506f}.info-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}.info-tag{border:3px solid #59719c;border-radius:8px;background:#fff;padding:1px 7px;font-size:18px;font-weight:1000}.info-tag.warn{border-color:#f35b74;background:#ffeaf0;color:#8a1830}.info-tag.good{border-color:#39a965;background:#e8ffe8;color:#195c3d}.turn-history{display:flex;flex-direction:column;gap:5px;max-height:118px;overflow:hidden}.history-line{border-left:6px solid #2fa8f4;background:#ffffffc8;border-radius:8px;padding:3px 8px;font-size:18px;line-height:1.2;font-weight:900}.history-line:first-child{border-left-color:#ffd852;background:#fff8d6}.setup-squad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}.squad-chip{border:3px solid #58709d;border-radius:10px;background:#ffffffd8;padding:5px;text-align:center;font-size:24px;font-weight:1000;min-height:56px;box-shadow:0 3px 0 #31466e}.squad-chip.empty{opacity:.42}.squad-chip span{display:block;font-size:15px;color:#405072;line-height:1.1}.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}.result-stat{border:4px solid #58709d;border-radius:14px;background:#ffffffd8;padding:8px 10px;text-align:center;font-weight:1000}.result-stat b{display:block;font-size:26px;color:#172144}.result-stat span{font-size:18px;color:#52617e}
+.hud{gap:10px}.hud-box{padding:10px 13px}.hud-label{font-size:23px}.timer{height:150px}.timer .num{font-size:78px}.timer .label{font-size:24px}.turn-badge{font-size:27px;padding:10px}.faction-pill{min-height:88px}.faction-pill .fp-state{font-size:21px}.info-main{font-size:21px}.info-sub{font-size:16px}.info-tag{font-size:15px;border-width:2px}.turn-history{max-height:82px;gap:3px}.history-line{font-size:15px;padding:2px 7px}.event-main{font-size:21px}.event-line{font-size:16px;padding:2px 7px}.battle-actions .btn{min-height:58px}
+@keyframes pop{from{transform:scale(1.3);opacity:.3}to{transform:scale(1);opacity:1}}
+@keyframes toastPop{from{transform:translateX(-50%) translateY(-18px) scale(.92);opacity:.2}to{transform:translateX(-50%) translateY(0) scale(1);opacity:1}}
+@keyframes eventPing{0%{transform:scale(.35);opacity:0}20%{opacity:1}100%{transform:scale(1.75);opacity:0}}
+@keyframes eventChip{0%{transform:translateY(10px) scale(.65);opacity:0}18%,78%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-12px) scale(.92);opacity:0}}
+@keyframes eventTrace{0%{transform:scaleX(.05) rotate(var(--angle));opacity:0}18%,75%{opacity:1}100%{transform:scaleX(1) rotate(var(--angle));opacity:0}}
+@keyframes eventFeed{from{transform:translateX(22px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes checkPulse{from{filter:saturate(1);opacity:.88}to{filter:saturate(1.45);opacity:1}}
+@keyframes kingShake{from{transform:translateX(-2px)}to{transform:translateX(2px)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Readability pass: restore the darker board feel and remove text from board cells. */
+:root{--ink:#dfe8ff;--gold:#ffd35a;--line:#252b4f;--blue:#4d8eea;--red:#e75b54;--panel:#101a33}
+#fit{background:radial-gradient(circle at 50% 20%,#263c70,#090e20 68%)}
+#stage{background:radial-gradient(90% 75% at 85% 105%,rgba(234,111,82,.2),transparent 62%),linear-gradient(145deg,#243b72,#28234e 58%,#3c2248);box-shadow:inset 0 0 180px #070a16}
+#stage:before{opacity:.18;background-image:linear-gradient(#fff2 1px,transparent 1px),linear-gradient(90deg,#fff2 1px,transparent 1px);background-size:72px 72px}
+.topbar{background:linear-gradient(#121a3bea,#0d132ed8);border-bottom:4px solid #ffd35a66;box-shadow:none}
+.panel{background:linear-gradient(#17233e,#0f1830);border-color:#344465;border-radius:18px;box-shadow:0 12px 0 #080d1d,0 20px 40px #0008;color:#edf3ff}
+.hud-box,.direction-key,.research-reward,.hand-shelf{border-color:#4d638c;background:linear-gradient(180deg,#17233e,#101a33);box-shadow:none;color:#edf3ff}
+.hud-label{color:#aebbe0}.hud-value,.info-main{color:#fff}.info-sub{color:#c4cde6}.info-tag{background:#101a33;border-color:#52617e;color:#edf3ff}.info-tag.warn{background:#3c1723;color:#ffc8d4}.info-tag.good{background:#143424;color:#bbf7d0}
+.btn{border-color:#252b4f;border-radius:18px;background:linear-gradient(#f4f7ff,#bfc9e5);box-shadow:0 6px 0 #151a35;color:#171b34;text-shadow:none}.btn.primary{background:linear-gradient(#ffe991,#ffc53f);box-shadow:0 6px 0 #71470f}.btn.red{background:linear-gradient(#ff887e,#dc443e);box-shadow:0 6px 0 #6d1d1a;color:#fff}.btn:active,.btn.focused{box-shadow:0 3px 0 #151a35}
+.board-wrap{background:linear-gradient(145deg,#18213c,#0c1227);border-radius:18px;box-shadow:none}.board{background:#11182e;border-color:#53658f;border-radius:10px;box-shadow:0 16px 0 #080d1d,0 24px 45px #0009,inset 0 0 40px #0008;overflow:hidden}
+.cell{border-color:#344465;background:linear-gradient(135deg,#1e2a49,#151e37);box-shadow:none}.cell:nth-child(even){background:linear-gradient(135deg,#202f52,#17213d)}.cell.territory-0{background:linear-gradient(135deg,#173b57,#13243d);border-color:#3da9d5}.cell.territory-1{background:linear-gradient(135deg,#522334,#321b2a);border-color:#c84f6b}.cell.territory-2{background:linear-gradient(135deg,#17422c,#142d25);border-color:#43ae69}.cell.territory-3{background:linear-gradient(135deg,#52451c,#332d19);border-color:#c6a534}
+.cell.allowed{background:linear-gradient(135deg,#304b68,#20364e)}.cell.legal{background:linear-gradient(135deg,#244e52,#173c3f)}.cell.last{box-shadow:inset 0 0 0 7px #ffd35a}
+.board .cell:before,.board .cell:after{content:""!important}.board .cell.allowed:after,.board .cell.legal:after{content:""!important;display:block!important;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%}.board .cell.allowed:after{width:22px;height:22px;background:#66e4ff;border:3px solid #d5f9ff;box-shadow:0 0 18px #5ee8ff}.board .cell.legal:after{width:31px;height:31px;background:#8fffc8aa;border:4px solid #baffdc;box-shadow:0 0 18px #62ffb4}.board .cell.zone-warn,.board .cell.attack-target{box-shadow:inset 0 0 0 7px #ffb84a,0 0 18px #ff9f2e}.board .cell.attack-king,.board .cell.king-check{box-shadow:inset 0 0 0 8px #ff416d,0 0 24px #ff416dcc!important}.board .cell.swap-legal{box-shadow:inset 0 0 0 7px #c691ff,0 0 18px #c691ff99}.board .cell.own-threat:not(.king-check){box-shadow:inset 0 0 0 6px #ff5d4a,0 0 16px #ff5d4a88}
+.board .move-map{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);place-items:center}.board .move-arrow{display:grid;place-items:center;font-size:21px;line-height:1;text-shadow:0 0 3px #fff,0 0 8px currentColor}.board .move-avatar{grid-column:auto;grid-row:auto;font-size:42px;filter:drop-shadow(0 3px 2px #0008)}
+.piece{border-radius:8px;border:4px solid #fff;box-shadow:0 5px 0 #28334e,0 0 18px #fff4;color:#10182c;transform:none}.piece.owner-0{background:linear-gradient(145deg,#e7f8ff,#559aca);border-color:#9ce8ff;box-shadow:0 5px 0 #23516f,0 0 18px #4edbff88}.piece.owner-1{background:linear-gradient(145deg,#ffe9ee,#c65c72);border-color:#ff9cb1;box-shadow:0 5px 0 #732c3c,0 0 18px #ff527888}.piece.owner-2{background:linear-gradient(145deg,#e6ffe9,#55aa70);border-color:#8dffaa;box-shadow:0 5px 0 #24613a,0 0 18px #55ef8588}.piece.owner-3{background:linear-gradient(145deg,#fff8cf,#d7a82d);border-color:#ffe878;box-shadow:0 5px 0 #765a16,0 0 18px #ffd84e99}.piece.king{outline:5px double #fff2a4;outline-offset:-9px}
+.timer{height:136px;background:linear-gradient(#192750,#101830);border-color:#53658f;border-radius:16px;box-shadow:none}.timer .num{font-size:70px;color:#ffd35a;text-shadow:none}.timer .label{font-size:22px}.turn-badge{font-size:24px;padding:8px;background:#172144;box-shadow:none}
+.game-layout{inset:112px 24px 22px;grid-template-columns:390px minmax(780px,1fr) 390px;gap:18px}.hud{padding:16px;gap:8px;overflow:hidden}.hud h3{font-size:32px}.hud-box{padding:8px 10px;border-width:3px;border-radius:13px;overflow:hidden}.hud-label{font-size:20px}.faction-status{gap:6px}.faction-pill{min-height:76px;padding:4px 6px}.faction-pill .fp-name{font-size:18px}.faction-pill .fp-state{font-size:18px}.faction-pill .fp-metrics span{font-size:14px;padding:1px 4px}.hand-head{min-height:42px}.hand-title{font-size:24px}.hand-count{font-size:18px}.hand-tabs{gap:4px;margin:4px 0}.hand-tab{font-size:16px;padding:3px 2px}.hands{grid-auto-rows:68px;gap:5px}.hands.big{grid-auto-rows:82px}.hands.big .hand-piece{height:82px}.hand-piece{height:68px}.hand-piece .move-arrow{font-size:13px}.hand-piece .move-avatar{font-size:27px}.shelf-grid{grid-auto-rows:52px;gap:3px}.shelf-grid .hand-piece{height:52px}.shelf-grid .move-arrow{font-size:11px}.shelf-grid .move-avatar{font-size:22px}.hand-more{height:52px;font-size:18px}.empty{font-size:18px;padding:6px}
+.battle-info{gap:3px}.info-main{font-size:18px}.info-sub{font-size:14px;line-height:1.2}.info-tags{gap:3px}.info-tag{font-size:12px;border-width:2px;padding:0 5px}.compact-log{font-size:17px!important;line-height:1.22!important}.event-main{font-size:18px}.event-line{font-size:13px;padding:1px 5px;border-left-width:5px}.event-more{font-size:12px}.turn-history{max-height:70px;gap:3px}.history-line{font-size:13px;line-height:1.15;padding:2px 5px;border-left-width:5px}.battle-actions{gap:8px}.battle-actions .btn{min-height:50px;font-size:21px;padding:0 12px}
+.setup-side{width:430px;padding:20px;overflow:hidden}.setup-side h3{font-size:32px}.setup-side p{font-size:21px;line-height:1.28;margin:8px 0 12px}.draw-card{min-height:270px;background:linear-gradient(145deg,#1a2748,#10182f);border-color:#52658c;box-shadow:none;gap:10px}.draw-avatar{font-size:84px}.draw-name{font-size:30px}.draw-dirs{font-size:23px}.setup-squad{gap:5px;margin-top:8px}.squad-chip{background:#111a30;color:#edf3ff;border-color:#52617e;font-size:20px;min-height:46px;padding:3px;box-shadow:none}.squad-chip span{font-size:12px;color:#b8c4e3}.setup-actions{gap:10px}.setup-actions .btn{min-height:50px;font-size:20px;padding:0 10px}.content{inset:120px 24px 24px;gap:18px}
+.modal-card{max-height:830px;overflow:hidden}.result-card{max-height:900px;overflow:hidden}.result-stats{gap:6px;margin:8px 0}.result-stat{background:#111a30;color:#edf3ff;border-color:#52617e;border-radius:10px;padding:6px}.result-stat b{font-size:22px;color:#fff}.result-stat span{font-size:14px;color:#c4cde6}.result-card h2,.modal-card h2{font-size:56px}.result-card p,.modal-card p{font-size:24px;margin:12px 0}.rr-item{font-size:18px;min-height:54px}.rr-item b{font-size:20px}
+.hud>*{flex-shrink:0}.hand-hud{padding:12px!important;min-height:0;flex:1 1 auto;overflow:hidden}.hand-overview{gap:5px}.hand-shelf{padding:4px}.shelf-head{font-size:17px;padding:3px 7px}.hud-box:has(.faction-status){padding:7px}.hud-box:has(#event-log){max-height:104px}.hud-box:has(#turn-history){max-height:102px}.hud-box:has(#reserve-info),.hud-box:has(#battle-hint){max-height:92px}.log,.battle-info,.turn-history{overflow:hidden}.faction-status{max-height:154px;overflow:hidden}.faction-pill.input-ready:before,.faction-pill.check:after{display:none}.hand-piece .piece{border-radius:6px}.hand-piece .move-arrow{display:grid}
+.event-feed-item{max-width:360px;font-size:17px;padding:4px 9px;border-width:3px}.event-chip{font-size:20px;min-width:58px;min-height:36px;border-width:4px}.reserve-badge{min-width:46px;height:38px;font-size:20px;border-width:3px}.reserve-arrow{height:8px}.reserve-arrow:after{right:-15px;border-left-width:20px;border-top-width:12px;border-bottom-width:12px}
+.research-wrap{inset:118px 24px 24px;grid-template-columns:1fr 440px;gap:18px}.research-main,.research-side{padding:18px;overflow:hidden}.research-summary h3{font-size:32px}.research-total{font-size:29px}.research-grid{gap:8px}.research-unit{height:220px;padding:10px}.research-unit .ru-avatar{font-size:54px}.research-unit .ru-name{font-size:22px}.research-unit .ru-title{font-size:19px}.research-unit .ru-dot{height:24px;font-size:15px;line-height:24px}.research-help{font-size:18px}.research-legend span{font-size:16px}
+.custom-wrap{inset:118px 24px 24px;grid-template-columns:850px 1fr;gap:18px}.roster-panel,.edit-panel{padding:18px;overflow:hidden}.roster-grid{gap:9px}.roster-card{height:205px}.roster-card .avatar{font-size:60px}.roster-card .name{font-size:23px}.roster-card .dirs{font-size:20px}.avatar-btn{height:45px;font-size:27px}.editor-actions .btn{height:62px;font-size:22px}.stock{font-size:16px}.stock b{font-size:22px}
+#battle-screen>.topbar{display:none}
+#battle-screen .game-layout{inset:14px 14px 14px;grid-template-columns:400px minmax(1000px,1fr) 400px;gap:12px}
+#battle-screen .board-wrap{padding:0}
+#battle-screen .battle-board{width:1000px;height:1000px}
+#battle-screen .board{width:1000px;height:1000px;border-width:8px}
+#battle-screen .hud{padding:15px;gap:9px}
+#battle-screen .hand-hud{padding:13px!important}
+#battle-screen .hud h3{font-size:30px}
+#battle-screen .timer{height:130px}
+#battle-screen .timer .num{font-size:68px}
+#battle-screen .timer .label{font-size:21px}
+#battle-screen .turn-badge{font-size:25px;padding:9px}
+#battle-screen .faction-status{grid-template-columns:1fr 1fr;gap:7px;max-height:170px}
+#battle-screen .faction-pill{min-height:80px;padding:5px 7px}
+#battle-screen .faction-pill .fp-name{font-size:19px}
+#battle-screen .faction-pill .fp-state{font-size:19px}
+#battle-screen .faction-pill .fp-metrics span{font-size:15px}
+#battle-screen .hand-title{font-size:25px}
+#battle-screen .hand-count{font-size:19px}
+#battle-screen .hand-back{font-size:18px;padding:4px 8px}
+#battle-screen .hands{grid-auto-rows:76px;gap:6px}
+#battle-screen .hands.big{grid-auto-rows:90px}
+#battle-screen .hands.big .hand-piece{height:90px}
+#battle-screen .hand-piece{height:76px}
+#battle-screen .hand-piece .move-avatar{font-size:31px}
+#battle-screen .hand-piece .move-arrow{font-size:15px}
+#battle-screen .shelf-grid{grid-auto-rows:60px;gap:4px}
+#battle-screen .shelf-grid .hand-piece{height:60px}
+#battle-screen .shelf-grid .move-avatar{font-size:25px}
+#battle-screen .shelf-grid .move-arrow{font-size:13px}
+#battle-screen .hud-box{padding:9px 11px}
+#battle-screen .hud-label{font-size:22px}
+#battle-screen .compact-log{font-size:18px!important;line-height:1.25!important}
+#battle-screen .battle-actions .btn{min-height:52px;font-size:22px}
+#battle-screen .hand-head{min-height:58px}
+#battle-screen .hand-title{font-size:32px;line-height:1.05}
+#battle-screen .hand-count{font-size:26px}
+#battle-screen .hand-back{font-size:24px;padding:8px 12px}
+#battle-screen .hand-tabs{gap:7px;margin:8px 0}
+#battle-screen .hand-tab{font-size:24px;padding:7px 4px;border-width:3px}
+#battle-screen .hands{grid-template-columns:repeat(3,1fr);grid-auto-rows:116px;gap:8px;margin-top:8px}
+#battle-screen .hands.big{grid-template-columns:repeat(3,1fr);grid-auto-rows:124px}
+#battle-screen .hands.big .hand-piece{height:124px}
+#battle-screen .hand-piece{height:116px;border-width:3px;border-radius:10px}
+#battle-screen .hand-piece .piece{border-width:3px;border-radius:7px}
+#battle-screen .hand-piece .move-avatar{font-size:44px}
+#battle-screen .hand-piece .move-arrow{font-size:22px}
+#battle-screen .hand-overview{gap:8px}
+#battle-screen #player-hand{min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:2px}
+#battle-screen .faction-status{grid-template-columns:1fr;gap:8px;max-height:none}
+#battle-screen .faction-pill{min-height:92px;padding:8px 10px}
+#battle-screen .faction-pill .fp-name{font-size:25px;line-height:1.05}
+#battle-screen .faction-pill .fp-state{font-size:26px;line-height:1.05}
+#battle-screen .faction-pill .fp-metrics{gap:6px;margin-top:5px}
+#battle-screen .faction-pill .fp-metrics span{font-size:22px;padding:3px 5px}
+#battle-screen .hud-label{font-size:26px}
+#battle-screen .compact-log{font-size:24px!important;line-height:1.25!important}
+#battle-screen .turn-badge{font-size:30px}
+#battle-screen .timer .label{font-size:25px}
+#battle-screen .timer .num{font-size:76px}
+#battle-screen .battle-actions .btn{min-height:64px;font-size:28px}
+.piece .move-map,.board .piece .move-map,.hand-piece .piece .move-map{
+  position:absolute;
+  inset:3px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(3,1fr);
+  align-items:center;
+  justify-items:center;
+}
+.piece .move-arrow,.board .piece .move-arrow,.hand-piece .piece .move-arrow{
+  display:grid;
+  place-items:center;
+  width:100%;
+  height:100%;
+  font-family:"Segoe UI Symbol",sans-serif;
+  font-size:26px;
+  line-height:1;
+  font-weight:1000;
+  text-align:center;
+  text-shadow:0 0 3px #fff,0 0 8px currentColor;
+}
+.piece .move-avatar,.board .piece .move-avatar,.hand-piece .piece .move-avatar{
+  grid-column:2;
+  grid-row:2;
+  align-self:center;
+  justify-self:center;
+  font-size:46px;
+  line-height:1;
+  filter:drop-shadow(0 2px 1px #0008);
+}
+#battle-screen .hand-piece .piece .move-map{inset:2px}
+#battle-screen .hand-piece .piece .move-arrow{font-size:22px}
+#battle-screen .hand-piece .piece .move-avatar{font-size:42px}
+#battle-screen .hand-overview{display:flex;flex-direction:column;gap:7px;min-height:0}
+#battle-screen .hand-shelf{padding:6px;min-height:0}
+#battle-screen .hand-shelf.mine{flex:0 0 auto}
+#battle-screen .hand-shelf.other{flex:0 1 auto}
+#battle-screen .shelf-head{color:#10182c!important;font-size:20px!important;line-height:1.05;padding:5px 8px!important}
+#battle-screen #player-hand{padding-right:8px}
+#battle-screen .shelf-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto;gap:5px;margin-top:5px;overflow:visible}
+#battle-screen .shelf-grid .hand-piece{width:100%;height:auto!important;aspect-ratio:1/1;min-width:0;padding:2px}
+#battle-screen .shelf-grid .hand-piece:disabled{opacity:1;filter:none;cursor:default}
+#battle-screen .shelf-grid .hand-piece .piece{width:100%;height:100%}
+#battle-screen .shelf-grid .move-arrow{font-size:15px!important}
+#battle-screen .shelf-grid .move-avatar{font-size:29px!important}
+#battle-screen .hands{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto}
+#battle-screen .hands.big{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto}
+#battle-screen .hands .hand-piece,#battle-screen .hands.big .hand-piece{width:100%;height:auto!important;aspect-ratio:1/1;min-width:0;padding:2px}
+#battle-screen .hand-more{height:auto;aspect-ratio:1/1;background:#101a33;color:#edf3ff;border-color:#52617e;font-size:18px}
+#battle-screen .empty{background:#101a33;color:#c4cde6;border-radius:8px;font-size:18px}
+#battle-screen .hand-tabs{display:none}
+#result-overlay .result-card{width:1040px;max-height:900px;padding:34px 40px;overflow:hidden}
+#result-overlay .result-card h2{font-size:72px!important;line-height:1}
+#result-overlay .result-card p{font-size:34px!important;line-height:1.25;margin:14px 0!important}
+#result-overlay .result-stats{gap:10px;margin:12px 0}
+#result-overlay .result-stat{padding:10px 12px;border-radius:14px}
+#result-overlay .result-stat b{font-size:38px!important;line-height:1;color:#fff}
+#result-overlay .result-stat span{font-size:28px!important;line-height:1.08;color:#cbd7f2;font-weight:1000}
+#result-overlay .result-research{padding:16px 18px;margin:14px 0;border-radius:18px}
+#result-overlay .result-research h3{font-size:38px!important;line-height:1.05;margin-bottom:10px}
+#result-overlay .rr-list{gap:10px}
+#result-overlay .rr-item{font-size:30px!important;line-height:1.12;min-height:82px;padding:10px 14px}
+#result-overlay .rr-item b{font-size:32px!important;line-height:1.05;margin-bottom:4px}
+#result-overlay .rr-empty,#result-overlay .rr-note{font-size:30px!important;line-height:1.18}
+#result-overlay .result-card .btn{min-height:66px;font-size:28px;margin:6px}
+#research-screen .research-wrap{inset:104px 22px 22px;grid-template-columns:minmax(0,1fr) 470px;gap:18px}
+#research-screen .research-main,#research-screen .research-side{padding:22px;overflow:hidden;background:linear-gradient(180deg,#101a33,#0b1227);color:#edf3ff;border-color:#58709d}
+#research-screen .research-summary{margin-bottom:14px;gap:14px}
+#research-screen .research-summary h3,#research-screen .research-side h3{font-size:42px!important;line-height:1.05;color:#fff;text-shadow:0 3px 0 #050918}
+#research-screen .research-total{font-size:36px!important;line-height:1.05;color:#ffe063;background:#172144;border:4px solid #52617e;border-radius:12px;padding:7px 12px;white-space:nowrap}
+#research-screen .research-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+#research-screen .research-unit{height:232px;padding:12px;border-width:4px;border-radius:14px;background:linear-gradient(180deg,#f7fbff,#cddbf0);color:#172144;box-shadow:0 5px 0 #080d1d}
+#research-screen .research-unit .ru-avatar{font-size:58px;line-height:1}
+#research-screen .research-unit .ru-name{font-size:30px;line-height:1.05;font-weight:1000;color:#10182c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#research-screen .research-unit .ru-title{font-size:25px!important;line-height:1.08;color:#243b65;font-weight:1000;margin:5px 0}
+#research-screen .research-unit .ru-dots{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
+#research-screen .research-unit .ru-dot{height:34px;border-radius:8px;background:#4b5b78;color:#edf3ff;font-size:22px!important;line-height:34px;border:2px solid #26344e}
+#research-screen .research-unit .ru-dot.on{background:#26c95d;color:#fff;border-color:#a7ffd0;box-shadow:0 0 0 3px #0f6b38,0 0 12px #52e6b3}
+#research-screen .research-rewards{gap:10px;margin-top:14px}
+#research-screen .research-reward{background:#17233e!important;color:#edf3ff;border-color:#52617e;padding:12px 14px;font-size:28px!important;line-height:1.18}
+#research-screen .research-reward.on{background:#123826!important;border-color:#39d47b;color:#dcffe9}
+#research-screen .research-reward b{font-size:32px!important;line-height:1.05;color:#fff;margin-bottom:4px}
+#research-screen .research-reward span{display:block;font-size:28px;line-height:1.15;color:#dbe6ff}
+#research-screen .research-legend{grid-template-columns:1fr;gap:7px;margin-top:14px}
+#research-screen .research-legend span{background:#17233e;color:#edf3ff;border:3px solid #52617e;border-radius:10px;padding:7px 10px;font-size:26px!important;line-height:1.1;font-weight:1000}
+#research-screen .research-help{font-size:27px!important;line-height:1.25;color:#dbe6ff;background:#17233e;border:3px solid #52617e;border-radius:12px;padding:12px;margin-top:14px}
+#research-screen .research-side .btn{min-height:70px;font-size:30px}
+#custom-screen>.topbar,#research-screen>.topbar{display:none}
+#custom-screen .custom-wrap{inset:14px 22px 22px;grid-template-columns:850px minmax(0,1fr);gap:18px}
+#research-screen .research-wrap{inset:14px 22px 22px}
+#custom-screen .screen-back,#research-screen .screen-back{width:100%;min-height:68px;font-size:30px;margin:10px 0 14px}
+#custom-screen .roster-panel,#custom-screen .edit-panel{background:linear-gradient(180deg,#101a33,#0b1227);color:#edf3ff;border-color:#58709d}
+#custom-screen .roster-panel h3,#custom-screen .avatar-section h3{font-size:40px!important;color:#fff;text-shadow:0 3px 0 #050918}
+#custom-screen .roster-grid{gap:10px}
+#custom-screen .roster-card{height:218px}
+#custom-screen .editor-actions .btn{min-height:66px;font-size:25px}
+#custom-screen .roster-panel,#custom-screen .edit-panel{padding:22px}
+#custom-screen .roster-panel{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+#custom-screen .roster-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+#custom-screen .roster-grid{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:6px}
+#custom-screen .roster-card{height:152px!important;border-width:4px;border-radius:14px;padding:8px;background:linear-gradient(180deg,#f7fbff,#cddbf0);color:#172144}
+#custom-screen .roster-card .avatar{font-size:44px!important;line-height:1}
+#custom-screen .roster-card .name{font-size:28px!important;line-height:1.05;color:#10182c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#custom-screen .roster-card .dirs{font-size:22px!important;line-height:1.08;color:#243b65;min-height:0;font-weight:1000}
+#custom-screen .edit-panel{grid-template-rows:212px 250px minmax(0,1fr) 78px;gap:12px;min-height:0}
+#custom-screen .stockbar{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;overflow:hidden;min-height:0}
+#custom-screen .stock{background:#17233e;color:#edf3ff;border:3px solid #52617e;border-radius:12px;padding:8px 6px;font-size:25px!important;line-height:1.08}
+#custom-screen .stock b{font-size:34px!important;color:#ffe063}
+#custom-screen .deck-score{gap:8px;padding:8px;border-color:#52617e;background:#101a33}
+#custom-screen .score-item{font-size:20px!important;line-height:1.05;color:#edf3ff;min-width:0}
+#custom-screen .score-note{font-size:22px!important;line-height:1.12;color:#ffe063;white-space:normal;overflow:hidden;text-overflow:clip}
+#custom-screen .dirpad{width:min(440px,100%);height:250px;gap:8px}
+#custom-screen .dirbtn{border-width:4px;border-radius:14px;font-size:48px!important;color:#172144}
+#custom-screen .dirbtn.center{font-size:60px!important;color:#fff}
+#custom-screen .avatar-section{min-height:0;overflow:hidden}
+#custom-screen .avatar-grid{grid-template-columns:repeat(8,minmax(0,1fr));gap:7px;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:4px}
+#custom-screen .avatar-btn{height:52px!important;border-width:3px;border-radius:10px;font-size:32px!important;background:#f7fbff;color:#172144}
+#custom-screen .avatar-btn.locked{font-size:22px!important;background:#424b61;color:#fff}
+#custom-screen .editor-actions{gap:12px}
+#custom-screen .editor-actions .btn{min-height:72px!important;font-size:28px!important;padding:6px 10px}
+.piece{aspect-ratio:1/1}
+.move-trace{position:absolute;z-index:20;pointer-events:none;height:14px;border-radius:999px;background:#fff3a8;transform-origin:0 50%;box-shadow:0 0 0 4px #172144,0 0 18px #fff3a8}
+.move-trace:after{content:"";position:absolute;right:-22px;top:50%;transform:translateY(-50%);border-left:28px solid #fff3a8;border-top:18px solid transparent;border-bottom:18px solid transparent;filter:drop-shadow(3px 0 0 #172144)}
+.move-trace.owner-0,.reserve-arrow.owner-0{background:#73d9ff;box-shadow:0 0 0 4px #172144,0 0 20px #73d9ff}
+.move-trace.owner-0:after,.reserve-arrow.owner-0:after{border-left-color:#73d9ff}
+.move-trace.owner-1,.reserve-arrow.owner-1{background:#ff7995;box-shadow:0 0 0 4px #172144,0 0 20px #ff7995}
+.move-trace.owner-1:after,.reserve-arrow.owner-1:after{border-left-color:#ff7995}
+.move-trace.owner-2,.reserve-arrow.owner-2{background:#70e995;box-shadow:0 0 0 4px #172144,0 0 20px #70e995}
+.move-trace.owner-2:after,.reserve-arrow.owner-2:after{border-left-color:#70e995}
+.move-trace.owner-3,.reserve-arrow.owner-3{background:#ffe063;box-shadow:0 0 0 4px #172144,0 0 20px #ffe063}
+.move-trace.owner-3:after,.reserve-arrow.owner-3:after{border-left-color:#ffe063}
+.move-from,.move-to{position:absolute;z-index:21;pointer-events:none;width:58px;height:58px;margin:-29px 0 0 -29px;display:grid;place-items:center;border:5px solid #172144;border-radius:10px;background:#fff3a8;color:#172144;font-size:34px;font-weight:1000;box-shadow:0 0 0 3px #fff,0 6px 0 #080d1d}
+.move-to{background:#8fffc8}
+.move-drop{background:#70eaff}
+.board .piece.selected{outline:8px solid #fff!important;outline-offset:5px;box-shadow:0 0 0 7px #57dfff,0 0 24px #57dfff,0 5px 0 #10182c!important;transform:scale(.96)}
+.board .cell.own-threat:not(.king-check):before{content:"危"!important;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:7;width:44px;height:44px;display:grid;place-items:center;border:3px solid #fff;border-radius:50%;background:#ff5d4a;color:#fff;padding:0;font-size:24px;font-weight:1000;text-shadow:0 2px 0 #882015;box-shadow:0 0 0 3px #882015,0 0 13px #ff5d4a}
+#setup-screen>.topbar{display:none}
+#setup-screen .content{inset:14px 14px 14px;gap:12px}
+#setup-screen .setup-side{width:420px;padding:24px}
+#setup-screen .setup-side h3{font-size:40px}
+#setup-screen .setup-side p{font-size:27px;line-height:1.32;margin:12px 0 18px}
+#setup-screen .draw-card{min-height:430px;gap:18px;border-width:5px}
+#setup-screen .draw-avatar{font-size:130px}
+#setup-screen .draw-name{font-size:42px}
+#setup-screen .draw-dirs{font-size:34px}
+#setup-screen .draw-card div[style]{font-size:26px!important}
+#setup-screen .draw-progress{gap:12px;margin-top:14px}
+#setup-screen .draw-dot{width:48px;height:20px}
+#setup-screen .setup-actions{gap:12px}
+#setup-screen .setup-actions .btn{min-height:70px;font-size:28px;padding:0 18px}
+#setup-screen .hud-box{padding:16px 18px}
+#setup-screen .hud-label{font-size:28px}
+#setup-screen .hud-value{font-size:34px}
+#setup-screen .board{width:1000px;height:1000px;border-width:8px}
+.screen>.topbar{display:none!important}
+#online-screen .net-wrap{inset:28px 250px 70px}
+#lobby-screen .lobby-wrap{inset:42px 170px 70px}
+
+</style></head>
+<body><div id="fit"><main id="stage">
+  <section id="title-screen" class="screen active">
+    <div class="title-logo"><h1><span>L-</span>SHOGI</h1><p>REALTIME SIMULTANEOUS SHOGI</p></div>
+    <div class="menu">
+      <button class="btn primary nav" data-action="new">CPU対戦</button>
+      <button class="btn primary nav" data-action="online">オンライン対戦</button>
+      <button id="four-toggle" class="btn nav" data-action="four-toggle">4人対戦：OFF</button>
+      <button class="btn nav" data-action="custom">駒カスタム</button>
+      <button class="btn nav" data-action="research">駒研究</button>
+      <button class="btn nav" data-action="guide">遊び方</button>
+      <button class="btn nav" data-action="settings">設定</button>
+    </div>
+  </section>
+
+  <section id="online-screen" class="screen">
+    <header class="topbar"><h2>オンライン対戦</h2><div class="grow"></div><button class="btn small ghost" data-action="online-back">タイトルへ</button></header>
+    <div class="net-wrap">
+      <section class="panel net-card"><h3>合言葉で接続</h3><p>同じ合言葉を入力した2人が対戦します。最初の人が部屋を作り、もう1人が参加します。</p><label class="net-field">合言葉<input id="net-keyword" maxlength="24" placeholder="例：ほしぞら24" autocomplete="off"></label><label class="net-field">プレイヤー名<input id="net-name" maxlength="12" placeholder="プレイヤー" autocomplete="off"></label><div id="net-msg" class="net-msg"></div></section>
+      <section class="panel net-card"><h3>接続方法</h3><p>部屋を作る人は「ホスト」、参加する人は「ゲスト」を選びます。通信切断時は試合を止め、自動再接続します。</p><button class="btn primary" data-action="net-host">部屋を作る</button><button class="btn" data-action="net-join">部屋に入る</button><button class="btn" data-action="online-back">タイトルへ</button><div class="online-badge">🔒 予約手は締切まで相手に非公開</div></section>
+    </div>
+  </section>
+
+  <section id="lobby-screen" class="screen">
+    <header class="topbar"><h2>オンラインロビー</h2><div class="grow"></div><button class="btn small ghost" data-action="net-leave">退室</button></header>
+    <div class="lobby-wrap"><div id="lobby-code" class="room-code"></div><div id="lobby-seats" class="seat-grid"></div><div id="lobby-hint" class="online-badge"></div><div class="lobby-actions"><button id="lobby-ready" class="btn primary" data-action="net-ready">準備OK</button><button id="lobby-start" class="btn primary" data-action="net-start">対戦開始</button><button class="btn" data-action="net-leave">退室</button></div></div>
+  </section>
+
+  <section id="setup-screen" class="screen">
+    <header class="topbar"><h2>ランダム配置</h2><div class="grow"></div><div class="status" id="setup-count">0 / 6 体</div></header>
+    <div class="content">
+      <aside class="panel setup-side"><h3>今回の仲間</h3><p>12体から選ばれた仲間を、1体ずつ光るマスへ配置します。</p><div id="draw-card" class="draw-card"></div><div id="draw-progress" class="draw-progress"></div><div class="setup-actions"><button class="btn small" data-action="auto-setup">残りを自動</button><button class="btn small primary" data-action="start" disabled>対局開始</button></div></aside>
+      <div class="panel board-wrap"><div id="setup-board" class="board"></div></div>
+      <aside class="panel setup-side"><h3>配置ルール</h3><p>王は最下段中央に固定。相手の編成と配置は、6体すべて置き終わるまで見えません。</p><div class="hud-box"><div class="hud-label">今回の戦力</div><div class="hud-value">固定王＋ランダム6体</div></div><div class="hud-box"><div class="hud-label">勝利条件</div><div class="hud-value">相手の王を消す</div></div><button class="btn small" data-action="title" style="margin-top:auto">タイトルへ</button></aside>
+    </div>
+  </section>
+
+  <section id="custom-screen" class="screen">
+    <header class="topbar"><h2>駒カスタム</h2><div class="grow"></div><div class="status">12体を自由設計</div></header>
+    <div class="custom-wrap">
+      <section class="panel roster-panel"><h3 style="font-size:36px">カスタム駒一覧</h3><button class="btn primary screen-back" data-action="title">タイトルへ</button><div id="roster-grid" class="roster-grid"></div></section>
+      <section class="panel edit-panel">
+        <div id="stockbar" class="stockbar"></div>
+        <div id="dirpad" class="dirpad"></div>
+        <div class="avatar-section"><h3>キャラクター</h3><div id="avatar-grid" class="avatar-grid"></div></div>
+        <div class="editor-actions"><button class="btn small red" data-action="custom-clear">全て外す</button><button class="btn small" data-action="custom-restore">変更前に戻す</button><button class="btn small primary" data-action="custom-save">保存して戻る</button></div>
+      </section>
+    </div>
+  </section>
+
+  <section id="research-screen" class="screen">
+    <header class="topbar"><h2>駒研究</h2><div class="grow"></div><div class="status">記録が新しい姿を解除する</div></header>
+    <div class="research-wrap">
+      <section class="panel research-main"><div class="research-summary"><h3>12体の研究記録</h3><div id="research-total" class="research-total"></div></div><div id="research-grid" class="research-grid"></div></section>
+      <aside class="panel research-side"><h3 style="font-size:38px">恒久解除</h3><button class="btn primary screen-back" data-action="research-back">タイトルへ</button><div id="research-rewards" class="research-rewards"></div><div id="research-legend" class="research-legend"></div><p class="research-help">同じ行動の反復ではなく、未達成の記録を埋めると進みます。能力や方向ストックは増えません。</p></aside>
+    </div>
+  </section>
+
+  <section id="battle-screen" class="screen">
+    <header class="topbar"><h2 id="battle-title">L-SHOGI・対CPU戦</h2><div class="grow"></div><div class="status" id="phase-label">入力受付中</div></header>
+    <div class="game-layout">
+      <aside class="panel hud hand-hud">
+        <div class="hand-head"><div id="hand-title" class="hand-title">持ち駒</div><button id="hand-back" class="hand-back" data-action="hand-overview">一覧へ</button><div id="hand-count" class="hand-count"></div></div>
+        <div id="player-hand" class="hand-overview"></div>
+      </aside>
+      <div class="panel board-wrap"><div id="battle-board" class="board battle-board"></div></div>
+      <aside class="panel hud">
+        <div class="turn-badge" id="turn-label">第1ターン</div>
+        <div class="timer"><div><div class="label">行動決定まで</div><div id="timer-num" class="num">3</div></div></div>
+        <div id="faction-status" class="faction-status"></div>
+        <div class="hud-box"><div class="hud-label">直前の結果</div><div id="event-log" class="log compact-log">駒を選び、移動先を選択してください。</div></div>
+        <div class="battle-actions"><button class="btn small" data-action="clear-move">取消</button><button class="btn small red" data-action="resign">投了</button></div>
+      </aside>
+    </div>
+    <div id="count-flash" class="count-flash">GO</div>
+    <div id="research-toast" class="research-toast"></div>
+    <div id="result-overlay" class="result-overlay"><div class="panel result-card"><h2 id="result-title">勝利</h2><p id="result-text"></p><div id="result-stats" class="result-stats"></div><div id="result-research" class="result-research"></div><button class="btn primary" data-action="rematch">もう一度</button><button class="btn" data-action="result-research">研究を見る</button><button class="btn" data-action="title">タイトルへ</button></div></div>
+  </section>
+
+  <div id="guide-modal" class="modal"><div class="panel modal-card"><h2>遊び方</h2><div class="guide-grid">
+    <div class="guide-item"><b>① 12体をカスタム</b>キャラクターと1マス移動できる方向を設定します。方向ストックは12体で共有します。</div>
+    <div class="guide-item"><b>② 3秒で予約</b>駒→移動先の順に選択。時間内なら何度でも変更できます。</div>
+    <div class="guide-item"><b>③ 同時に実行</b>互いの行動は時間終了まで見えません。移動経路の交差や交換は無視します。</div>
+    <div class="guide-item"><b>場所替え</b>移動先の味方を選ぶと位置を交換。押し出された味方も、敵と同じマスなら相打ちになります。</div>
+    <div class="guide-item"><b>④ ランダム配置</b>王は固定。12体から重複なしで選ばれた6体を、1体ずつ自陣へ配置します。</div>
+    <div class="guide-item"><b>⑤ 衝突と捕獲</b>2駒衝突は互いの通常駒を獲得。3駒以上なら全消滅し、誰の持ち駒にもなりません。王は何も捕れません。</div>
+    <div class="guide-item"><b>⑥ 最後の王が勝利</b>王手は警告表示のみで、強制応手はありません。王を失った勢力の残存駒は停止し、敵に取られると再利用されます。</div>
+    <div class="guide-item"><b>操作</b>クリックまたは方向キー＋決定。Escで予約を取り消します。</div>
+  </div><div class="modal-actions"><button class="btn primary" data-action="close-modal">わかった</button></div></div></div>
+
+  <div id="settings-modal" class="modal"><div class="panel modal-card"><h2>設定</h2>
+    <div class="setting-row"><span>効果音</span><button id="sound-toggle" class="btn small">ON</button></div>
+    <div class="setting-row"><span>盤面のマス番号</span><button id="coord-toggle" class="btn small">ON</button></div>
+    <div class="setting-row"><span>1ターン</span><div class="setting-stepper"><button id="turn-sec-down" class="btn small">−</button><span id="turn-sec-value" class="setting-value">3秒</span><button id="turn-sec-up" class="btn small">＋</button></div></div>
+    <div class="modal-actions" style="margin-top:30px"><button class="btn primary" data-action="close-modal">決定</button></div>
+  </div></div>
+  <div id="net-overlay" class="net-overlay"><div class="panel net-overlay-card"><h2 id="net-overlay-title">再接続中</h2><p id="net-overlay-body"></p><div id="net-overlay-actions" class="net-overlay-actions"></div></div></div>
+</main></div><script>
+const BOARD_SIZE = 7;
+
+const PIECE_CATALOG = {
+  king:   { id:"king",   name:"王", label:"👑", royal:true,  slide:false, steps:[[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]] },
+  rook:   { id:"rook",   name:"飛車", label:"飛", slide:true,  steps:[[0,-1],[1,0],[0,1],[-1,0]] },
+  bishop: { id:"bishop", name:"角行", label:"角", slide:true,  steps:[[1,-1],[1,1],[-1,1],[-1,-1]] },
+  gold:   { id:"gold",   name:"金将", label:"金", slide:false, steps:[[0,-1],[1,-1],[1,0],[0,1],[-1,0],[-1,-1]] },
+  silver: { id:"silver", name:"銀将", label:"銀", slide:false, steps:[[0,-1],[1,-1],[1,1],[-1,1],[-1,-1]] },
+  knight: { id:"knight", name:"桂馬", label:"桂", slide:false, steps:[[1,-2],[-1,-2]], jump:true },
+  lance:  { id:"lance",  name:"香車", label:"香", slide:true,  steps:[[0,-1]] },
+  pawn:   { id:"pawn",   name:"歩兵", label:"歩", slide:false, steps:[[0,-1]] }
+};
+
+// 将来はこの配列を、15種から選ぶ編成データへ差し替える。
+const DEFAULT_LOADOUT = Object.freeze([
+  "king","rook","bishop","gold","silver","knight","lance","pawn"
+]);
+
+const DEFAULT_CONFIG = Object.freeze({
+  boardSize: BOARD_SIZE,
+  playerCount: 2,
+  turnSeconds: 3,
+  placementLimit: 9,
+  loadout: DEFAULT_LOADOUT,
+  collisionRule: "mutual-capture",
+  allowDrops: true
+});
+
+const keyOf = (x,y) => `${x},${y}`;
+const inside = (x,y,size=BOARD_SIZE) => x>=0 && y>=0 && x<size && y<size;
+const clone = value => JSON.parse(JSON.stringify(value));
+const hasKing = (state,owner) => !!state?.board?.list(owner).some(piece=>piece.type==="king");
+const COMPRESSION_RULES = Object.freeze([
+  {turn:20,margin:1,size:5,label:"5×5"},
+  {turn:40,margin:2,size:3,label:"3×3"},
+  {turn:50,margin:3,size:1,label:"1×1"}
+]);
+const COMPRESSION_WARNING_TURNS = 3;
+function compressionRuleAt(turn){
+  return COMPRESSION_RULES.reduce((active,rule)=>turn>=rule.turn?rule:active,null);
+}
+function nextCompressionRule(turn){
+  return COMPRESSION_RULES.find(rule=>turn<rule.turn)||null;
+}
+function compressionWarningAt(turn){
+  const rule=nextCompressionRule(turn);
+  return rule&&turn>=rule.turn-COMPRESSION_WARNING_TURNS?rule:null;
+}
+function compressionVisualRule(turn){
+  return compressionRuleAt(turn)||compressionWarningAt(turn);
+}
+function insideCompression(pos,rule){
+  if(!rule)return true;
+  return pos.x>=rule.margin&&pos.x<BOARD_SIZE-rule.margin&&pos.y>=rule.margin&&pos.y<BOARD_SIZE-rule.margin;
+}
+function compressionDistance(pos,rule){
+  if(!rule)return 0;
+  const min=rule.margin,max=BOARD_SIZE-1-rule.margin;
+  const dx=pos.x<min?min-pos.x:pos.x>max?pos.x-max:0;
+  const dy=pos.y<min?min-pos.y:pos.y>max?pos.y-max:0;
+  return dx+dy;
+}
+function compressionCellClass(x,y,turn){
+  const active=compressionRuleAt(turn);
+  if(active&&!insideCompression({x,y},active))return "zone-danger";
+  const warn=compressionWarningAt(turn);
+  if(warn&&!insideCompression({x,y},warn))return "zone-warn";
+  return "";
+}
+function applyCompression(state){
+  const rule=compressionRuleAt(state.turn);
+  if(!rule)return [];
+  const removed=state.board.list().filter(piece=>!insideCompression(piece,rule));
+  removed.forEach(piece=>state.board.remove(piece.id));
+  return removed.length?[{type:"compression",rule,count:removed.length,pieces:removed}]:[];
+}
+
+class Piece {
+  constructor({ id, type, owner, x=null, y=null }) {
+    this.id=id; this.type=type; this.owner=owner; this.x=x; this.y=y;
+  }
+}
+
+class Board {
+  constructor(size=BOARD_SIZE, pieces=[]) {
+    this.size=size;
+    this.pieces=new Map();
+    pieces.forEach(piece=>this.add(piece));
+  }
+  add(piece) { this.pieces.set(piece.id, piece instanceof Piece ? piece : new Piece(piece)); return piece; }
+  remove(id) { const p=this.pieces.get(id); this.pieces.delete(id); return p; }
+  get(id) { return this.pieces.get(id) || null; }
+  at(x,y) { return [...this.pieces.values()].find(p=>p.x===x && p.y===y) || null; }
+  list(owner=null) { const all=[...this.pieces.values()]; return owner===null ? all : all.filter(p=>p.owner===owner); }
+  copy() { return new Board(this.size, this.list().map(p=>clone(p))); }
+  serialize() { return { size:this.size, pieces:this.list().map(p=>clone(p)) }; }
+}
+
+class Move {
+  constructor({ player, kind="wait", pieceId=null, to=null, handIndex=null }) {
+    this.player=player; this.kind=kind; this.pieceId=pieceId; this.to=to; this.handIndex=handIndex;
+  }
+  static wait(player) { return new Move({player}); }
+}
+
+function placementCells(player, size=BOARD_SIZE) {
+  const base = [{x:3,y:4},{x:2,y:5},{x:3,y:5},{x:4,y:5},
+    {x:1,y:6},{x:2,y:6},{x:3,y:6},{x:4,y:6},{x:5,y:6}];
+  if(player===0) return base;
+  if(player===1) return base.map(({x,y})=>({x:size-1-x,y:size-1-y}));
+  // 左右陣営。王位置は player 2=(0,3)、player 3=(6,3)。
+  if(player===2) return base.map(({x,y})=>({x:size-1-y,y:x}));
+  return base.map(({x,y})=>({x:y,y:size-1-x}));
+}
+function homeKing(owner,size=BOARD_SIZE){
+  return [{x:3,y:size-1},{x:3,y:0},{x:0,y:3},{x:size-1,y:3}][owner];
+}
+
+class Rules {
+  constructor({ catalog=PIECE_CATALOG, config=DEFAULT_CONFIG }={}) {
+    this.catalog=catalog; this.config={...DEFAULT_CONFIG,...config};
+  }
+  orient([dx,dy], owner) {
+    if(owner===0) return [dx,dy];
+    if(owner===1) return [-dx,-dy];
+    if(owner===2) return [-dy,dx];
+    return [dy,-dx];
+  }
+  destinations(board,piece) {
+    const def=this.catalog[piece.type];
+    if(!def) return [];
+    const out=[];
+    for(const vector of def.steps) {
+      const [dx,dy]=this.orient(vector,piece.owner);
+      const max=def.slide ? board.size-1 : 1;
+      for(let n=1;n<=max;n++) {
+        const x=piece.x+dx*n, y=piece.y+dy*n;
+        if(!inside(x,y,board.size)) break;
+        const occupant=board.at(x,y);
+        // 王は敵駒を一切捕れない。空きマス移動と味方との場所替えだけ可能。
+        if(piece.type==="king"&&occupant&&occupant.owner!==piece.owner) break;
+        if(occupant?.owner===piece.owner) {
+          out.push({x,y,swap:true});
+          break;
+        }
+        out.push({x,y,swap:false});
+        if(occupant) break;
+        if(!def.slide) break;
+      }
+    }
+    return out;
+  }
+  isLegal(state,move) {
+    if(!move || move.kind==="wait") return true;
+    if(move.player<0 || move.player>=state.players.length || !inside(move.to?.x,move.to?.y,state.board.size)) return false;
+    // 王を失った陣営は盤上に駒を残すが、一切行動できない。
+    if(!hasKing(state,move.player)) return false;
+    if(move.kind==="drop") {
+      return this.config.allowDrops && Number.isInteger(move.handIndex) &&
+        !!state.players[move.player].hand[move.handIndex] && !state.board.at(move.to.x,move.to.y);
+    }
+    const piece=state.board.get(move.pieceId);
+    return !!piece && piece.owner===move.player &&
+      this.destinations(state.board,piece).some(pos=>pos.x===move.to.x && pos.y===move.to.y);
+  }
+  winner(state) {
+    const alive=state.players.map((_,owner)=>hasKing(state,owner));
+    const survivors=alive.map((yes,i)=>yes?i:null).filter(i=>i!==null);
+    if(survivors.length===1) return {over:true,winner:survivors[0],draw:false};
+    if(survivors.length===0) return {over:true,winner:null,draw:true};
+    const hasActionPiece=survivors.some(owner=>
+      state.board.list(owner).some(piece=>piece.type!=="king") ||
+      state.players[owner].hand.some(piece=>piece.type!=="king")
+    );
+    if(!hasActionPiece) return {over:true,winner:null,draw:true};
+    return {over:false,winner:null,draw:false};
+  }
+}
+
+class SimultaneousResolver {
+  constructor({rules=new Rules(), collisionRule="mutual-capture"}={}) {
+    this.rules=rules; this.collisionRule=collisionRule;
+  }
+  resolve(state, submitted=[]) {
+    const before=state.board.copy();
+    const moves=state.players.map((_,player)=>{
+      const candidate=submitted.find(m=>m?.player===player) || Move.wait(player);
+      return this.rules.isLegal(state,candidate) ? candidate : Move.wait(player);
+    });
+    const actors=moves.flatMap((move,player)=>{
+      if(move.kind==="move") {
+        const piece=before.get(move.pieceId);
+        const target=before.at(move.to.x,move.to.y);
+        if(piece&&target?.owner===player) {
+          return [
+            {move,player,piece,swap:true},
+            {move:new Move({player,kind:"move",pieceId:target.id,to:{x:piece.x,y:piece.y}}),player,piece:target,swap:true}
+          ];
+        }
+        return [{move,player,piece,swap:false}];
+      }
+      if(move.kind==="drop") {
+        const held=state.players[player].hand[move.handIndex];
+        return [{move,player,piece:held ? new Piece({...held,owner:player,x:null,y:null}) : null,swap:false}];
+      }
+      return [];
+    }).filter(a=>a.piece);
+
+    const arrivals=new Map();
+    actors.forEach(actor=>{
+      const k=keyOf(actor.move.to.x,actor.move.to.y);
+      if(!arrivals.has(k)) arrivals.set(k,[]);
+      arrivals.get(k).push(actor);
+    });
+    const collided=new Set();
+    for(const group of arrivals.values()) if(group.length>1) group.forEach(a=>collided.add(a));
+
+    const next=before.copy();
+    const events=[];
+    // 全移動元を先に空ける。これにより交換・すれ違いが成立する。
+    actors.filter(a=>a.move.kind==="move").forEach(a=>next.remove(a.piece.id));
+    actors.filter(a=>a.move.kind==="drop").forEach(a=>state.players[a.player].hand.splice(a.move.handIndex,1));
+
+    for(const group of arrivals.values()) if(group.length>1) {
+      if(group.length>=3){
+        group.forEach(actor=>events.push({type:"annihilation",player:actor.player,piece:actor.piece,captured:[],from:{x:actor.piece.x,y:actor.piece.y},to:actor.move.to,count:group.length}));
+        continue;
+      }
+      const capturedBy=new Map(group.map(actor=>[actor,[]]));
+      // 2駒衝突だけは、従来どおり互いの通常駒を獲得する。
+      group.forEach((victim,index)=>{
+        const captor=Array.from({length:group.length},(_,step)=>group[(index+step+1)%group.length])
+          .find(actor=>actor.player!==victim.player);
+        const held=toHand(victim.piece,captor?.player);
+        if(captor&&held){state.players[captor.player].hand.push(held);capturedBy.get(captor).push(victim.piece)}
+      });
+      group.forEach(actor=>events.push({type:"collision",player:actor.player,piece:actor.piece,captured:capturedBy.get(actor),from:{x:actor.piece.x,y:actor.piece.y},to:actor.move.to}));
+    }
+
+    for(const actor of actors.filter(a=>!collided.has(a))) {
+      const targetBefore=before.at(actor.move.to.x,actor.move.to.y);
+      const targetLeaves=targetBefore && actors.some(a=>a.move.kind==="move" && a.piece.id===targetBefore.id);
+      if(targetBefore && !targetLeaves && targetBefore.owner!==actor.player) {
+        next.remove(targetBefore.id);
+        const held=toHand(targetBefore,actor.player);
+        if(held)state.players[actor.player].hand.push(held);
+        events.push({type:"capture",player:actor.player,piece:actor.piece,captured:[targetBefore],from:actor.move.kind==="move"?{x:actor.piece.x,y:actor.piece.y}:null,to:actor.move.to});
+      }
+      const placed=new Piece({...actor.piece,owner:actor.player,x:actor.move.to.x,y:actor.move.to.y});
+      next.add(placed);
+      events.push({type:actor.swap?"swap":actor.move.kind==="drop"?"drop":"move",player:actor.player,piece:placed,from:actor.move.kind==="move"?{x:actor.piece.x,y:actor.piece.y}:null,to:actor.move.to});
+    }
+    state.board=next;
+    state.turn+=1;
+    events.push(...applyCompression(state));
+    state.lastEvents=events;
+    state.result=this.rules.winner(state);
+    return {state,moves,events,result:state.result};
+  }
+}
+
+function toHand(piece,newOwner) {
+  if(!piece||piece.type==="king"||!Number.isInteger(newOwner))return null;
+  return {id:`h-${piece.type}-${cryptoId()}`,type:piece.type,owner:newOwner,x:null,y:null};
+}
+function cryptoId() {
+  return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function createState({config=DEFAULT_CONFIG, placements=null}={}) {
+  const cfg={...DEFAULT_CONFIG,...config};
+  const players=Array.from({length:cfg.playerCount},(_,id)=>({id,name:id===0?"あなた":`CPU ${id}`,hand:[]}));
+  const board=new Board(cfg.boardSize);
+  if(placements) placements.forEach(p=>board.add(p));
+  return {config:cfg,players,board,turn:1,lastEvents:[],result:{over:false,winner:null,draw:false}};
+}
+
+function makePiece(type,owner,x=null,y=null,index=0) {
+  return new Piece({id:`p${owner}-${type}-${index}`,type,owner,x,y});
+}
+
+class TurnTimer {
+  constructor({seconds=3,onTick=()=>{},onEnd=()=>{}}={}) {
+    this.seconds=seconds; this.onTick=onTick; this.onEnd=onEnd; this.timer=null; this.deadline=0;
+  }
+  start() {
+    this.stop(); this.deadline=performance.now()+this.seconds*1000; this.onTick(this.seconds);
+    this.timer=setInterval(()=>{
+      const left=Math.max(0,Math.ceil((this.deadline-performance.now())/1000));
+      this.onTick(left);
+      if(left<=0) { this.stop(); this.onEnd(); }
+    },80);
+  }
+  stop() { if(this.timer) clearInterval(this.timer); this.timer=null; }
+}
+
+class TacticalCPU {
+  constructor({rules=new Rules(),random=Math.random}={}) {
+    this.rules=rules; this.random=random;
+    this.values={king:100000,rook:950,bishop:850,gold:620,silver:540,knight:400,lance:330,pawn:180};
+  }
+  personality(player,state=null) {
+    const table=[
+      {name:"標準",attack:1.0,safety:1.0,center:1.0,quick:.18,expected:.6,worst:.4,target:"nearest"},
+      {name:"突撃",attack:1.28,safety:.86,center:1.08,quick:.26,expected:.62,worst:.30,target:"nearest"},
+      {name:"守備",attack:.92,safety:1.34,center:1.0,quick:.14,expected:.54,worst:.56,target:"guard"},
+      {name:"漁夫",attack:1.08,safety:1.02,center:.9,quick:.22,expected:.70,worst:.28,target:"weak"}
+    ];
+    if(state?.players?.length===2&&player===1)return table[1];
+    return table[player]||table[0];
+  }
+  value(type) {
+    if(this.values[type]) return this.values[type];
+    const directions=this.rules.catalog[type]?.steps?.length||1;
+    return 170+directions*155;
+  }
+  legalMoves(state,player) {
+    if(!hasKing(state,player))return [Move.wait(player)];
+    const legal=[];
+    for(const piece of state.board.list(player)) {
+      for(const to of this.rules.destinations(state.board,piece)) legal.push(new Move({player,kind:"move",pieceId:piece.id,to}));
+    }
+    state.players[player].hand.forEach((_,handIndex)=>{
+      for(let y=0;y<state.board.size;y++) for(let x=0;x<state.board.size;x++)
+        if(!state.board.at(x,y)) legal.push(new Move({player,kind:"drop",handIndex,to:{x,y}}));
+    });
+    legal.push(Move.wait(player));
+    return legal;
+  }
+  copyState(state) {
+    return {
+      config:{...state.config},
+      players:state.players.map(p=>({...p,hand:p.hand.map(h=>({...h}))})),
+      board:state.board.copy(),turn:state.turn,lastEvents:[],result:{...state.result}
+    };
+  }
+  compressionRuleForThinking(state){
+    return compressionRuleAt(state.turn+1)||compressionRuleAt(state.turn)||compressionWarningAt(state.turn)||compressionWarningAt(state.turn+1);
+  }
+  compressionMoveScore(state,move,player,piece=null){
+    const rule=this.compressionRuleForThinking(state);
+    if(!rule||move.kind==="wait")return 0;
+    const p=piece||(move.kind==="move"?state.board.get(move.pieceId):state.players[player].hand[move.handIndex]);
+    if(!p)return 0;
+    const activeNow=!!compressionRuleAt(state.turn),activeAfter=!!compressionRuleAt(state.turn+1);
+    const dist=compressionDistance(move.to,rule);
+    const unsafe=!insideCompression(move.to,rule);
+    const weight=p.type==="king"?1450:185;
+    let score=-dist*weight+(insideCompression(move.to,rule)?(p.type==="king"?520:70):0);
+    if(unsafe&&(activeNow||activeAfter))score-=p.type==="king"?900000:9000;
+    const center=3-Math.abs(3-move.to.x)+3-Math.abs(3-move.to.y);
+    score+=center*(rule.size===3?18:8);
+    return score;
+  }
+  quickScore(state,move,player) {
+    const style=this.personality(player,state);
+    if(move.kind==="wait") return -90;
+    const target=state.board.at(move.to.x,move.to.y);
+    let score=target && target.owner!==player ? this.value(target.type)*style.attack : 0;
+    if(target?.type==="king") score+=1000000*style.attack;
+    const center=3-Math.abs(3-move.to.x)+3-Math.abs(3-move.to.y);
+    score+=center*12*style.center;
+    const piece=move.kind==="move" ? state.board.get(move.pieceId) : state.players[player].hand[move.handIndex];
+    score+=this.compressionMoveScore(state,move,player,piece);
+    const enemyKing=this.focusKing(state,player,move.to);
+    if(enemyKing&&piece) {
+      const dist=Math.abs(move.to.x-enemyKing.x)+Math.abs(move.to.y-enemyKing.y);
+      score+=(12-dist)*18*style.attack;
+      if(piece.type!=="king") score+=this.threatScoreFrom(state,piece,move.to,enemyKing)*520*style.attack;
+      else score-=28;
+    }
+    return score;
+  }
+  evaluate(state,player) {
+    if(state.result.over) return state.result.draw?0:(state.result.winner===player?2000000:-2000000);
+    let score=0;
+    for(const piece of state.board.list()) {
+      const sign=piece.owner===player?1:-1;
+      score+=sign*this.value(piece.type);
+      score+=sign*(6-Math.abs(3-piece.x)-Math.abs(3-piece.y))*6;
+      const compressionRule=this.compressionRuleForThinking(state);
+      if(compressionRule){
+        const dist=compressionDistance(piece,compressionRule);
+        const weight=piece.type==="king"?1100:120;
+        score-=sign*dist*weight;
+        if(!insideCompression(piece,compressionRule)&&compressionRuleAt(state.turn))score-=sign*(piece.type==="king"?850000:8000);
+      }
+    }
+    state.players.forEach((p,owner)=>p.hand.forEach(h=>score+=(owner===player?1:-1)*this.value(h.type)*.82));
+    const myKing=state.board.list(player).find(p=>p.type==="king");
+    const enemyKing=this.focusKing(state,player);
+    const style=this.personality(player,state);
+    if(myKing) score+=this.kingSafety(state,myKing,player)*style.safety;
+    if(enemyKing) {
+      score-=this.kingSafety(state,enemyKing,enemyKing.owner)*1.15*style.attack;
+      score+=this.armyPressure(state,player,enemyKing)*style.attack;
+    }
+    return score;
+  }
+  focusKing(state,player,from=null) {
+    const kings=state.board.list().filter(p=>p.owner!==player&&p.type==="king"&&hasKing(state,p.owner));
+    if(!kings.length)return null;
+    const origin=from||state.board.list(player).find(p=>p.type!=="king")||state.board.list(player)[0]||{x:3,y:3};
+    const style=this.personality(player,state);
+    const myKing=state.board.list(player).find(p=>p.type==="king")||origin;
+    return kings.sort((a,b)=>{
+      const da=Math.abs(origin.x-a.x)+Math.abs(origin.y-a.y),db=Math.abs(origin.x-b.x)+Math.abs(origin.y-b.y);
+      if(style.target==="weak"){
+        const va=state.board.list(a.owner).filter(p=>p.type!=="king").length+state.players[a.owner].hand.length*.6;
+        const vb=state.board.list(b.owner).filter(p=>p.type!=="king").length+state.players[b.owner].hand.length*.6;
+        return (va-vb)||(da-db);
+      }
+      if(style.target==="guard"){
+        const ga=Math.abs(myKing.x-a.x)+Math.abs(myKing.y-a.y),gb=Math.abs(myKing.x-b.x)+Math.abs(myKing.y-b.y);
+        return (ga-gb)||(da-db);
+      }
+      return da-db;
+    })[0];
+  }
+  threatScoreFrom(state,piece,to,enemyKing) {
+    if(!piece||piece.type==="king"||!enemyKing)return 0;
+    const board=state.board.copy();
+    const moving=board.get(piece.id);
+    if(moving){moving.x=to.x;moving.y=to.y;}
+    return this.rules.destinations(board,moving||{...piece,x:to.x,y:to.y})
+      .some(pos=>pos.x===enemyKing.x&&pos.y===enemyKing.y) ? 1 : 0;
+  }
+  armyPressure(state,player,enemyKing) {
+    let pressure=0;
+    for(const piece of state.board.list(player)) {
+      if(piece.type==="king")continue;
+      const dist=Math.abs(piece.x-enemyKing.x)+Math.abs(piece.y-enemyKing.y);
+      pressure+=Math.max(0,8-dist)*22;
+      if(this.rules.destinations(state.board,piece).some(pos=>pos.x===enemyKing.x&&pos.y===enemyKing.y))pressure+=780;
+    }
+    return pressure;
+  }
+  kingSafety(state,king,owner) {
+    let allies=0,danger=0;
+    for(let y=Math.max(0,king.y-1);y<=Math.min(6,king.y+1);y++) for(let x=Math.max(0,king.x-1);x<=Math.min(6,king.x+1);x++) {
+      const p=state.board.at(x,y); if(p?.owner===owner) allies++;
+    }
+    for(const enemy of state.board.list().filter(p=>p.owner!==owner))
+      if(this.rules.destinations(state.board,enemy).some(q=>q.x===king.x&&q.y===king.y)) danger++;
+    return allies*45-danger*900;
+  }
+  attacksOn(state,x,y,owner) {
+    let danger=0;
+    for(const enemy of state.board.list().filter(piece=>piece.owner!==owner&&hasKing(state,piece.owner))){
+      if(this.rules.destinations(state.board,enemy).some(pos=>pos.x===x&&pos.y===y))danger++;
+    }
+    return danger;
+  }
+  emergencyKingMoves(state,player,actionable) {
+    const king=state.board.list(player).find(piece=>piece.type==="king");
+    if(!king||this.attacksOn(state,king.x,king.y,player)===0)return null;
+    const escapes=[];
+    for(const move of actionable){
+      if(move.kind!=="move")continue;
+      const piece=state.board.get(move.pieceId);
+      let destination=null;
+      if(piece?.type==="king")destination=move.to;
+      else if(move.to.x===king.x&&move.to.y===king.y)destination={x:piece.x,y:piece.y}; // 味方から王への場所替え
+      if(!destination)continue;
+      escapes.push({move,danger:this.attacksOn(state,destination.x,destination.y,player),center:Math.abs(3-destination.x)+Math.abs(3-destination.y)});
+    }
+    if(!escapes.length)return [];
+    const safest=Math.min(...escapes.map(item=>item.danger));
+    return escapes.filter(item=>item.danger===safest)
+      .sort((a,b)=>b.center-a.center+this.random()*.01)
+      .map(item=>item.move);
+  }
+  emergencyKingMoves(state,player,actionable) {
+    const king=state.board.list(player).find(piece=>piece.type==="king");
+    const compressionRule=this.compressionRuleForThinking(state);
+    const compressionDanger=king&&compressionRule&&!insideCompression(king,compressionRule);
+    if(!king||(this.attacksOn(state,king.x,king.y,player)===0&&!compressionDanger))return null;
+    const escapes=[];
+    for(const move of actionable){
+      if(move.kind!=="move")continue;
+      const piece=state.board.get(move.pieceId);
+      let destination=null;
+      if(piece?.type==="king")destination=move.to;
+      else if(move.to.x===king.x&&move.to.y===king.y)destination={x:piece.x,y:piece.y};
+      if(!destination)continue;
+      escapes.push({
+        move,
+        danger:this.attacksOn(state,destination.x,destination.y,player),
+        compression:compressionDistance(destination,compressionRule),
+        center:Math.abs(3-destination.x)+Math.abs(3-destination.y)
+      });
+    }
+    if(!escapes.length)return [];
+    const safestCompression=Math.min(...escapes.map(item=>item.compression));
+    const compressedSafe=escapes.filter(item=>item.compression===safestCompression);
+    const safest=Math.min(...compressedSafe.map(item=>item.danger));
+    return compressedSafe.filter(item=>item.danger===safest)
+      .sort((a,b)=>a.center-b.center+this.random()*.01)
+      .map(item=>item.move);
+  }
+  choose(state,player=1) {
+    if(!hasKing(state,player))return Move.wait(player);
+    const actionable=this.legalMoves(state,player).filter(move=>move.kind!=="wait");
+    if(!actionable.length)return Move.wait(player);
+    const emergency=this.emergencyKingMoves(state,player,actionable);
+    if(emergency?.length)return emergency[0];
+    const focus=this.focusKing(state,player);
+    const enemy=focus?.owner;
+    const style=this.personality(player,state);
+    const mine=actionable
+      .sort((a,b)=>this.quickScore(state,b,player)-this.quickScore(state,a,player)).slice(0,36);
+    if(enemy===undefined)return mine[0];
+    const theirs=this.legalMoves(state,enemy)
+      .sort((a,b)=>this.quickScore(state,b,enemy)-this.quickScore(state,a,enemy)).slice(0,16);
+    let best=mine[0]||Move.wait(player),bestScore=-Infinity;
+    for(const move of mine) {
+      let total=0,worst=Infinity;
+      for(const reply of theirs) {
+        const sim=this.copyState(state);
+        const result=new SimultaneousResolver({rules:this.rules}).resolve(sim,[move,reply]);
+        const score=this.evaluate(result.state,player);
+        total+=score; worst=Math.min(worst,score);
+      }
+      const expected=total/Math.max(1,theirs.length);
+      const score=expected*style.expected+worst*style.worst+this.quickScore(state,move,player)*style.quick+this.random()*2;
+      if(score>bestScore){bestScore=score;best=move}
+    }
+    return best;
+  }
+}
+
+const $=sel=>document.querySelector(sel);
+const CUSTOM_KEY="l-shogi-custom-v1";
+const AVATARS=["🤖","🐺","🦊","🐲","👻","🦁","🐼","🦅","🐙","🦈","🦖","🦄","🐸","🐯","🐰","🦇","🐱","🐶","🦂","🦋","🐝","🦀","🦉","🐧"];
+const BONUS_AVATARS=[
+  {avatar:"🛸",req:6},{avatar:"👽",req:6},{avatar:"🌙",req:6},{avatar:"☄️",req:6},
+  {avatar:"🧙",req:18},{avatar:"🧛",req:18},{avatar:"🧜",req:18},{avatar:"🧚",req:18},
+  {avatar:"⚡",req:36},{avatar:"🔥",req:36},{avatar:"❄️",req:36},{avatar:"🌌",req:36}
+];
+const DIRECTIONS=[
+  {id:"ul",mark:"↖",name:"左上",vector:[-1,-1],stock:6},
+  {id:"up",mark:"↑",name:"上",vector:[0,-1],stock:6},
+  {id:"ur",mark:"↗",name:"右上",vector:[1,-1],stock:6},
+  {id:"left",mark:"←",name:"左",vector:[-1,0],stock:3},
+  {id:"dl",mark:"↙",name:"左下",vector:[-1,1],stock:2},
+  {id:"down",mark:"↓",name:"下",vector:[0,1],stock:4},
+  {id:"dr",mark:"↘",name:"右下",vector:[1,1],stock:2},
+  {id:"right",mark:"→",name:"右",vector:[1,0],stock:3}
+];
+function defaultRoster(){
+  const sets=[
+    ["up","left"],["up","right"],["up","ul"],["up","ur"],
+    ["up","down"],["up","ul","ur"],["ul","left","dl"],["ul","down"],
+    ["ul","dr"],["ul","ur"],["ur","right","dl"],["ur","right","down","dr"]
+  ];
+  return sets.map((dirs,i)=>({id:`c${i}`,name:`ユニット ${String(i+1).padStart(2,"0")}`,avatar:AVATARS[i],dirs}));
+}
+const RESEARCH_KEY="l-shogi-research-v1";
+const ACHIEVEMENTS=[
+  {id:"deploy",icon:"出",name:"初出陣"},{id:"move",icon:"動",name:"盤上を移動"},
+  {id:"capture",icon:"捕",name:"敵を捕獲"},{id:"swap",icon:"替",name:"場所替え"},
+  {id:"collision",icon:"衝",name:"相打ち"},{id:"stolen",icon:"奪",name:"敵側で行動"},
+  {id:"kingKill",icon:"王",name:"敵王を討伐"},{id:"survive",icon:"生",name:"勝負を生還"}
+];
+function freshResearch(){return {version:1,units:Array.from({length:12},()=>({ach:{},matches:0})),updatedAt:Date.now()}}
+function loadResearch(){
+  try{
+    const d=JSON.parse(localStorage.getItem(RESEARCH_KEY)||"null");
+    if(d&&Array.isArray(d.units)&&d.units.length===12){
+      d.units=d.units.map(unit=>({ach:unit?.ach&&typeof unit.ach==="object"?unit.ach:{},matches:Math.max(0,Number(unit?.matches)||0)}));
+      return d;
+    }
+  }catch{}
+  return freshResearch();
+}
+let research=loadResearch(),researchMatch={deployed:new Set(),finalized:false,newUnlocks:[],totalBefore:0},researchToastTimer=null;
+function saveResearch(){research.updatedAt=Date.now();try{localStorage.setItem(RESEARCH_KEY,JSON.stringify(research))}catch{}}
+function researchCount(index){return ACHIEVEMENTS.reduce((n,a)=>n+(research.units[index]?.ach?.[a.id]?1:0),0)}
+function researchTotal(){return research.units.reduce((n,_,i)=>n+researchCount(i),0)}
+function masteryLevel(index){const n=researchCount(index);return n>=8?4:n>=6?3:n>=4?2:n>=2?1:0}
+function masteryTitle(index){return ["新人","ブロンズ","熟練","英雄","伝説"][masteryLevel(index)]}
+function localTypeIndex(type){
+  const prefix=["c","e","f","g"][myOwner()];
+  return typeof type==="string"&&type.startsWith(prefix)&&Number.isInteger(+type.slice(1))?+type.slice(1):-1;
+}
+function typeIndexForOwner(type,owner){
+  const prefix=["c","e","f","g"][owner];
+  if(typeof type!=="string"||!type.startsWith(prefix))return -1;
+  const index=Number(type.slice(1));
+  return Number.isInteger(index)&&index>=0&&index<12?index:-1;
+}
+function unlockAchievement(index,id){
+  if(index<0||index>=12||!ACHIEVEMENTS.some(a=>a.id===id))return false;
+  const unit=research.units[index]||(research.units[index]={ach:{},matches:0});
+  if(unit.ach[id])return false;unit.ach[id]=Date.now();
+  const entry={index,id,at:Date.now()};
+  if(researchMatch?.newUnlocks)researchMatch.newUnlocks.push(entry);
+  showResearchToast(entry);
+  saveResearch();return true;
+}
+function showResearchToast(entry){
+  if(!entry||["deploy","survive"].includes(entry.id))return;
+  const screen=$("#battle-screen"),toast=$("#research-toast");
+  if(!screen?.classList?.contains?.("active")||!toast||$("#result-overlay")?.classList?.contains?.("show"))return;
+  const unit=customRoster[entry.index]||{name:`ユニット${entry.index+1}`,avatar:"◆"};
+  const ach=ACHIEVEMENTS.find(a=>a.id===entry.id)||{icon:"★",name:entry.id};
+  toast.innerHTML=`<b>研究達成！</b><span>${unit.avatar} ${unit.name}：${ach.icon} ${ach.name}</span>`;
+  toast.classList.remove("show");void toast.offsetWidth;toast.classList.add("show");
+  clearTimeout(researchToastTimer);
+  researchToastTimer=setTimeout(()=>toast.classList.remove("show"),1350);
+  tone(940,.08);
+}
+function avatarUnlocked(avatar){const bonus=BONUS_AVATARS.find(x=>x.avatar===avatar);return !bonus||researchTotal()>=bonus.req}
+function allAllowedAvatars(){return [...AVATARS,...BONUS_AVATARS.map(x=>x.avatar)]}
+function beginResearchMatch(s,owner){
+  researchMatch={deployed:new Set(),finalized:false,newUnlocks:[],totalBefore:researchTotal()};
+  if(!s?.board)return;
+  for(const piece of s.board.list()){
+    const index=typeIndexForOwner(piece.type,owner);
+    if(index<0)continue;
+    researchMatch.deployed.add(index);
+    const unit=research.units[index]||(research.units[index]={ach:{},matches:0});
+    unit.matches=(unit.matches||0)+1;
+    unlockAchievement(index,"deploy");
+  }
+  saveResearch();
+}
+function recordResearchEvents(events,owner){
+  for(const event of events||[]){
+    const index=typeIndexForOwner(event.piece?.type,owner);
+    if(index<0)continue;
+    if(event.player===owner){
+      if(event.type==="move"||event.type==="drop")unlockAchievement(index,"move");
+      if(event.type==="swap")unlockAchievement(index,"swap");
+      if(event.type==="capture")unlockAchievement(index,"capture");
+      if(event.type==="collision"||event.type==="annihilation")unlockAchievement(index,"collision");
+      if((event.captured||[]).some(piece=>piece.type==="king"))unlockAchievement(index,"kingKill");
+    }else if(["move","drop","swap","collision","annihilation"].includes(event.type)){
+      unlockAchievement(index,"stolen");
+    }
+  }
+}
+function finalizeResearchMatch(s,owner){
+  if(researchMatch.finalized)return;
+  researchMatch.finalized=true;
+  for(const index of researchMatch.deployed){
+    const survived=s?.board?.list(owner).some(piece=>typeIndexForOwner(piece.type,owner)===index);
+    if(survived)unlockAchievement(index,"survive");
+  }
+}
+const CPU_ROSTER=[
+  ["ul","ur"],["ul","right"],["left","ur"],["ul","up","right"],
+  ["left","up","ur"],["ul","right","down"],["dl","up","ur"],["ul","dr","up"],
+  ["left","ur","down"],["dl","ur"],["ul","right","dr"],["left","up","right"]
+].map((dirs,i)=>({id:`e${i}`,name:`CPUユニット ${String(i+1).padStart(2,"0")}`,avatar:AVATARS[(i+12)%AVATARS.length],dirs}));
+function normalizeRoster(roster){
+  const left=Object.fromEntries(DIRECTIONS.map(d=>[d.id,d.stock]));
+  return roster.slice(0,12).map((unit,i)=>{
+    const dirs=[];
+    for(const id of Array.isArray(unit.dirs)?unit.dirs:[]){
+      if(left[id]>0&&!dirs.includes(id)){dirs.push(id);left[id]--}
+    }
+    const avatar=allAllowedAvatars().includes(unit.avatar)&&avatarUnlocked(unit.avatar)?unit.avatar:AVATARS[i];
+    return {id:`c${i}`,name:unit.name||`ユニット ${String(i+1).padStart(2,"0")}`,avatar,dirs};
+  });
+}
+function loadRoster(){
+  try{
+    const value=JSON.parse(localStorage.getItem(CUSTOM_KEY)||"null");
+    if(Array.isArray(value)&&value.length===12)return normalizeRoster(value);
+  }catch{}
+  return defaultRoster();
+}
+let customRoster=loadRoster();
+function installCustomCatalog(){
+  customRoster.forEach((unit,i)=>{
+    const steps=unit.dirs.map(id=>DIRECTIONS.find(d=>d.id===id)?.vector).filter(Boolean);
+    PIECE_CATALOG[`c${i}`]={id:`c${i}`,name:unit.name,label:unit.avatar,avatar:unit.avatar,slide:false,steps};
+  });
+  ["e","f","g"].forEach((prefix,seat)=>CPU_ROSTER.forEach((unit,i)=>{
+    const steps=unit.dirs.map(id=>DIRECTIONS.find(d=>d.id===id)?.vector).filter(Boolean);
+    const id=`${prefix}${i}`;
+    PIECE_CATALOG[id]={id,name:`CPU ${seat+1}・${unit.name}`,label:unit.avatar,avatar:unit.avatar,slide:false,steps};
+  }));
+}
+function cleanRoster(roster,prefix){
+  const left=Object.fromEntries(DIRECTIONS.map(d=>[d.id,d.stock]));
+  const source=(Array.isArray(roster)&&roster.length===12?roster:defaultRoster()).slice(0,12);
+  return source.map((unit,i)=>{
+    const dirs=[];
+    for(const id of Array.isArray(unit.dirs)?unit.dirs:[])if(left[id]>0&&!dirs.includes(id)){dirs.push(id);left[id]--}
+    const avatar=allAllowedAvatars().includes(unit.avatar)?unit.avatar:AVATARS[i%AVATARS.length];
+    return {id:`${prefix}${i}`,name:String(unit.name||`ユニット ${i+1}`).slice(0,20),avatar,dirs};
+  });
+}
+function installOnlineCatalog(...inputRosters){
+  const prefixes=["c","e","f","g"];
+  const both=inputRosters.map((roster,owner)=>cleanRoster(roster,prefixes[owner]));
+  both.forEach((roster,owner)=>roster.forEach((unit,i)=>{
+    const type=`${prefixes[owner]}${i}`;
+    PIECE_CATALOG[type]={id:type,name:unit.name,label:unit.avatar,avatar:unit.avatar,slide:false,steps:unit.dirs.map(id=>DIRECTIONS.find(d=>d.id===id).vector)};
+  }));
+}
+installCustomCatalog();
+const TURN_SECONDS_MIN=2,TURN_SECONDS_MAX=10,TURN_SECONDS_DEFAULT=DEFAULT_CONFIG.turnSeconds;
+const clampTurnSeconds=value=>Math.max(TURN_SECONDS_MIN,Math.min(TURN_SECONDS_MAX,Number.isFinite(+value)?Math.round(+value):TURN_SECONDS_DEFAULT));
+const settings=Object.assign({sound:true,coords:true,turnSeconds:TURN_SECONDS_DEFAULT},JSON.parse(localStorage.getItem("l-shogi-settings")||"{}"));
+settings.turnSeconds=clampTurnSeconds(settings.turnSeconds);
+const rules=new Rules();
+const resolver=new SimultaneousResolver({rules});
+const cpu=new TacticalCPU({rules});
+let setup=new Map(), drawQueue=[], cpuQueue=[], drawIndex=0, editingUnit=0;
+let state=null, selected=null, reserved=Move.wait(0), locked=false, keyboardCell={x:3,y:6};
+let handViewOwner=null;
+let lastTimerTone=null;
+let lastCheckAlertKey="";
+let customEntrySnapshot=null;
+let gameMode="cpu",setupOwner=0;
+let matchStats={turns:0,captures:0,collisions:0,annihilations:0,drops:0,swaps:0,compressions:0};
+let fourPlayer=localStorage.getItem("l-shogi-four-player")==="1";
+const myOwner=()=>gameMode==="online"&&typeof NET!=="undefined"?NET.myIdx:0;
+function normalizeSelection(sel=selected, s=state, owner=myOwner()){
+  if(!sel||!s||!s.players?.[owner])return null;
+  if(sel.kind==="board"){
+    const piece=s.board.get(sel.pieceId);
+    return piece&&piece.owner===owner&&hasKing(s,owner)?{kind:"board",pieceId:piece.id}:null;
+  }
+  if(sel.kind==="hand"){
+    return s.players[owner].hand[sel.handIndex]?{kind:"hand",handIndex:sel.handIndex}:null;
+  }
+  return null;
+}
+function selectionAfterTurn(prevSelected,prevReserved,droppedId=null,s=state,owner=myOwner()){
+  return normalizeSelection(prevSelected,s,owner);
+}
+const viewToWorld=(x,y)=>{
+  const owner=myOwner();
+  return owner===1?[6-x,6-y]:owner===2?[6-y,x]:owner===3?[y,6-x]:[x,y];
+};
+const worldToView=(x,y)=>{
+  const owner=myOwner();
+  return owner===1?[6-x,6-y]:owner===2?[y,6-x]:owner===3?[6-y,x]:[x,y];
+};
+const worldVectorToView=([dx,dy])=>{
+  const owner=myOwner();
+  return owner===1?[-dx,-dy]:owner===2?[dy,-dx]:owner===3?[-dy,dx]:[dx,dy];
+};
+
+const timer=new TurnTimer({seconds:settings.turnSeconds,onTick:updateTimer,onEnd:resolveTurn});
+
+function saveSettings(){ localStorage.setItem("l-shogi-settings",JSON.stringify(settings)); }
+function turnDurationMs(){return clampTurnSeconds(settings.turnSeconds)*1000}
+function renderTurnSecondsSetting(){
+  settings.turnSeconds=clampTurnSeconds(settings.turnSeconds);
+  timer.seconds=settings.turnSeconds;
+  const value=$("#turn-sec-value");
+  const down=$("#turn-sec-down");
+  const up=$("#turn-sec-up");
+  if(value)value.textContent=`${settings.turnSeconds}秒`;
+  if(down)down.disabled=settings.turnSeconds<=TURN_SECONDS_MIN;
+  if(up)up.disabled=settings.turnSeconds>=TURN_SECONDS_MAX;
+}
+function fitStage(){
+  const scale=Math.min(innerWidth/1920,innerHeight/1080);
+  $("#stage").style.setProperty("--stage-scale",scale);
+  $("#stage").dataset.scale=scale.toFixed(4);
+}
+addEventListener("resize",fitStage);
+globalThis.visualViewport?.addEventListener("resize",fitStage);
+fitStage();
+function renderFourToggle(){
+  const button=$("#four-toggle");
+  if(button){button.textContent=`4人対戦：${fourPlayer?"ON":"OFF"}`;button.classList.toggle("mode-on",fourPlayer)}
+}
+renderFourToggle();
+
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));
+  document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
+}
+function openModal(id){ $(id).classList.add("show"); }
+function closeModals(){ document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show")); }
+
+function tone(freq=520,duration=.07){
+  if(!settings.sound) return;
+  try{ const c=new AudioContext(),o=c.createOscillator(),g=c.createGain(); o.frequency.value=freq; g.gain.value=.05;o.connect(g);g.connect(c.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,c.currentTime+duration);o.stop(c.currentTime+duration); }catch{}
+}
+function kingThreatMap(s=state){
+  const map=new Map();
+  if(!s)return map;
+  for(const king of s.board.list().filter(piece=>piece.type==="king")){
+    if(!hasKing(s,king.owner))continue;
+    let count=0;
+    for(const enemy of s.board.list().filter(piece=>piece.owner!==king.owner&&piece.type!=="king"&&hasKing(s,piece.owner))){
+      if(rules.destinations(s.board,enemy).some(pos=>pos.x===king.x&&pos.y===king.y))count++;
+    }
+    if(count>0)map.set(king.owner,count);
+  }
+  return map;
+}
+function enemyAttackCells(s=state,owner=myOwner()){
+  const cells=new Map();
+  if(!s)return cells;
+  for(const enemy of s.board.list().filter(piece=>piece.owner!==owner&&piece.type!=="king"&&hasKing(s,piece.owner))){
+    for(const pos of rules.destinations(s.board,enemy)){
+      const key=`${pos.x},${pos.y}`;
+      cells.set(key,(cells.get(key)||0)+1);
+    }
+  }
+  return cells;
+}
+function moveWouldPressureKing(piece,to,s=state){
+  if(!piece||piece.type==="king"||!s)return false;
+  const board=s.board.copy();
+  const moving=board.get(piece.id)||new Piece({...piece,id:piece.id||`ghost-${piece.type}`,x:piece.x??null,y:piece.y??null});
+  if(!board.get(moving.id))board.add(moving);
+  moving.x=to.x;moving.y=to.y;
+  return s.board.list().some(target=>
+    target.owner!==piece.owner&&target.type==="king"&&hasKing(s,target.owner)&&
+    rules.destinations(board,moving).some(pos=>pos.x===target.x&&pos.y===target.y)
+  );
+}
+function playCheckAlert(threats){
+  const mine=myOwner();
+  if(!threats?.has(mine))return;
+  const key=`${state?.turn||0}:${mine}:${threats.get(mine)}`;
+  if(key===lastCheckAlertKey)return;
+  lastCheckAlertKey=key;
+  tone(190,.16);setTimeout(()=>tone(120,.18),105);
+}
+function onlineCommittedOwners(){
+  const set=new Set();
+  if(gameMode!=="online"||typeof NET==="undefined"||NET.phase!=="battle")return set;
+  NET.inputReady?.forEach(owner=>set.add(+owner));
+  return set;
+}
+function netLatency(){
+  if(gameMode!=="online"||typeof NET==="undefined"||!NET.active)return null;
+  if(NET.isHost){
+    const conns=NET.guestConns?[...NET.guestConns.values()]:[NET.guestConn].filter(Boolean);
+    const values=conns.map(conn=>conn?.__latency).filter(Number.isFinite);
+    return values.length?Math.max(...values):null;
+  }
+  return Number.isFinite(NET._latency)?NET._latency:null;
+}
+function netHealthText(){
+  if(gameMode!=="online"||typeof NET==="undefined"||!NET.active)return "";
+  if(NET.paused||NET._reco)return "再接続中";
+  const ms=netLatency();
+  return ms===null?"通信確認中":`通信 ${Math.round(ms)}ms`;
+}
+function phaseText(base){
+  const health=netHealthText();
+  return health?`${base}・${health}`:base;
+}
+function renderOnlineInputStatus(){
+  const committed=onlineCommittedOwners();
+  if(gameMode!=="online"||!state)return;
+  committed.forEach(owner=>document.querySelector(`[data-hand-owner="${owner}"]`)?.classList.add("input-ready"));
+  const alive=state.players.map((_,owner)=>hasKing(state,owner)).filter(Boolean).length;
+  if(NET.phase==="battle"&&!locked)$("#phase-label").textContent=phaseText(`入力受付中 ${committed.size} / ${alive}`);
+}
+function renderFactionStatus(threats){
+  const box=$("#faction-status"),mine=myOwner(),colors=["青","赤","緑","黄"];
+  box.innerHTML="";
+  state.players.forEach((player,owner)=>{
+    const alive=hasKing(state,owner),check=threats.has(owner);
+    const button=document.createElement("button");
+    button.className=`faction-pill f${owner} ${alive?"":"dead"} ${check?"check":""}`;
+    button.dataset.handOwner=owner;
+    const boardCount=state.board.list(owner).filter(piece=>piece.type!=="king").length;
+    const handCount=player.hand.length;
+    const cpuStyle=gameMode==="cpu"&&owner!==mine?`・${cpu.personality(owner,state).name}`:"";
+    const name=document.createElement("div");name.className="fp-name";name.textContent=`${colors[owner]} ${owner===mine?"あなた":player.name||`CPU ${owner}`}${cpuStyle}`;
+    const status=document.createElement("div");status.className="fp-state";status.textContent=check?"王手！":alive?"王 生存":"王 脱落";
+    const metrics=document.createElement("div");metrics.className="fp-metrics";
+    const boardMetric=document.createElement("span");boardMetric.textContent=`盤 ${boardCount}`;
+    const handMetric=document.createElement("span");handMetric.textContent=`手 ${handCount}`;
+    metrics.append(boardMetric,handMetric);
+    button.append(name,status,metrics);
+    button.onclick=()=>{handViewOwner=owner;renderHand();tone(560)};
+    box.append(button);
+  });
+  renderOnlineInputStatus();
+}
+
+function newSetup(){
+  gameMode="cpu"; setupOwner=0;
+  timer.stop(); installCustomCatalog();
+  beginPlacement(0,shuffle(customRoster.map((_,i)=>`c${i}`)).slice(0,6));
+  cpuQueue=shuffle(customRoster.map((_,i)=>`e${i}`)).slice(0,6);
+}
+function beginPlacement(owner,queue){
+  setupOwner=owner;
+  const king=homeKing(owner);
+  setup=new Map([[`${king.x},${king.y}`,{type:"king"}]]);
+  drawQueue=[...queue];
+  drawIndex=0;
+  $("#result-overlay").classList.remove("show");
+  $("#phase-label").textContent="入力受付中";
+  show("setup-screen"); renderSetup();
+}
+function renderSetup(){
+  const current=drawQueue[drawIndex];
+  const def=current?PIECE_CATALOG[current]:null;
+  $("#draw-card").innerHTML=def
+    ?`<div class="draw-avatar">${def.label}</div><div class="draw-name">${customRoster[+current.slice(1)].name}</div><div class="draw-dirs">${directionMarks(def.steps)}</div><div style="font-size:25px;font-weight:900;color:#cbd7f2">配置マスを選んでください</div>`
+    :`<div class="draw-avatar">✓</div><div class="draw-name">6体の配置完了</div><div class="draw-dirs">${gameMode==="online"?"全員の完了後に一斉公開":"CPU陣営を公開できます"}</div>`;
+  $("#draw-progress").innerHTML=Array.from({length:6},(_,i)=>`<i class="draw-dot ${i<drawIndex?"done":""}"></i>`).join("");
+  const board=$("#setup-board"); board.innerHTML="";
+  const king=homeKing(setupOwner);
+  const allowed=new Set(placementCells(setupOwner).filter(p=>!(p.x===king.x&&p.y===king.y)).map(p=>`${p.x},${p.y}`));
+  for(let vy=0;vy<7;vy++) for(let vx=0;vx<7;vx++){
+    const [x,y]=viewToWorld(vx,vy);
+    const canPlace=!!current&&allowed.has(`${x},${y}`)&&!setup.has(`${x},${y}`);
+    const cell=cellElement(x,y,canPlace?"allowed":"");
+    const placed=setup.get(`${x},${y}`);
+    if(placed) cell.append(pieceElement(placed.type,setupOwner,false));
+    if(canPlace)cell.onclick=()=>placeSetup(x,y);
+    board.append(cell);
+  }
+  $("#setup-count").textContent=`${drawIndex} / 6 体`;
+  $('[data-action="start"]').disabled=drawIndex!==6;
+}
+function placeSetup(x,y){
+  if(drawIndex>=6)return;
+  const key=`${x},${y}`;
+  if(setup.has(key))return;
+  setup.set(key,{type:drawQueue[drawIndex]});
+  drawIndex++;renderSetup();tone(620);
+}
+function autoSetup(){
+  const king=homeKing(setupOwner);
+  const cells=shuffle(placementCells(setupOwner).filter(p=>!(p.x===king.x&&p.y===king.y)&&!setup.has(`${p.x},${p.y}`)));
+  while(drawIndex<6){
+    const pos=cells.shift();setup.set(`${pos.x},${pos.y}`,{type:drawQueue[drawIndex]});drawIndex++;
+  }
+  renderSetup();tone(700);
+}
+function startGame(){
+  if(drawIndex!==6)return;
+  if(gameMode==="online"){ NET.submitPlacement([...setup.entries()].map(([key,value])=>{const [x,y]=key.split(",").map(Number);return {type:value.type,x,y}})); return; }
+  $("#result-overlay").classList.remove("show");
+  const pieces=[]; const counts={};
+  setup.forEach((value,key)=>{
+    const [x,y]=key.split(",").map(Number);counts[value.type]=(counts[value.type]||0)+1;
+    pieces.push(makePiece(value.type,0,x,y,counts[value.type]-1));
+  });
+  const playerCount=fourPlayer?4:2;
+  for(let owner=1;owner<playerCount;owner++){
+    const king=homeKing(owner),prefix=["c","e","f","g"][owner];
+    pieces.push(makePiece("king",owner,king.x,king.y,0));
+    const cells=shuffle(placementCells(owner).filter(p=>!(p.x===king.x&&p.y===king.y)));
+    const queue=owner===1?cpuQueue:shuffle(CPU_ROSTER.map((_,i)=>`${prefix}${i}`)).slice(0,6);
+    queue.forEach((type,i)=>pieces.push(makePiece(type,owner,cells[i].x,cells[i].y,0)));
+  }
+  state=createState({config:{playerCount},placements:pieces});
+  beginResearchMatch(state,0);
+  resetBattleAssist();
+  selected=null;reserved=Move.wait(0);locked=false;handViewOwner=null;lastCheckAlertKey="";
+  $("#battle-title").textContent=`L-SHOGI・${fourPlayer?"4人":"対CPU"}戦`;
+  show("battle-screen");renderBattle();flash("GO");setTimeout(()=>timer.start(),450);
+}
+function directionMarks(steps){
+  return steps.map(step=>DIRECTIONS.find(d=>d.vector[0]===step[0]&&d.vector[1]===step[1])?.mark).filter(Boolean).join(" ");
+}
+
+function cellElement(x,y,extra=""){
+  const el=document.createElement("div");el.className=`cell ${extra}`;el.dataset.x=x;el.dataset.y=y;
+  if(settings.coords)el.classList.add("coord");
+  el.dataset.coord=`${x+1}${y+1}`;return el;
+}
+function pieceElement(type,owner,isSelected){
+  const def=PIECE_CATALOG[type];
+  const actual=new Map(def.steps.map(vector=>{
+    let [dx,dy]=rules.orient(vector,owner);
+    [dx,dy]=worldVectorToView([dx,dy]);
+    return [`${dx},${dy}`,DIRECTIONS.find(d=>d.vector[0]===dx&&d.vector[1]===dy)?.mark||""];
+  }));
+  const positions=[[-1,-1],[0,-1],[1,-1],[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1]];
+  const map=positions.map(([dx,dy])=>{
+    if(dx===0&&dy===0)return `<span class="move-avatar">${def.label}</span>`;
+    const mark=actual.get(`${dx},${dy}`);
+    return `<span class="move-arrow">${mark||""}</span>`;
+  }).join("");
+  const el=document.createElement("div");
+  const researchIndex=localTypeIndex(type);
+  const mastery=researchIndex>=0?`mastery-${masteryLevel(researchIndex)}`:"";
+  el.className=`piece owner-${owner} ${type==="king"?"king":""} ${isSelected?"selected":""} ${mastery}`;
+  el.innerHTML=`<span class="move-map">${map}</span>`;
+  el.title=`${def.name}：${[...actual.values()].join(" ")||"移動なし"}`;
+  return el;
+}
+function renderReservationOverlay(board){
+  if(!state||!reserved||reserved.kind==="wait"||!reserved.to)return;
+  const cellSize=(board.clientWidth||810)/7;
+  const center=([vx,vy])=>({x:vx*cellSize+cellSize/2,y:vy*cellSize+cellSize/2});
+  const target=state.board.at(reserved.to.x,reserved.to.y);
+  const isSwap=reserved.kind==="move"&&target?.owner===myOwner();
+  const to=center(worldToView(reserved.to.x,reserved.to.y));
+  if(reserved.kind==="move"){
+    const piece=state.board.get(reserved.pieceId);
+    if(piece){
+      const from=center(worldToView(piece.x,piece.y));
+      const dx=to.x-from.x,dy=to.y-from.y,len=Math.hypot(dx,dy);
+      if(len>8){
+        const trim=Math.min(44,len/3),sx=from.x+dx/len*trim,sy=from.y+dy/len*trim;
+        const arrow=document.createElement("div");
+        arrow.className=`reserve-arrow owner-${myOwner()} ${isSwap?"swap":""}`;
+        arrow.style.left=`${sx}px`;arrow.style.top=`${sy-6}px`;
+        arrow.style.width=`${Math.max(24,len-trim*2)}px`;
+        arrow.style.transform=`rotate(${Math.atan2(dy,dx)}rad)`;
+        board.append(arrow);
+      }
+    }
+  }
+  const badge=document.createElement("div");
+  badge.className=`reserve-badge ${reserved.kind==="drop"?"drop":isSwap?"swap":""}`;
+  badge.textContent="";
+  badge.style.left=`${to.x-28}px`;badge.style.top=`${to.y-23}px`;
+  board.append(badge);
+}
+function eventKind(event){
+  if(event?.type==="capture"&&event.captured?.some(piece=>piece.type==="king"))return "king";
+  if(event?.type==="capture")return "capture";
+  if(event?.type==="annihilation")return "annihilation";
+  if(event?.type==="collision")return "collision";
+  if(event?.type==="swap")return "swap";
+  if(event?.type==="drop")return "drop";
+  if(event?.type==="compression")return "compression";
+  return "move";
+}
+function eventLabel(kind){
+  return {king:"王撃破",capture:"捕獲",annihilation:"全消滅",collision:"衝突",swap:"交替",drop:"打",compression:"圧縮",move:"移動"}[kind]||"結果";
+}
+function eventFeedText(event,kind){
+  const colors=["青","赤","緑","黄"];
+  const owner=Number.isInteger(event?.player)?colors[event.player]||`P${event.player+1}`:"";
+  const piece=PIECE_CATALOG[event?.piece?.type]?.label||"駒";
+  const pos=event?.to?`${event.to.x+1}${event.to.y+1}`:"";
+  if(kind==="king")return `${owner}${piece}が王を撃破`;
+  if(kind==="capture"){
+    const captured=event.captured?.[0];
+    return `${owner}${piece}が${PIECE_CATALOG[captured?.type]?.label||"駒"}を捕獲`;
+  }
+  if(kind==="collision")return `${pos}で2駒衝突`;
+  if(kind==="annihilation")return `${pos}で${event.count||3}駒全消滅`;
+  if(kind==="swap")return `${owner}が味方と交替`;
+  if(kind==="drop")return `${owner}${piece}を${pos}へ打つ`;
+  if(kind==="compression")return `圧縮で${event.count||0}駒消滅`;
+  return `${owner}${piece}が${pos}へ移動`;
+}
+function renderEventOverlay(board){
+  if(!state?.lastEvents?.length)return;
+  if(!locked&&!state.result?.over)return;
+  const events=state.lastEvents.filter(Boolean);
+  const cellSize=(board.clientWidth||810)/7;
+  const center=({x,y})=>{
+    const [vx,vy]=worldToView(x,y);
+    return {x:vx*cellSize+cellSize/2,y:vy*cellSize+cellSize/2};
+  };
+  const layer=document.createElement("div");
+  layer.className="event-layer";
+  const rank={king:6,capture:5,collision:4,annihilation:4,swap:3,move:2,drop:1};
+  const routes=new Map();
+  for(const event of events.filter(e=>e?.to&&["move","capture","swap","drop","collision","annihilation"].includes(e.type))){
+    const kind=eventKind(event);
+    const from=event.from||(event.type==="drop"?null:event.piece&&Number.isFinite(event.piece.x)&&Number.isFinite(event.piece.y)?{x:event.piece.x,y:event.piece.y}:null);
+    const key=[event.player,event.piece?.id||event.piece?.type||"",from?`${from.x},${from.y}`:"hand",`${event.to.x},${event.to.y}`].join("|");
+    const current=routes.get(key);
+    if(!current||(rank[kind]||0)>(rank[current.kind]||0))routes.set(key,{event,kind,from,to:event.to});
+  }
+  for(const route of routes.values()){
+    const glyph=PIECE_CATALOG[route.event.piece?.type]?.label||"駒";
+    const to=center(route.to);
+    if(route.from){
+      const from=center(route.from);
+      const dx=to.x-from.x,dy=to.y-from.y,len=Math.hypot(dx,dy);
+      if(len>18){
+        const trim=Math.min(cellSize*.38,len/3);
+        const sx=from.x+dx/len*trim,sy=from.y+dy/len*trim;
+        const trace=document.createElement("div");
+        trace.className=`move-trace owner-${route.event.player??route.event.piece?.owner??0}`;
+        trace.style.left=`${sx}px`;trace.style.top=`${sy-7}px`;
+        trace.style.width=`${Math.max(28,len-trim*2)}px`;
+        trace.style.transform=`rotate(${Math.atan2(dy,dx)}rad)`;
+        layer.append(trace);
+      }
+    }
+    const end=document.createElement("div");
+    end.className=`move-to ${route.kind==="drop"?"move-drop":""}`;
+    end.textContent=glyph;
+    end.style.left=`${to.x}px`;end.style.top=`${to.y}px`;
+    layer.append(end);
+  }
+  if(layer.childElementCount)board.append(layer);
+}function renderBattle(){
+  if(!state)return;
+  selected=normalizeSelection(selected);
+  const threats=kingThreatMap(state);
+  const enemyAttacks=enemyAttackCells(state,myOwner());
+  const board=$("#battle-board");board.innerHTML="";
+  const legal=new Set();
+  const swapLegal=new Set();
+  const attackTargets=new Set();
+  const attackKings=new Set();
+  if(selected?.kind==="board"){
+    const selectedPiece=state.board.get(selected.pieceId);
+    if(selectedPiece)rules.destinations(state.board,selectedPiece).forEach(p=>{
+      legal.add(`${p.x},${p.y}`);
+      if(p.swap)swapLegal.add(`${p.x},${p.y}`);
+      const target=state.board.at(p.x,p.y);
+      if(target?.owner!==undefined&&target.owner!==myOwner()){
+        attackTargets.add(`${p.x},${p.y}`);
+        if(target.type==="king")attackKings.add(`${p.x},${p.y}`);
+      }
+      if(moveWouldPressureKing(selectedPiece,p,state))attackKings.add(`${p.x},${p.y}`);
+    });
+  }else if(selected?.kind==="hand"){
+    const handPiece=state.players[myOwner()].hand[selected.handIndex];
+    for(let y=0;y<7;y++)for(let x=0;x<7;x++)if(!state.board.at(x,y)){
+      legal.add(`${x},${y}`);
+      if(handPiece&&moveWouldPressureKing({...handPiece,id:handPiece.id||`hand-${selected.handIndex}`,owner:myOwner(),x:null,y:null},{x,y},state))attackKings.add(`${x},${y}`);
+    }
+  }
+  const last=new Set((state.lastEvents||[]).filter(e=>e?.to).map(e=>`${e.to.x},${e.to.y}`));
+  const reservedToKey=reserved?.kind!=="wait"&&reserved?.to?`${reserved.to.x},${reserved.to.y}`:"";
+  const reservedFromId=reserved?.kind==="move"?reserved.pieceId:null;
+  const reservedTarget=reservedToKey?state.board.at(reserved.to.x,reserved.to.y):null;
+  const reservedSwap=reserved?.kind==="move"&&reservedTarget?.owner===myOwner();
+  for(let vy=0;vy<7;vy++)for(let vx=0;vx<7;vx++){
+    const [x,y]=viewToWorld(vx,vy);
+    const territory=state.players.length===4?[0,1,2,3].find(owner=>placementCells(owner).some(p=>p.x===x&&p.y===y)):null;
+    const piece=state.board.at(x,y);
+    const kingChecked=piece?.type==="king"&&threats.has(piece.owner);
+    const key=`${x},${y}`;
+    const ownThreat=piece?.owner===myOwner()&&enemyAttacks.has(key);
+    const zone=compressionCellClass(x,y,state.turn);
+    const reservedTo=key===reservedToKey;
+    const reservedFrom=piece?.id&&piece.id===reservedFromId;
+    const classes=[territory!==null&&territory!==undefined?`territory-${territory}`:"",zone,last.has(key)?"last":"",reservedFrom?"reserved-from":"",reservedTo?"reserved-to":"",reservedTo&&reservedSwap?"swap-dest":"",ownThreat?"own-threat":"",kingChecked?"king-check":""].join(" ");
+    const cell=cellElement(x,y,classes);
+    if(piece){
+      const chosen=selected?.kind==="board"&&selected.pieceId===piece.id;
+      const el=pieceElement(piece.type,piece.owner,chosen);
+      if(reserved.pieceId===piece.id)el.classList.add("reserved");
+      cell.append(el);
+    }
+    cell.onclick=()=>boardClick(x,y);
+    board.append(cell);
+  }
+  $("#turn-label").textContent=`第${state.turn}ターン`;
+  renderEventOverlay(board);
+  renderReservationOverlay(board);
+  const activeCompression=compressionRuleAt(state.turn),warningCompression=compressionWarningAt(state.turn);
+  const compressionText=activeCompression?` / 圧縮 ${activeCompression.label}`:warningCompression?` / 圧縮まで${warningCompression.turn-state.turn}T`:"";
+  $("#turn-label").textContent=`第${state.turn}ターン${compressionText}`;
+  renderFactionStatus(threats);
+  playCheckAlert(threats);
+  renderHand();
+}
+function boardClick(x,y){
+  if(locked||!state||state.result.over)return;
+  const piece=state.board.at(x,y);
+  if(selected?.kind==="board"){
+    if(piece?.id===selected.pieceId){tone(360);renderBattle();return}
+    const move=new Move({player:myOwner(),kind:"move",pieceId:selected.pieceId,to:{x,y}});
+    if(rules.isLegal(state,move)){reserved=move;selected=null;tone(720);if(gameMode==="online")NET.commitMove(reserved,true);renderBattle();return}
+  }
+  if(selected?.kind==="hand"){
+    const move=new Move({player:myOwner(),kind:"drop",handIndex:selected.handIndex,to:{x,y}});
+    if(rules.isLegal(state,move)){reserved=move;selected=null;tone(720);if(gameMode==="online")NET.commitMove(reserved,true);renderBattle();return}
+  }
+  if(piece?.owner===myOwner()){selected={kind:"board",pieceId:piece.id};tone();renderBattle()}
+}
+function handTabsHTML(activeOwner){
+  const colors=["青","赤","緑","黄"];
+  return `<div class="hand-tabs">${state.players.map((player,owner)=>
+    `<button class="hand-tab f${owner} ${activeOwner===owner?"active":""}" data-hand-tab="${owner}">${colors[owner]} ${player.hand.length}</button>`
+  ).join("")}</div>`;
+}
+function bindHandTabs(){
+  document.querySelectorAll("[data-hand-tab]").forEach(button=>button.onclick=()=>{handViewOwner=+button.dataset.handTab;renderHand();tone(560)});
+}
+function renderHand(){
+  const box=$("#player-hand"),mine=myOwner(),colors=["青","赤","緑","黄"];
+  box.innerHTML="";
+  document.querySelectorAll("[data-hand-owner]").forEach(button=>button.classList.toggle("active",handViewOwner===+button.dataset.handOwner));
+  const addPiece=(parent,p,index,owner)=>{
+    const b=document.createElement("button");
+    b.className=`hand-piece ${owner===mine&&selected?.kind==="hand"&&selected.handIndex===index?"selected":""}`;
+    b.append(pieceElement(p.type,owner,false));
+    if(owner===mine)b.onclick=()=>{if(!locked){selected={kind:"hand",handIndex:index};tone(520);renderBattle()}};
+    else{b.disabled=true;b.title=`${colors[owner]}勢力の持ち駒（確認専用）`}
+    parent.append(b);
+  };
+  if(handViewOwner===null){
+    box.className="hand-overview";$("#hand-title").textContent="全プレイヤー残駒";$("#hand-count").textContent="";
+    $("#hand-back").classList.remove("show");
+    const mineHand=state.players[mine]?.hand.length||0;
+    const orderedOwners=state.players.map((player,owner)=>({player,owner,alive:hasKing(state,owner)}))
+      .sort((a,b)=>{
+        if(a.owner===mine)return -1;
+        if(b.owner===mine)return 1;
+        if(a.alive!==b.alive)return a.alive?-1:1;
+        if(a.player.hand.length!==b.player.hand.length)return b.player.hand.length-a.player.hand.length;
+        return a.owner-b.owner;
+      });
+    let otherSlots=Math.max(0,(state.players.length>2?12:15)-Math.max(0,mineHand-6));
+    orderedOwners.forEach(({player,owner,alive})=>{
+      const shelf=document.createElement("section");shelf.className=`hand-shelf ${owner===mine?"mine":"other"}`;
+      const head=document.createElement("button");head.className=`shelf-head f${owner}`;head.textContent=`${colors[owner]} ${owner===mine?"あなた":player.name}　${player.hand.length}駒`;
+      head.onclick=()=>{handViewOwner=owner;renderHand();tone(560)};shelf.append(head);
+      const grid=document.createElement("div");grid.className="shelf-grid";
+      const cap=alive?(state.players.length>2?6:9):(state.players.length>2?3:4);
+      const visible=owner===mine?player.hand.length:Math.min(player.hand.length,cap,otherSlots);
+      if(owner!==mine)otherSlots-=visible;
+      player.hand.slice(0,visible).forEach((p,index)=>addPiece(grid,p,index,owner));
+      if(player.hand.length>visible){const more=document.createElement("button");more.className="hand-more";more.textContent=`他 ${player.hand.length-visible}`;more.onclick=head.onclick;grid.append(more)}
+      if(!player.hand.length)grid.innerHTML='<div class="empty">なし</div>';
+      shelf.append(grid);box.append(shelf);
+    });
+    return;
+  }
+  const owner=Math.max(0,Math.min(state.players.length-1,handViewOwner)),player=state.players[owner];
+  box.className="hand-overview";$("#hand-title").textContent=`${colors[owner]} ${owner===mine?"あなた":player.name}の持ち駒`;
+  $("#hand-count").textContent=`${player.hand.length} / 24`;$("#hand-back").classList.add("show");
+  box.insertAdjacentHTML("beforeend",handTabsHTML(owner));
+  bindHandTabs();
+  const grid=document.createElement("div");grid.className=`hands ${player.hand.length<=12?"big":""}`;
+  if(!player.hand.length){grid.innerHTML='<div class="empty">持ち駒なし</div>';box.append(grid);return}
+  player.hand.forEach((p,index)=>addPiece(grid,p,index,owner));
+  box.append(grid);
+}
+function selectedLabel(){
+  if(!selected)return"なし";
+  const p=selected.kind==="board"?state.board.get(selected.pieceId):state.players[myOwner()].hand[selected.handIndex];
+  return p?`${PIECE_CATALOG[p.type].name}${selected.kind==="hand"?"を打つ":""}`:"なし";
+}
+function reserveLabel(){
+  if(reserved.kind==="wait")return"待機";
+  const pos=`${reserved.to.x+1}${reserved.to.y+1}`;
+  if(reserved.kind==="drop")return`${PIECE_CATALOG[state.players[myOwner()].hand[reserved.handIndex]?.type]?.label||"駒"}を ${pos} へ`;
+  return`${PIECE_CATALOG[state.board.get(reserved.pieceId)?.type]?.label||"駒"}を ${pos} へ`;
+}
+function clearMove(){if(locked)return;selected=null;reserved=Move.wait(myOwner());if(gameMode==="online")NET.commitMove(reserved,true);tone(300);renderBattle()}
+function resetBattleAssist(){
+  matchStats={turns:0,captures:0,collisions:0,annihilations:0,drops:0,swaps:0,compressions:0};
+}
+function selectedInfoText(){
+  if(!selected)return"駒を選択してください";
+  const p=selected.kind==="board"?state.board.get(selected.pieceId):state.players[myOwner()].hand[selected.handIndex];
+  if(!p)return"選択なし";
+  return `${PIECE_CATALOG[p.type]?.label||"駒"} ${selected.kind==="hand"?"持ち駒":"盤上"}`;
+}
+function renderReserveInfo(){
+  const box=$("#reserve-info");if(!box||!state)return;
+  const hasMove=reserved&&reserved.kind!=="wait";
+  const main=hasMove?reserveLabel():"まだ予約なし";
+  const sub=hasMove?"時間切れでこの行動を実行します。Escか取消で待機に戻せます。":`${selectedInfoText()}。移動先を選ぶと予約されます。`;
+  const tags=[reserved?.kind==="drop"?"打ち":reserved?.kind==="move"?"移動":"待機"];
+  box.innerHTML=`<div class="info-main">${main}</div><div class="info-sub">${sub}</div><div class="info-tags">${tags.map(t=>`<span class="info-tag">${t}</span>`).join("")}</div>`;
+}
+function renderBattleHint(threats){
+  const box=$("#battle-hint");if(!box||!state)return;
+  const owner=myOwner();
+  const tags=[];
+  let main="次の一手を選ぶ";
+  let sub="相手の王に近づくか、危険な駒を先に処理しましょう。";
+  if(threats.has(owner)){
+    main="王が狙われています";
+    sub="王手は強制応手ではありませんが、次の同時解決で王を失う危険があります。";
+    tags.push(["危険","warn"]);
+  }
+  const selectedPiece=selected?.kind==="board"?state.board.get(selected.pieceId):null;
+  if(selectedPiece){
+    const dest=rules.destinations(state.board,selectedPiece);
+    const captures=dest.filter(p=>{const target=state.board.at(p.x,p.y);return target&&target.owner!==owner}).length;
+    main=`${PIECE_CATALOG[selectedPiece.type]?.label||"駒"}の行き先 ${dest.length}`;
+    sub=captures?`捕獲できるマスが${captures}あります。王マーク付きのマスは勝負所です。`:"安全な位置取りか、味方との場所替えを狙えます。";
+    if(captures)tags.push(["捕獲候補","good"]);
+  }
+  const warning=compressionWarningAt(state.turn);
+  const active=compressionRuleAt(state.turn);
+  if(active){tags.push([`圧縮 ${active.label}`,"warn"])}
+  else if(warning){tags.push([`圧縮まで${warning.turn-state.turn}T`,"warn"])}
+  box.innerHTML=`<div class="info-main">${main}</div><div class="info-sub">${sub}</div><div class="info-tags">${tags.map(([t,c])=>`<span class="info-tag ${c||""}">${t}</span>`).join("")}</div>`;
+}
+function renderTurnHistory(){
+}
+
+function updateTimer(left){
+  $("#timer-num").textContent=left||"GO";
+  if(left>0&&left!==lastTimerTone)tone(left===1?760:500,.04);
+  lastTimerTone=left;
+}
+function pieceName(piece){
+  const def=PIECE_CATALOG[piece?.type];
+  return def?.label||def?.name||"駒";
+}
+function eventOwnerName(owner){
+  const colors=["青","赤","緑","黄"];
+  const player=state?.players?.[owner];
+  return `${colors[owner]||`P${owner+1}`} ${owner===myOwner()?"あなた":player?.name||`CPU ${owner}`}`;
+}
+function eventPos(pos){return pos?`${pos.x+1}${pos.y+1}`:"--"}
+function eventRoute(event){return event?.from?`${eventPos(event.from)}→${eventPos(event.to)}`:eventPos(event?.to)}
+function logLineForEvent(event){
+  const kind=eventKind(event);
+  const actor=Number.isInteger(event.player)?eventOwnerName(event.player):"盤面";
+  const piece=pieceName(event.piece);
+  const pos=eventPos(event.to),route=eventRoute(event);
+  if(kind==="king")return {text:`${actor}の${piece}が${route}で王を撃破`,important:true};
+  if(kind==="capture"){
+    const captured=event.captured?.[0];
+    const targetOwner=Number.isInteger(captured?.owner)?eventOwnerName(captured.owner).split(" ")[0]:"相手";
+    return {text:`${actor}の${piece}が${route}で${targetOwner}の${pieceName(captured)}を捕獲`,important:true};
+  }
+  if(kind==="collision"){
+    const got=event.captured?.map(piece=>pieceName(piece)).join("・");
+    return {text:`${actor}の${piece}が${route}で衝突${got?`、${got}を持ち駒へ`:""}`,important:true};
+  }
+  if(kind==="annihilation")return {text:`${actor}の${piece}が${route}で${event.count||3}駒衝突、全消滅`,important:true};
+  if(kind==="swap")return {text:`${actor}の${piece}が${route}へ場所替え`,important:false};
+  if(kind==="drop")return {text:`${actor}が${piece}を${pos}へ打つ`,important:false};
+  if(kind==="compression")return {text:`圧縮エリア外の${event.count||0}駒が消滅`,system:true};
+  return {text:`${actor}の${piece}が${route}へ移動`,important:false};
+}
+function eventMainText(events){
+  const compression=events.find(e=>e.type==="compression");
+  if(compression)return `圧縮で${compression.count}駒が消滅`;
+  if(events.some(e=>eventKind(e)==="king"))return "王が撃破されました";
+  const captures=events.filter(e=>e.type==="capture").length;
+  const collisions=new Set(events.filter(e=>e.type==="collision").map(e=>eventPos(e.to))).size;
+  const annihilations=new Set(events.filter(e=>e.type==="annihilation").map(e=>eventPos(e.to))).size;
+  const swaps=Math.ceil(events.filter(e=>e.type==="swap").length/2);
+  const drops=events.filter(e=>e.type==="drop").length;
+  const parts=[];
+  if(captures)parts.push(`捕獲${captures}`);
+  if(collisions)parts.push(`衝突${collisions}`);
+  if(annihilations)parts.push(`全消滅${annihilations}`);
+  if(swaps)parts.push(`場所替え${swaps}`);
+  if(drops)parts.push(`打ち${drops}`);
+  return parts.length?parts.join(" / "):"移動が同時に実行されました";
+}
+function renderEventLog(events){
+  const box=$("#event-log");
+  if(!events?.length){
+    box.textContent="両者とも待機しました。";
+    return;
+  }
+  const seen=new Set(),lines=[];
+  for(const event of events){
+    const line=logLineForEvent(event);
+    if(!line?.text||seen.has(line.text))continue;
+    seen.add(line.text);
+    lines.push(line);
+  }
+  const visible=lines.slice(0,5);
+  const rows=visible.map(line=>`<div class="event-line ${line.important?"important":line.system?"system":""}">${line.text}</div>`).join("");
+  const more=lines.length>visible.length?`<div class="event-more">ほか ${lines.length-visible.length} 件</div>`:"";
+  box.innerHTML=`<div class="event-summary"><div class="event-main">${eventMainText(events)}</div><div class="event-lines">${rows}</div>${more}</div>`;
+}
+function recordTurnSummary(events){
+  matchStats.turns=Math.max(matchStats.turns,state?.turn?state.turn-1:matchStats.turns+1);
+  matchStats.captures+=events.filter(e=>e.type==="capture").length;
+  matchStats.collisions+=new Set(events.filter(e=>e.type==="collision").map(e=>eventPos(e.to))).size;
+  matchStats.annihilations+=new Set(events.filter(e=>e.type==="annihilation").map(e=>eventPos(e.to))).size;
+  matchStats.drops+=events.filter(e=>e.type==="drop").length;
+  matchStats.swaps+=Math.ceil(events.filter(e=>e.type==="swap").length/2);
+  matchStats.compressions+=events.filter(e=>e.type==="compression").length;
+}
+function resolveTurn(){
+  if(locked||!state)return;locked=true;$("#phase-label").textContent="同時解決中";
+  const prevSelected=selected,prevReserved=reserved;
+  const droppedId=prevReserved.kind==="drop"?state.players[myOwner()]?.hand[prevReserved.handIndex]?.id:null;
+  const moves=[reserved,...state.players.slice(1).map((_,owner)=>cpu.choose(state,owner+1))];
+  const result=resolver.resolve(state,moves);
+  recordResearchEvents(result.events,0);
+  selected=selectionAfterTurn(prevSelected,prevReserved,droppedId);reserved=Move.wait(0);renderBattle();showEvents(result.events);flash("GO");
+  if(result.result.over){setTimeout(showResult,700);return}
+  locked=false;$("#phase-label").textContent="入力受付中";
+  setTimeout(()=>{if(!locked&&!state.result.over)timer.start()},650);
+}
+function showEvents(events){
+  recordTurnSummary(events||[]);
+  const compression=events.find(e=>e.type==="compression");
+  if(compression){$("#event-log").textContent=`圧縮エリア外の${compression.count}駒が消滅しました。`;return}
+  if(!events.length){$("#event-log").textContent="両者とも待機しました。";return}
+  const annihilation=events.find(e=>e.type==="annihilation");
+  const collision=events.some(e=>e.type==="collision");
+  const capture=events.find(e=>e.type==="capture");
+  const swap=events.some(e=>e.type==="swap");
+  $("#event-log").textContent=annihilation?`${annihilation.count}駒が集中衝突！ 全駒が消滅しました。`:collision?"2駒が衝突！ 互いの通常駒が持ち駒になります。":capture?`${PIECE_CATALOG[capture.captured[0].type].name}を取りました。`:swap?"味方同士が場所替えしました。":"予約した手が同時に実行されました。";
+}
+function renderResultResearch(){
+  const box=$("#result-research");if(!box)return;
+  const unlocks=[...(researchMatch.newUnlocks||[])];
+  const totalAfter=researchTotal();
+  const rewardUnlocks=BONUS_AVATARS
+    .map(x=>x.req).filter((req,i,arr)=>arr.indexOf(req)===i)
+    .filter(req=>(researchMatch.totalBefore||0)<req&&totalAfter>=req);
+  if(!unlocks.length&&!rewardUnlocks.length){
+    const deployed=[...(researchMatch.deployed||[])];
+    const next=deployed.map(index=>({index,missing:ACHIEVEMENTS.find(a=>!research.units[index]?.ach?.[a.id])}))
+      .find(x=>x.missing);
+    box.innerHTML=`<h3>駒研究</h3><div class="rr-empty">${next?`次は「${customRoster[next.index]?.name||`ユニット${next.index+1}`}」で ${next.missing.name} を狙おう。`:"今回の新記録はありません。研究はかなり埋まっています。"}</div>`;
+    return;
+  }
+  const visible=unlocks.slice(0,4);
+  const items=visible.map(u=>{
+    const unit=customRoster[u.index]||{name:`ユニット${u.index+1}`,avatar:"◆"};
+    const ach=ACHIEVEMENTS.find(a=>a.id===u.id)||{icon:"★",name:u.id};
+    return `<div class="rr-item"><b>${unit.avatar} ${unit.name}</b>${ach.icon} ${ach.name} 達成</div>`;
+  }).join("");
+  const more=unlocks.length>visible.length?`ほか ${unlocks.length-visible.length} 件の新記録。`:"";
+  const rewards=rewardUnlocks.length?`見た目候補を新しく解放：研究 ${rewardUnlocks.join(" / ")}`:"";
+  box.innerHTML=`<h3>今回の駒研究</h3><div class="rr-list">${items}</div><div class="rr-note">${[more,rewards].filter(Boolean).join("　")}</div>`;
+}
+function flash(text){
+  const el=$("#count-flash");el.textContent=text;el.classList.remove("show");void el.offsetWidth;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),380);
+}
+function renderResultStats(){
+  const box=$("#result-stats");if(!box)return;
+  const remaining=state.players.map((_,owner)=>state.board.list(owner).filter(p=>p.type!=="king").length+state.players[owner].hand.length);
+  const maxRemain=Math.max(...remaining),leader=remaining.indexOf(maxRemain);
+  box.innerHTML=[
+    ["ターン",`${Math.max(0,matchStats.turns)}`],
+    ["捕獲",`${matchStats.captures}`],
+    ["衝突",`${matchStats.collisions+matchStats.annihilations}`],
+    ["打ち",`${matchStats.drops}`],
+    ["場所替え",`${matchStats.swaps}`],
+    ["最多戦力",`${["青","赤","緑","黄"][leader]||"?"} ${maxRemain}`]
+  ].map(([label,value])=>`<div class="result-stat"><b>${value}</b><span>${label}</span></div>`).join("");
+}
+function showResult(){
+  timer.stop();const r=state.result;
+  finalizeResearchMatch(state,myOwner());
+  const win=r.winner===myOwner();
+  $("#result-title").textContent=r.draw?"引き分け":win?"勝利！":"敗北";
+  $("#result-text").textContent=r.draw?"すべての王が同時に盤上から消えました。":win?"最後の王として生き残りました。":`プレイヤー${(r.winner??0)+1}の王が生き残りました。`;
+  renderResultStats();
+  renderResultResearch();
+  const again=$('[data-action="rematch"]');if(again)again.textContent=gameMode==="online"?"ロビーへ":"もう一度";
+  $("#result-overlay").classList.add("show");tone(win?880:220,.3);
+}
+function resign(){
+  if(!state||state.result.over)return;
+  if(gameMode==="online"){NET.resign();return}
+  timer.stop();state.result={over:true,winner:1,draw:false};showResult();
+}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function openCustom(){
+  timer.stop();
+  customEntrySnapshot=clone(customRoster);
+  editingUnit=Math.max(0,Math.min(11,editingUnit));show("custom-screen");renderCustom();
+}
+function stockRemaining(id){
+  const max=DIRECTIONS.find(d=>d.id===id).stock;
+  const used=customRoster.reduce((n,u)=>n+(u.dirs.includes(id)?1:0),0);
+  return max-used;
+}
+function clampScore(n){return Math.max(0,Math.min(100,Math.round(n)))}
+function deckEvaluation(roster=customRoster){
+  const active=roster.filter(unit=>unit.dirs.length);
+  const avg=active.reduce((n,u)=>n+u.dirs.length,0)/Math.max(1,active.length);
+  const front=roster.filter(u=>u.dirs.some(id=>["ul","up","ur"].includes(id))).length;
+  const side=roster.filter(u=>u.dirs.includes("left")||u.dirs.includes("right")).length;
+  const back=roster.filter(u=>u.dirs.some(id=>["dl","down","dr"].includes(id))).length;
+  const bothSide=roster.filter(u=>u.dirs.includes("left")&&u.dirs.includes("right")).length;
+  const empty=roster.filter(u=>!u.dirs.length).length;
+  const maxDirs=Math.max(0,...roster.map(u=>u.dirs.length));
+  const repeated=new Map();
+  roster.forEach(u=>{const key=[...u.dirs].sort().join(",");repeated.set(key,(repeated.get(key)||0)+1)});
+  const duplicate=Math.max(0,...repeated.values())-1;
+  const attack=clampScore(front*7+avg*16+roster.filter(u=>u.dirs.includes("up")).length*3);
+  const lateral=clampScore(side*8+bothSide*8);
+  const retreat=clampScore(back*9+roster.filter(u=>u.dirs.includes("down")).length*3);
+  const stability=clampScore(front*5+side*5+active.length*3-empty*10-duplicate*7);
+  const risk=clampScore(maxDirs*18+avg*10+duplicate*8);
+  const note=empty?`未設定 ${empty}体。抽選事故に注意。`:risk>72?"強駒寄り。捕られると相手の武器になる。":stability<50?"尖り気味。出目負け時の割り切り型。":"役割が散っていて扱いやすい構成。";
+  return {attack,lateral,retreat,stability,risk,note};
+}
+function scoreHTML(label,value,cls=""){
+  return `<div class="score-item ${cls}">${label} ${value}<div class="score-bar"><i style="width:${value}%"></i></div></div>`;
+}
+function renderCustom(){
+  $("#roster-grid").innerHTML=customRoster.map((unit,i)=>{
+    const marks=unit.dirs.map(id=>DIRECTIONS.find(d=>d.id===id).mark).join(" ");
+    return `<button class="roster-card mastery-${masteryLevel(i)} ${i===editingUnit?"active":""}" data-unit="${i}"><span class="avatar">${unit.avatar}</span><span class="name">${unit.name}</span><span class="dirs">${marks||"移動なし"} ・ ${masteryTitle(i)}</span></button>`;
+  }).join("");
+  document.querySelectorAll("[data-unit]").forEach(card=>card.onclick=()=>{editingUnit=+card.dataset.unit;renderCustom();tone()});
+  const deck=deckEvaluation(customRoster);
+  $("#stockbar").innerHTML=DIRECTIONS.map(dir=>`<div class="stock">${dir.mark} ${dir.name}<br><b>${stockRemaining(dir.id)}</b> / ${dir.stock}</div>`).join("")+
+    `<div class="deck-score">${scoreHTML("攻撃",deck.attack)}${scoreHTML("横対応",deck.lateral)}${scoreHTML("後退",deck.retreat)}${scoreHTML("安定",deck.stability)}${scoreHTML("危険",deck.risk,"score-risk")}<div class="score-note">${deck.note}</div></div>`;
+  const order=["ul","up","ur","left","center","right","dl","down","dr"];
+  $("#dirpad").innerHTML=order.map(id=>{
+    if(id==="center")return `<button class="dirbtn center" disabled>${customRoster[editingUnit].avatar}</button>`;
+    const dir=DIRECTIONS.find(d=>d.id===id),on=customRoster[editingUnit].dirs.includes(id);
+    return `<button class="dirbtn ${on?"on":""}" data-dir="${id}">${dir.mark}</button>`;
+  }).join("");
+  document.querySelectorAll("[data-dir]").forEach(button=>button.onclick=()=>toggleDirection(button.dataset.dir));
+  $("#avatar-grid").innerHTML=allAllowedAvatars().map(avatar=>{
+    const bonus=BONUS_AVATARS.find(x=>x.avatar===avatar),unlocked=avatarUnlocked(avatar);
+    return `<button class="avatar-btn ${customRoster[editingUnit].avatar===avatar?"on":""} ${unlocked?"":"locked"}" data-avatar="${avatar}" ${unlocked?"":"disabled"}>${unlocked?avatar:`🔒 ${bonus.req}`}</button>`;
+  }).join("");
+  document.querySelectorAll("[data-avatar]:not([disabled])").forEach(button=>button.onclick=()=>{customRoster[editingUnit].avatar=button.dataset.avatar;renderCustom();tone(640)});
+}
+function openResearch(){timer.stop();$("#result-overlay")?.classList.remove("show");show("research-screen");renderResearch()}
+function renderResearch(){
+  $("#research-total").textContent=`全研究 ${researchTotal()} / ${12*ACHIEVEMENTS.length}`;
+  $("#research-grid").innerHTML=customRoster.map((unit,index)=>{
+    const achievements=ACHIEVEMENTS.map(a=>`<span class="ru-dot ${research.units[index]?.ach?.[a.id]?"on":""}" title="${a.name}">${a.icon}</span>`).join("");
+    return `<article class="research-unit mastery-${masteryLevel(index)}"><div class="ru-avatar">${unit.avatar}</div><div class="ru-name">${unit.name}</div><div class="ru-title">${masteryTitle(index)} ・ ${researchCount(index)}/8</div><div class="ru-dots">${achievements}</div></article>`;
+  }).join("");
+  $("#research-rewards").innerHTML=`
+    <div class="research-reward on"><b>個体フレーム</b><span>各駒 2 / 4 / 6 / 8 記録で進化</span></div>
+    ${[6,18,36].map(req=>{
+      const unlocked=researchTotal()>=req;
+      const faces=BONUS_AVATARS.filter(x=>x.req===req).map(x=>x.avatar).join(" ");
+      return `<div class="research-reward ${unlocked?"on":""}"><b>${unlocked?"解放済み":"研究 "+req+"で解放"}</b><span>${faces}</span></div>`;
+    }).join("")}`;
+  $("#research-legend").innerHTML=ACHIEVEMENTS.map(a=>`<span>${a.icon} ${a.name}</span>`).join("");
+}
+function toggleDirection(id){
+  const unit=customRoster[editingUnit],index=unit.dirs.indexOf(id);
+  if(index>=0){unit.dirs.splice(index,1);tone(340)}
+  else if(stockRemaining(id)>0){unit.dirs.push(id);tone(700)}
+  else{tone(180,.14)}
+  renderCustom();
+}
+function saveCustom(){
+  localStorage.setItem(CUSTOM_KEY,JSON.stringify(customRoster));
+  installCustomCatalog();show("title-screen");tone(760);
+}
+function clearCustomDirections(){
+  customRoster.forEach(unit=>unit.dirs=[]);
+  renderCustom();tone(260);
+}
+function restoreCustomEntry(){
+  if(customEntrySnapshot)customRoster=clone(customEntrySnapshot);
+  renderCustom();tone(520);
+}
+
+/* ============================================================
+   ONLINE: PeerJS / ホスト権威 / コミット→開示 / 自動再接続
+   ============================================================ */
+const NET_VER="lshogi-net-2",NET_HB=3000,NET_ZOMBIE=9000,NET_RECO_TTL=5*60*1000;
+const NET_BACKOFF=[250,500,900,1500,2500,4000],NET_RECO_MAX=24;
+let peerLoader=null;
+function ensurePeerJS(){
+  if(globalThis.Peer)return Promise.resolve(globalThis.Peer);
+  if(peerLoader)return peerLoader;
+  const urls=["https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js","https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"];
+  peerLoader=new Promise((resolve,reject)=>{
+    const load=i=>{
+      if(i>=urls.length){peerLoader=null;reject(new Error("通信ライブラリを読み込めません"));return}
+      const s=document.createElement("script");s.src=urls[i];s.async=true;
+      s.onload=()=>globalThis.Peer?resolve(globalThis.Peer):load(i+1);
+      s.onerror=()=>{s.remove();load(i+1)};document.head.appendChild(s);
+    };load(0);
+  });
+  return peerLoader;
+}
+function netRoomId(keyword){
+  let h=2166136261>>>0;
+  for(const ch of String(keyword).trim().toLowerCase()){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0}
+  // 人数はホストから通知する。参加側のON/OFFで別部屋にならない共通ID。
+  return `lshogi-v3-${h.toString(36)}`;
+}
+function netToken(){return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`}
+function movePlain(move,owner){
+  if(!move||move.kind==="wait")return {player:owner,kind:"wait",pieceId:null,to:null,handIndex:null};
+  return {player:owner,kind:move.kind,pieceId:move.pieceId||null,to:move.to?{x:+move.to.x,y:+move.to.y}:null,handIndex:Number.isInteger(move.handIndex)?move.handIndex:null};
+}
+function sealHash(move,nonce){
+  const text=JSON.stringify(move)+":"+nonce,seeds=[2166136261,2246822519,3266489917,668265263];
+  return seeds.map(seed=>{let h=seed>>>0;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619)>>>0;h^=h>>>13}return h.toString(36)}).join(".");
+}
+function packState(s){
+  return {config:s.config,players:s.players.map(p=>({...p,hand:p.hand.map(h=>({...h}))})),board:s.board.serialize(),turn:s.turn,lastEvents:s.lastEvents,result:s.result};
+}
+function unpackState(data){
+  const s=createState({config:data.config||DEFAULT_CONFIG});
+  s.players=(data.players||s.players).map(p=>({...p,hand:(p.hand||[]).map(h=>({...h}))}));
+  s.board=new Board(data.board?.size||7,(data.board?.pieces||[]).map(p=>new Piece(p)));
+  s.turn=data.turn||1;s.lastEvents=data.lastEvents||[];s.result=data.result||{over:false,winner:null,draw:false};return s;
+}
+function validPlacement(items,owner,queue){
+  if(!Array.isArray(items)||items.length!==7)return null;
+  const king=homeKing(owner),allowed=new Set(placementCells(owner).map(p=>`${p.x},${p.y}`)),seen=new Set(),types=[];
+  for(const raw of items){
+    const p={type:String(raw.type||""),x:+raw.x,y:+raw.y},key=`${p.x},${p.y}`;
+    if(!inside(p.x,p.y,7)||!allowed.has(key)||seen.has(key))return null;seen.add(key);
+    if(p.type==="king"){if(p.x!==king.x||p.y!==king.y)return null}else types.push(p.type);
+  }
+  if(!seen.has(`${king.x},${king.y}`)||types.sort().join("|")!==[...queue].sort().join("|"))return null;
+  return items.map(p=>({type:String(p.type),x:+p.x,y:+p.y}));
+}
+const NET={
+  active:false,isHost:false,myIdx:0,peer:null,hostConn:null,guestConn:null,keyword:"",name:"",roomId:"",
+  token:"",session:"",hostSession:"",seat:null,guest:null,phase:"idle",matchId:"",stateVer:0,lastVer:0,
+  hostRoster:null,guestRoster:null,queues:null,placements:[null,null],ready:false,guestReady:false,
+  paused:false,roundId:0,commitments:new Map(),reveals:new Map(),inputReady:new Set(),localSeal:null,
+  _seq:0,_lastSeq:0,_hb:null,_watch:null,_roundTimer:null,_roundClock:null,_lastRx:0,_latency:null,_reco:false,_tries:0,_intentional:false,
+  send(conn,message){try{if(conn&&conn.open!==false){conn.send(message);return true}}catch{}return false},
+  message(text){const e=$("#net-msg");if(e)e.textContent=text||""},
+  saveReco(){try{(globalThis.sessionStorage||localStorage).setItem(`lshogi-reconnect-${this.roomId}`,JSON.stringify({roomId:this.roomId,token:this.token,session:this.hostSession,name:this.name,ts:Date.now()}))}catch{}},
+  loadReco(){try{const d=JSON.parse((globalThis.sessionStorage||localStorage).getItem(`lshogi-reconnect-${this.roomId}`)||"null");return d&&d.roomId===this.roomId&&Date.now()-d.ts<NET_RECO_TTL?d:null}catch{return null}},
+  reset(){
+    this._intentional=true;this.active=false;this.phase="idle";this.paused=false;
+    clearInterval(this._hb);clearInterval(this._watch);clearInterval(this._roundClock);clearTimeout(this._roundTimer);
+    if(this.guestConns)for(const conn of this.guestConns.values())try{conn.close()}catch{}
+    this.guestConns?.clear?.();
+    try{this.guestConn?.close()}catch{}try{this.hostConn?.close()}catch{}
+    try{if(this.peer&&!this.peer.destroyed)this.peer.destroy()}catch{}
+    this.peer=this.hostConn=this.guestConn=null;this.commitments.clear();this.reveals.clear();this.inputReady.clear();this.closeOverlay();
+    this._hb=this._watch=this._roundClock=this._roundTimer=null;this._latency=null;
+  },
+  open(){
+    this.reset();gameMode="online";this._intentional=false;
+    show("online-screen");this.message("");
+    try{const s=JSON.parse(localStorage.getItem("lshogi-net-prefs")||"{}");$("#net-keyword").value=s.keyword||"";$("#net-name").value=s.name||""}catch{}
+  },
+  remember(){try{localStorage.setItem("lshogi-net-prefs",JSON.stringify({keyword:this.keyword,name:this.name}))}catch{}},
+  host(keyword,name){
+    this.reset();this._intentional=false;this.active=true;this.isHost=true;this.myIdx=0;this.keyword=keyword;this.name=(name||"ホスト").slice(0,12);this.roomId=netRoomId(keyword);this.hostSession=netToken();this.hostRoster=clone(customRoster);this._hostRetry=0;
+    this.seat={name:this.name,ready:true,connected:true};this.guest={name:"募集中",ready:false,connected:false,token:"",roster:null,lastSeq:0};this.remember();this.message("部屋を登録しています…");
+    ensurePeerJS().then(()=>this.createHostPeer()).catch(e=>this.message(e.message));
+  },
+  createHostPeer(){
+    if(!this.active||!this.isHost)return;
+    try{this.peer=new Peer(this.roomId,{debug:0})}catch{this.message("部屋を作れませんでした");return}
+    this.peer.on("open",()=>{if(!this.active)return;this._hostRetry=0;this.message("");show("lobby-screen");this.renderLobby();this.startHeartbeat()});
+    this.peer.on("connection",conn=>{conn.on("open",()=>{conn.__rx=Date.now();conn.on("data",m=>{conn.__rx=Date.now();this.handleHost(conn,m)});conn.on("close",()=>this.guestDropped(conn));conn.on("error",()=>this.guestDropped(conn))})});
+    this.peer.on("disconnected",()=>{if(!this._intentional)try{this.peer.reconnect()}catch{}});
+    this.peer.on("error",e=>{
+      if(e?.type==="unavailable-id"){
+        try{if(this.peer&&!this.peer.destroyed)this.peer.destroy()}catch{}this.peer=null;this._hostRetry++;
+        if(this.active&&this._hostRetry<=6){this.message("部屋を再登録しています…");setTimeout(()=>this.createHostPeer(),700)}
+        else{this.message("その合言葉は使用中です");this.active=false}
+      }else this.message(`接続エラー：${e?.type||"不明"}`);
+    });
+  },
+  join(keyword,name){
+    this.reset();this._intentional=false;this.active=true;this.isHost=false;this.myIdx=1;this.keyword=keyword;this.name=(name||"ゲスト").slice(0,12);this.roomId=netRoomId(keyword);this.guestRoster=clone(customRoster);this.remember();
+    const old=this.loadReco();if(old){this.token=old.token||"";this.hostSession=old.session||""}
+    this.message("部屋へ接続しています…");ensurePeerJS().then(()=>this.connectGuest(false)).catch(e=>this.message(e.message));
+  },
+  connectGuest(reconnect){
+    const connect=()=>{
+      if(!this.active)return;
+      let conn;try{conn=this.peer.connect(this.roomId,{reliable:true,serialization:"json"})}catch{return this.scheduleReconnect()}
+      let opened=false;
+      conn.on("open",()=>{opened=true;this.hostConn=conn;this._lastRx=Date.now();this.wireGuest(conn);this.send(conn,{type:"hello",ver:NET_VER,name:this.name,roster:this.guestRoster,token:this.token||null,session:this.hostSession||null})});
+      conn.on("error",()=>{if(!opened)this.scheduleReconnect()});
+      setTimeout(()=>{if(this.active&&!opened){try{conn.close()}catch{}this.scheduleReconnect()}},2800);
+    };
+    if(!this.peer||this.peer.destroyed){
+      try{this.peer=new Peer({debug:0})}catch{return this.scheduleReconnect()}
+      this.peer.on("open",connect);this.peer.on("disconnected",()=>{if(!this._intentional)try{this.peer.reconnect()}catch{}});
+      this.peer.on("error",e=>{if(!reconnect&&e?.type==="peer-unavailable"){this.message("部屋が見つかりません");this.active=false}else this.scheduleReconnect()});
+    }else connect();
+  },
+  wireGuest(conn){
+    conn.on("data",m=>{this._lastRx=Date.now();this.handleGuest(m)});
+    conn.on("close",()=>this.hostLost());conn.on("error",()=>this.hostLost());
+  },
+  renderLobby(){
+    $("#lobby-code").textContent=`合言葉：${this.keyword}`;
+    const host=this.isHost?this.seat:{name:this.hostName||"ホスト",ready:true,connected:true};
+    const guest=this.isHost?this.guest:{name:this.name,ready:this.ready,connected:true};
+    $("#lobby-seats").innerHTML=[host,guest].map((s,i)=>`<div class="panel seat-card"><h3>${i===0?"ホスト":"ゲスト"}${this.myIdx===i?"（あなた）":""}</h3><div class="seat-name">${s?.name||"募集中"}</div><span class="seat-state ${s?.ready?"ready":s?.connected?"":"off"}">${!s?.connected?"未接続":s?.ready?"準備OK":"準備中"}</span></div>`).join("");
+    $("#lobby-ready").style.display=this.isHost?"none":"";
+    $("#lobby-ready").textContent=this.ready?"準備を解除":"準備OK";
+    $("#lobby-start").style.display=this.isHost?"":"none";
+    $("#lobby-start").disabled=this.isHost&&(!this.guest?.connected||!this.guest?.ready);
+    $("#lobby-hint").textContent=this.isHost?"ゲストの準備後に対戦を開始できます。":"ホストの開始を待っています。";
+  },
+  lobbyBroadcast(){if(this.guestConn)this.send(this.guestConn,{type:"lobby",hostName:this.name,guest:{name:this.guest.name,ready:this.guest.ready,connected:this.guest.connected}});this.renderLobby()},
+  setReady(){
+    if(this.isHost)return;this.ready=!this.ready;this.sendAction("ready",{ready:this.ready,roster:clone(customRoster)});this.renderLobby();
+  },
+  startMatch(){
+    if(!this.isHost||!this.guest?.connected||!this.guest?.ready)return;
+    this.matchId=`m${Date.now().toString(36)}`;this.phase="setup";this.hostRoster=clone(customRoster);this.guestRoster=cleanRoster(this.guest.roster||defaultRoster(),"e");
+    installOnlineCatalog(this.hostRoster,this.guestRoster);
+    this.queues=[shuffle(this.hostRoster.map((_,i)=>`c${i}`)).slice(0,6),shuffle(this.guestRoster.map((_,i)=>`e${i}`)).slice(0,6)];
+    this.placements=[null,null];this.send(this.guestConn,{type:"setupStart",matchId:this.matchId,hostRoster:this.hostRoster,guestRoster:this.guestRoster,queue:this.queues[1]});
+    gameMode="online";this.myIdx=0;beginPlacement(0,this.queues[0]);$("#battle-title").textContent="L-SHOGI・オンライン対戦";
+  },
+  submitPlacement(items){
+    if(this.phase!=="setup")return;
+    const safe=validPlacement(items,this.myIdx,this.queues?.[this.myIdx]||drawQueue);if(!safe)return;
+    if(this.isHost){this.placements[0]=safe;$("#phase-label").textContent="相手の配置を待っています";this.maybeBeginBattle()}
+    else{this.sendAction("placement",{matchId:this.matchId,items:safe});$("#phase-label").textContent="ホストを待っています";locked=true}
+    $('[data-action="start"]').disabled=true;
+  },
+  maybeBeginBattle(){
+    if(!this.isHost||!this.placements[0]||!this.placements[1])return;
+    const pieces=[];this.placements.forEach((list,owner)=>list.forEach((p,i)=>pieces.push(makePiece(p.type,owner,p.x,p.y,i))));
+    state=createState({placements:pieces});state.players[0].name=this.name;state.players[1].name=this.guest.name;
+    beginResearchMatch(state,0);
+    this.phase="battle";this.stateVer=0;gameMode="online";this.sendState("battleStart");this.enterOnlineBattle();setTimeout(()=>this.startRound(),700);
+  },
+  enterOnlineBattle(){
+    timer.stop();$("#result-overlay").classList.remove("show");$("#battle-title").textContent="L-SHOGI・オンライン対戦";
+    resetBattleAssist();selected=null;reserved=Move.wait(this.myIdx);locked=true;handViewOwner=null;lastCheckAlertKey="";show("battle-screen");renderBattle();
+  },
+  sendState(type="state"){
+    if(!this.isHost||!state)return;this.stateVer++;this.send(this.guestConn,{type,v:this.stateVer,matchId:this.matchId,phase:this.phase,game:packState(state)});
+  },
+  startRound(){
+    if(!this.isHost||this.paused||this.phase!=="battle"||state?.result?.over)return;
+    clearTimeout(this._roundTimer);this.roundId++;this.commitments.clear();this.reveals.clear();this.inputReady.clear();locked=false;selected=normalizeSelection(selected);reserved=Move.wait(0);this.phase="battle";
+    const duration=turnDurationMs();this.roundDeadline=Date.now()+duration;this.send(this.guestConn,{type:"round",id:this.roundId,duration});this.beginRoundLocal(duration);
+    this._roundTimer=setTimeout(()=>this.requestReveal(),duration);
+  },
+  beginRoundLocal(duration){
+    locked=false;selected=normalizeSelection(selected);reserved=Move.wait(this.myIdx);lastTimerTone=null;$("#phase-label").textContent="入力受付中";renderBattle();this.startRoundClock(duration);this.commitMove(reserved);
+  },
+  startRoundClock(duration){
+    clearInterval(this._roundClock);const end=Date.now()+duration;
+    const tick=()=>{const left=Math.max(0,Math.ceil((end-Date.now())/1000));updateTimer(left);if(left<=0)clearInterval(this._roundClock)};
+    tick();this._roundClock=setInterval(tick,80);
+  },
+  commitMove(move,explicit=false){
+    if(!this.active||this.phase!=="battle"||locked)return;
+    const plain=movePlain(move,this.myIdx),nonce=netToken(),hash=sealHash(plain,nonce);
+    this.localSeal={roundId:this.roundId,move:plain,nonce,hash};
+    if(explicit)this.inputReady.add(this.myIdx);
+    if(this.isHost){this.commitments.set(0,hash);this.send(this.guestConn,{type:"commitNotice",roundId:this.roundId,owner:0,hash,input:!!explicit})}
+    else this.sendAction("commit",{roundId:this.roundId,hash,input:!!explicit});
+    renderOnlineInputStatus();
+  },
+  requestReveal(){
+    if(!this.isHost||this.phase!=="battle")return;locked=true;clearInterval(this._roundClock);$("#phase-label").textContent="手を開示中";
+    this.send(this.guestConn,{type:"revealRequest",roundId:this.roundId});this.revealLocal();
+    this._roundTimer=setTimeout(()=>this.finishRound(),1300);
+  },
+  revealLocal(){
+    const seal=this.localSeal;
+    if(!seal||seal.roundId!==this.roundId)return;
+    if(this.isHost)this.reveals.set(0,seal);else this.sendAction("reveal",{roundId:this.roundId,move:seal.move,nonce:seal.nonce});
+  },
+  finishRound(){
+    if(!this.isHost||this.phase!=="battle")return;
+    const moves=[0,1].map(owner=>{
+      const reveal=this.reveals.get(owner),hash=this.commitments.get(owner);
+      return reveal&&hash&&sealHash(movePlain(reveal.move,owner),reveal.nonce)===hash?new Move(movePlain(reveal.move,owner)):Move.wait(owner);
+    });
+    const prevSelected=selected,prevReserved=reserved;
+    const droppedId=prevReserved.kind==="drop"?state.players[myOwner()]?.hand[prevReserved.handIndex]?.id:null;
+    const result=resolver.resolve(state,moves);recordResearchEvents(result.events,0);selected=selectionAfterTurn(prevSelected,prevReserved,droppedId);reserved=Move.wait(0);locked=true;renderBattle();showEvents(result.events);
+    this.send(this.guestConn,{type:"roundResult",v:++this.stateVer,roundId:this.roundId,game:packState(state),commits:Object.fromEntries(this.commitments),reveals:Object.fromEntries(this.reveals)});
+    if(state.result.over){this.phase="ended";showResult();return}
+    setTimeout(()=>this.startRound(),650);
+  },
+  resign(){
+    if(!this.active||this.phase!=="battle")return;
+    if(this.isHost){state.result={over:true,winner:1,draw:false};this.phase="ended";this.sendState("state");showResult()}
+    else this.sendAction("resign",{matchId:this.matchId});
+  },
+  sendAction(kind,data={}){this.send(this.hostConn,{type:"action",seq:++this._seq,kind,...data})},
+  handleHost(conn,m){
+    if(!m||typeof m.type!=="string")return;
+    if(m.type==="ping"){this.send(conn,{type:"pong",t:m.t});return}
+    if(m.type==="pong"){conn.__latency=Date.now()-(+m.t||Date.now());renderOnlineInputStatus();return}
+    if(m.type==="hello"){
+      if(m.ver!==NET_VER){this.send(conn,{type:"reject",reason:"ゲームのバージョンが違います"});return}
+      const tokenReconnect=m.token&&m.token===this.guest.token&&(!m.session||m.session===this.hostSession);
+      const nameReconnect=this.phase!=="idle"&&this.phase!=="lobby"&&!this.guest.connected&&String(m.name||"")===this.guest.name;
+      const reconnect=tokenReconnect||nameReconnect;
+      if(this.guest.connected&&!reconnect){this.send(conn,{type:"reject",reason:"部屋は満員です"});return}
+      if(this.phase!=="idle"&&this.phase!=="lobby"&&!reconnect){this.send(conn,{type:"reject",reason:"対戦はすでに始まっています"});return}
+      this.guestConn=conn;this.guest={...this.guest,name:String(m.name||"ゲスト").slice(0,12),ready:reconnect?this.guest.ready:false,connected:true,token:reconnect?this.guest.token:netToken(),roster:cleanRoster(m.roster,"e"),lastSeq:0};
+      this.send(conn,{type:"welcome",playerCount:2,idx:1,token:this.guest.token,session:this.hostSession,reconnected:reconnect,phase:this.phase,hostName:this.name});this.lobbyBroadcast();
+      if(reconnect)this.resumeGuest();return;
+    }
+    if(conn!==this.guestConn)return;
+    if(m.type!=="action")return;
+    if(Number.isFinite(m.seq)){if(m.seq<=this.guest.lastSeq)return;this.guest.lastSeq=m.seq}
+    if(m.kind==="ready"&&(this.phase==="idle"||this.phase==="lobby")){this.phase="lobby";this.guest.ready=!!m.ready;this.guest.roster=cleanRoster(m.roster,"e");this.lobbyBroadcast()}
+    else if(m.kind==="placement"&&this.phase==="setup"&&m.matchId===this.matchId){const safe=validPlacement(m.items,1,this.queues[1]);if(safe){this.placements[1]=safe;this.maybeBeginBattle()}}
+    else if(m.kind==="commit"&&this.phase==="battle"&&m.roundId===this.roundId&&Date.now()<=(this.roundDeadline||0)+300){this.commitments.set(1,String(m.hash));if(m.input)this.inputReady.add(1);this.send(this.guestConn,{type:"commitNotice",roundId:this.roundId,owner:1,hash:String(m.hash),input:!!m.input});renderBattle();}
+    else if(m.kind==="reveal"&&this.phase==="battle"&&m.roundId===this.roundId){this.reveals.set(1,{move:movePlain(m.move,1),nonce:String(m.nonce||"")})}
+    else if(m.kind==="resign"&&this.phase==="battle"){state.result={over:true,winner:0,draw:false};this.phase="ended";this.sendState("state");showResult()}
+    else if(m.kind==="requestLobby"&&this.phase==="ended")this.returnLobby();
+    else if(m.kind==="resync")this.resumeGuest();
+  },
+  handleGuest(m){
+    if(!m||typeof m.type!=="string")return;
+    if(m.type==="ping"){this.send(this.hostConn,{type:"pong",t:m.t});return}
+    if(m.type==="pong"){this._latency=Date.now()-(+m.t||Date.now());renderOnlineInputStatus();return}
+    if(m.type==="hostClosed"){this.reset();gameMode="cpu";state=null;show("title-screen");return}
+    if(m.type==="reject"){this.message(m.reason||"参加できません");this.active=false;return}
+    if(m.type==="welcome"){
+      fourPlayer=m.playerCount===4;localStorage.setItem("l-shogi-four-player",fourPlayer?"1":"0");renderFourToggle();
+      this.myIdx=Number.isInteger(m.idx)?m.idx:1;this.token=m.token;this.hostSession=m.session;this.hostName=m.hostName;this.saveReco();this._reco=false;this._tries=0;this.closeOverlay();this.startWatch();
+      if(!m.reconnected){this.phase="lobby";show("lobby-screen")}this.renderLobby();return;
+    }
+    if(m.type==="lobby"){this.hostName=m.hostName;this.remoteSeats=m.seats||null;this.ready=m.seats?!!m.seats[this.myIdx]?.ready:!!m.guest?.ready;this.renderLobby();return}
+    if(m.type==="lobbyReset"){this.phase="lobby";this.ready=false;state=null;$("#result-overlay").classList.remove("show");show("lobby-screen");this.renderLobby();return}
+    if(m.type==="autoSetupWait"){
+      this.matchId=m.matchId;this.lastVer=0;this.phase="setup";this.rosters=m.rosters;installOnlineCatalog(...m.rosters);gameMode="online";
+      $("#lobby-hint").textContent="あなたの配置は完了しました。ほかのプレイヤーを待っています。";return;
+    }
+    if(m.type==="placementProgress"){
+      const done=Array.isArray(m.done)?m.done:[];
+      $("#phase-label").textContent=`配置完了 ${done.length} / ${m.total||4}人`;
+      return;
+    }
+    if(m.type==="setupStart"){
+      this.matchId=m.matchId;this.lastVer=0;this.phase="setup";
+      if(m.rosters){this.rosters=m.rosters;installOnlineCatalog(...m.rosters)}
+      else{this.hostRoster=m.hostRoster;this.guestRoster=m.guestRoster;installOnlineCatalog(this.hostRoster,this.guestRoster)}
+      gameMode="online";beginPlacement(this.myIdx,m.queue);return;
+    }
+    if(m.type==="battleStart"||m.type==="state"){
+      if(Number.isFinite(m.v)&&m.v<=this.lastVer)return;this.lastVer=m.v||this.lastVer;this.matchId=m.matchId||this.matchId;this.phase=m.phase||this.phase;if(m.rosters)installOnlineCatalog(...m.rosters);state=unpackState(m.game);gameMode="online";if(m.type==="battleStart")beginResearchMatch(state,this.myIdx);this.enterOnlineBattle();if(state.result.over)showResult();return;
+    }
+    if(m.type==="round"){
+      this.roundId=m.id;this.phase="battle";this.commitments.clear();this.reveals.clear();this.beginRoundLocal(m.duration||turnDurationMs());return;
+    }
+    if(m.type==="commitNotice"&&!locked&&m.roundId===this.roundId){this.commitments.set(m.owner,m.hash);if(m.input)this.inputReady.add(+m.owner);renderBattle();return}
+    if(m.type==="revealRequest"){
+      if(m.roundId!==this.roundId)return;locked=true;clearInterval(this._roundClock);$("#phase-label").textContent="手を開示中";this.revealLocal();return;
+    }
+    if(m.type==="roundResult"){
+      if(Number.isFinite(m.v)&&m.v<=this.lastVer)return;this.lastVer=m.v||this.lastVer;
+      const hostReveal=m.reveals?.["0"],hostCommit=this.commitments.get(0);
+      if(hostReveal&&hostCommit&&sealHash(movePlain(hostReveal.move,0),hostReveal.nonce)!==hostCommit)this.showOverlay("同期エラー","ホストの封印手を検証できませんでした。",[["退室",()=>this.leave()]]);
+      const prevSelected=selected,prevReserved=reserved;
+      const droppedId=prevReserved.kind==="drop"?state?.players?.[myOwner()]?.hand[prevReserved.handIndex]?.id:null;
+      state=unpackState(m.game);recordResearchEvents(state.lastEvents||[],this.myIdx);selected=selectionAfterTurn(prevSelected,prevReserved,droppedId);locked=true;renderBattle();showEvents(state.lastEvents||[]);if(state.result.over){this.phase="ended";showResult()}return;
+    }
+    if(m.type==="pause"){this.paused=true;locked=true;clearInterval(this._roundClock);this.showOverlay("通信待機","相手の再接続を待っています。",[["退室",()=>this.leave()]])}
+    if(m.type==="resume"){this.paused=false;this.closeOverlay()}
+  },
+  resumeGuest(){
+    if(!this.isHost||!this.guestConn)return;
+    this.paused=false;this.closeOverlay();this.send(this.guestConn,{type:"resume"});
+    if(this.phase==="setup")this.send(this.guestConn,{type:"setupStart",matchId:this.matchId,hostRoster:this.hostRoster,guestRoster:this.guestRoster,queue:this.queues[1]});
+    else if((this.phase==="battle"||this.phase==="ended")&&state){this.send(this.guestConn,{type:"state",v:++this.stateVer,matchId:this.matchId,phase:this.phase,game:packState(state)});if(this.phase==="battle")setTimeout(()=>this.startRound(),500)}
+  },
+  guestDropped(conn){
+    if(conn!==this.guestConn)return;this.guest.connected=false;this.guestConn=null;
+    if(this.phase==="battle"){this.paused=true;locked=true;clearTimeout(this._roundTimer);clearInterval(this._roundClock);this.showOverlay("再接続待ち",`${this.guest.name}の復帰を待っています。`,[["CPU対戦へ切替",()=>this.dropGuestToCPU()]]);}
+    else if(this.phase==="setup"){this.showOverlay("再接続待ち",`${this.guest.name}の復帰を待っています。`);}
+    else this.lobbyBroadcast();
+  },
+  dropGuestToCPU(){
+    if(!this.isHost||!state)return;this.active=false;this.paused=false;this.closeOverlay();gameMode="cpu";this.reset();$("#battle-title").textContent="L-SHOGI・対CPU戦";locked=false;reserved=Move.wait(0);timer.start();
+  },
+  hostLost(){if(!this.active||this.isHost||this._reco)return;this._reco=true;locked=true;this.showOverlay("再接続中","ホストとの接続を復旧しています。",[["退室",()=>this.leave()]]);this.scheduleReconnect()},
+  scheduleReconnect(){
+    if(!this.active||this.isHost)return;this._reco=true;if(++this._tries>NET_RECO_MAX){this.showOverlay("再接続できません","同じ合言葉で入り直してください。",[["タイトルへ",()=>this.leave()]]);return}
+    try{this.hostConn?.close()}catch{}this.hostConn=null;try{if(this.peer&&!this.peer.destroyed)this.peer.destroy()}catch{}this.peer=null;
+    const delay=NET_BACKOFF[Math.min(this._tries-1,NET_BACKOFF.length-1)];setTimeout(()=>{if(this.active)this.connectGuest(true)},delay);
+  },
+  startHeartbeat(){clearInterval(this._hb);this._hb=setInterval(()=>{if(!this.active||!this.isHost)return;const now=Date.now();if(this.guestConn){this.send(this.guestConn,{type:"ping",t:now});if(this.guestConn.__rx&&now-this.guestConn.__rx>NET_ZOMBIE){try{this.guestConn.close()}catch{}this.guestDropped(this.guestConn)}}},NET_HB)},
+  startWatch(){clearInterval(this._watch);this._lastRx=Date.now();this._watch=setInterval(()=>{if(!this.active||this.isHost)return;if(this.hostConn)this.send(this.hostConn,{type:"ping",t:Date.now()});if(Date.now()-this._lastRx>NET_ZOMBIE)this.hostLost()},NET_HB)},
+  showOverlay(title,body,buttons=[]){$("#net-overlay-title").textContent=title;$("#net-overlay-body").textContent=body;const box=$("#net-overlay-actions");box.innerHTML="";buttons.forEach(([label,fn])=>{const b=document.createElement("button");b.className="btn primary";b.textContent=label;b.onclick=fn;box.append(b)});$("#net-overlay").classList.add("show")},
+  closeOverlay(){$("#net-overlay").classList.remove("show")},
+  returnLobby(){
+    if(!this.active)return;
+    if(!this.isHost){this.sendAction("requestLobby");return}
+    clearTimeout(this._roundTimer);clearInterval(this._roundClock);this.phase="lobby";state=null;this.guest.ready=false;this.placements=[null,null];$("#result-overlay").classList.remove("show");
+    this.send(this.guestConn,{type:"lobbyReset"});this.lobbyBroadcast();show("lobby-screen");
+  },
+  leave(){if(this.isHost&&this.guestConn)this.send(this.guestConn,{type:"hostClosed"});this.reset();gameMode="cpu";state=null;show("title-screen")}
+};
+
+/* 4人オンライン拡張。2人モードの実装を残し、切替時だけ複数接続へ差し替える。 */
+const NET2={
+  host:NET.host.bind(NET),join:NET.join.bind(NET),renderLobby:NET.renderLobby.bind(NET),
+  lobbyBroadcast:NET.lobbyBroadcast.bind(NET),startMatch:NET.startMatch.bind(NET),
+  submitPlacement:NET.submitPlacement.bind(NET),maybeBeginBattle:NET.maybeBeginBattle.bind(NET),
+  sendState:NET.sendState.bind(NET),startRound:NET.startRound.bind(NET),
+  commitMove:NET.commitMove.bind(NET),requestReveal:NET.requestReveal.bind(NET),
+  finishRound:NET.finishRound.bind(NET),resign:NET.resign.bind(NET),
+  handleHost:NET.handleHost.bind(NET),guestDropped:NET.guestDropped.bind(NET),
+  startHeartbeat:NET.startHeartbeat.bind(NET),resumeGuest:NET.resumeGuest.bind(NET),
+  returnLobby:NET.returnLobby.bind(NET),leave:NET.leave.bind(NET)
+};
+function fourPrefix(owner){return ["c","e","f","g"][owner]}
+function randomPlacementFor(owner,queue){
+  const king=homeKing(owner),cells=shuffle(placementCells(owner).filter(p=>p.x!==king.x||p.y!==king.y));
+  return [{type:"king",x:king.x,y:king.y},...queue.map((type,i)=>({type,x:cells[i].x,y:cells[i].y}))];
+}
+function netFourSeats(){
+  if(NET.isHost)return [NET.seat,...[1,2,3].map(i=>NET.guests?.[i]||{name:"募集中",ready:false,connected:false})];
+  return NET.remoteSeats||Array.from({length:4},(_,i)=>i===0?{name:NET.hostName||"ホスト",ready:true,connected:true}:i===NET.myIdx?{name:NET.name,ready:NET.ready,connected:true}:{name:"接続待ち",ready:false,connected:false});
+}
+function netSendAll(message,except=null){
+  for(const conn of NET.guestConns?.values?.()||[])if(conn!==except)NET.send(conn,message);
+}
+NET.host=function(keyword,name){
+  if(!fourPlayer)return NET2.host(keyword,name);
+  NET2.host(keyword,name);this.guests=Array(4).fill(null);this.guestConns=new Map();this.seat={name:this.name,ready:true,connected:true};
+};
+NET.join=function(keyword,name){return NET2.join(keyword,name)};
+NET.renderLobby=function(){
+  if(!fourPlayer)return NET2.renderLobby();
+  $("#lobby-code").textContent=`合言葉：${this.keyword}　4人対戦`;
+  const seats=netFourSeats();
+  $("#lobby-seats").innerHTML=seats.map((s,i)=>`<div class="panel seat-card"><h3>${i===0?"ホスト":`席 ${i+1}`}${this.myIdx===i?"（あなた）":""}</h3><div class="seat-name">${s?.name||"募集中"}</div><span class="seat-state ${s?.ready?"ready":s?.connected?"":"off"}">${!s?.connected?"未接続":s?.ready?"準備OK":"準備中"}</span></div>`).join("");
+  $("#lobby-ready").style.display=this.isHost?"none":"";
+  $("#lobby-ready").textContent=this.ready?"準備を解除":"準備OK";
+  $("#lobby-start").style.display=this.isHost?"":"none";
+  $("#lobby-start").disabled=this.isHost&&!seats.slice(1).every(s=>s?.connected&&s?.ready);
+  $("#lobby-hint").textContent=this.isHost?"3人全員の準備後、各自が自分の駒を配置します。":"開始後、抽選された6体を1体ずつ配置します。";
+};
+NET.lobbyBroadcast=function(){
+  if(!fourPlayer)return NET2.lobbyBroadcast();
+  const seats=netFourSeats().map(s=>({name:s?.name||"募集中",ready:!!s?.ready,connected:!!s?.connected}));
+  netSendAll({type:"lobby",hostName:this.name,seats});this.renderLobby();
+};
+NET.handleHost=function(conn,m){
+  if(!fourPlayer)return NET2.handleHost(conn,m);
+  if(!m||typeof m.type!=="string")return;
+  if(m.type==="ping"){this.send(conn,{type:"pong",t:m.t});return}
+  if(m.type==="pong"){conn.__latency=Date.now()-(+m.t||Date.now());renderOnlineInputStatus();return}
+  if(m.type==="hello"){
+    if(m.ver!==NET_VER){this.send(conn,{type:"reject",reason:"ゲームのバージョンが違います"});return}
+    let seat=[1,2,3].find(i=>this.guests[i]?.token&&m.token===this.guests[i].token);
+    const reconnect=!!seat;
+    if(!seat){const open=shuffle([1,2,3].filter(i=>!this.guests[i]?.connected));seat=open[0]}
+    if(!seat){this.send(conn,{type:"reject",reason:"4人揃っています"});return}
+    if(this.phase!=="idle"&&this.phase!=="lobby"&&!reconnect){this.send(conn,{type:"reject",reason:"対戦はすでに始まっています"});return}
+    const old=this.guests[seat]||{};
+    this.guests[seat]={...old,name:String(m.name||`ゲスト${seat}`).slice(0,12),ready:reconnect?!!old.ready:false,connected:true,token:reconnect?old.token:netToken(),roster:cleanRoster(m.roster,fourPrefix(seat)),lastSeq:0};
+    conn.__seat=seat;this.guestConns.set(seat,conn);conn.__rx=Date.now();
+    this.send(conn,{type:"welcome",playerCount:4,idx:seat,token:this.guests[seat].token,session:this.hostSession,reconnected:reconnect,phase:this.phase,hostName:this.name});
+    this.lobbyBroadcast();if(reconnect)this.resumeGuest(conn);return;
+  }
+  const seat=conn.__seat,guest=this.guests?.[seat];
+  if(!guest||this.guestConns.get(seat)!==conn||m.type!=="action")return;
+  if(Number.isFinite(m.seq)){if(m.seq<=guest.lastSeq)return;guest.lastSeq=m.seq}
+  if(m.kind==="ready"&&(this.phase==="idle"||this.phase==="lobby")){this.phase="lobby";guest.ready=!!m.ready;guest.roster=cleanRoster(m.roster,fourPrefix(seat));this.lobbyBroadcast()}
+  else if(m.kind==="placement"&&this.phase==="setup"&&m.matchId===this.matchId){
+    const safe=validPlacement(m.items,seat,this.queues[seat]);
+    if(safe){
+      this.placements[seat]=safe;
+      const done=this.placements.map((placement,index)=>placement?index:null).filter(index=>index!==null);
+      netSendAll({type:"placementProgress",done,total:4});$("#phase-label").textContent=`配置完了 ${done.length} / 4人`;
+      this.maybeBeginBattle();
+    }
+  }
+  else if(m.kind==="commit"&&this.phase==="battle"&&m.roundId===this.roundId&&Date.now()<=(this.roundDeadline||0)+300){this.commitments.set(seat,String(m.hash));if(m.input)this.inputReady.add(seat);netSendAll({type:"commitNotice",roundId:this.roundId,owner:seat,hash:String(m.hash),input:!!m.input});renderBattle();}
+  else if(m.kind==="reveal"&&this.phase==="battle"&&m.roundId===this.roundId)this.reveals.set(seat,{move:movePlain(m.move,seat),nonce:String(m.nonce||"")});
+  else if(m.kind==="resign"&&this.phase==="battle"){const king=state.board.list(seat).find(p=>p.type==="king");if(king)state.board.remove(king.id);state.result=rules.winner(state);this.sendState("state");if(state.result.over){this.phase="ended";showResult()}}
+  else if(m.kind==="requestLobby"&&this.phase==="ended")this.returnLobby();
+  else if(m.kind==="resync")this.resumeGuest(conn);
+};
+NET.startMatch=function(){
+  if(!fourPlayer)return NET2.startMatch();
+  if(!this.isHost||![1,2,3].every(i=>this.guests[i]?.connected&&this.guests[i]?.ready))return;
+  this.matchId=`m${Date.now().toString(36)}`;this.phase="setup";this.rosters=[clone(customRoster),...[1,2,3].map(i=>cleanRoster(this.guests[i].roster,fourPrefix(i)))];
+  installOnlineCatalog(...this.rosters);
+  this.queues=this.rosters.map((roster,owner)=>shuffle(roster.map((_,i)=>`${fourPrefix(owner)}${i}`)).slice(0,6));
+  this.placements=[null,null,null,null];
+  for(let seat=1;seat<4;seat++)this.send(this.guestConns.get(seat),{type:"setupStart",matchId:this.matchId,rosters:this.rosters,queue:this.queues[seat]});
+  gameMode="online";this.myIdx=0;beginPlacement(0,this.queues[0]);$("#battle-title").textContent="L-SHOGI・4人オンライン";
+};
+NET.submitPlacement=function(items){
+  if(!fourPlayer)return NET2.submitPlacement(items);
+  if(this.phase!=="setup")return;
+  const queue=this.queues?.[this.myIdx]||drawQueue;
+  const safe=validPlacement(items,this.myIdx,queue);if(!safe){$("#phase-label").textContent="配置データを確認できません";return}
+  if(this.isHost){
+    this.placements[0]=safe;
+    const done=this.placements.map((placement,index)=>placement?index:null).filter(index=>index!==null);
+    netSendAll({type:"placementProgress",done,total:4});$("#phase-label").textContent=`配置完了 ${done.length} / 4人`;
+    this.maybeBeginBattle();
+  }
+  else{this.sendAction("placement",{matchId:this.matchId,items:safe});$("#phase-label").textContent="ほかのプレイヤーを待っています";locked=true}
+  $('[data-action="start"]').disabled=true;
+};
+NET.maybeBeginBattle=function(){
+  if(!fourPlayer)return NET2.maybeBeginBattle();
+  if(!this.isHost||!this.placements?.every(Boolean))return;
+  const pieces=[];this.placements.forEach((list,owner)=>list.forEach((p,i)=>pieces.push(makePiece(p.type,owner,p.x,p.y,i))));
+  state=createState({config:{playerCount:4},placements:pieces});
+  state.players.forEach((p,i)=>p.name=i===0?this.name:this.guests[i].name);
+  beginResearchMatch(state,0);this.phase="battle";this.stateVer=0;gameMode="online";this.sendState("battleStart");this.enterOnlineBattle();setTimeout(()=>this.startRound(),700);
+};
+NET.sendState=function(type="state"){
+  if(!fourPlayer)return NET2.sendState(type);
+  if(!this.isHost||!state)return;this.stateVer++;
+  netSendAll({type,v:this.stateVer,matchId:this.matchId,phase:this.phase,game:packState(state),rosters:type==="battleStart"?this.rosters:undefined});
+};
+NET.startRound=function(){
+  if(!fourPlayer)return NET2.startRound();
+  if(!this.isHost||this.paused||this.phase!=="battle"||state?.result?.over)return;
+  clearTimeout(this._roundTimer);this.roundId++;this.commitments.clear();this.reveals.clear();this.inputReady.clear();locked=false;selected=normalizeSelection(selected);reserved=Move.wait(0);
+  const duration=turnDurationMs();this.roundDeadline=Date.now()+duration;netSendAll({type:"round",id:this.roundId,duration});this.beginRoundLocal(duration);
+  this._roundTimer=setTimeout(()=>this.requestReveal(),duration);
+};
+NET.commitMove=function(move,explicit=false){
+  if(!fourPlayer)return NET2.commitMove(move,explicit);
+  if(!this.active||this.phase!=="battle"||locked)return;
+  const plain=movePlain(move,this.myIdx),nonce=netToken(),hash=sealHash(plain,nonce);this.localSeal={roundId:this.roundId,move:plain,nonce,hash};
+  if(explicit)this.inputReady.add(this.myIdx);
+  if(this.isHost){this.commitments.set(0,hash);netSendAll({type:"commitNotice",roundId:this.roundId,owner:0,hash,input:!!explicit})}
+  else this.sendAction("commit",{roundId:this.roundId,hash,input:!!explicit});
+  renderOnlineInputStatus();
+};
+NET.requestReveal=function(){
+  if(!fourPlayer)return NET2.requestReveal();
+  if(!this.isHost||this.phase!=="battle")return;locked=true;clearInterval(this._roundClock);$("#phase-label").textContent="手を開示中";
+  netSendAll({type:"revealRequest",roundId:this.roundId});this.revealLocal();this._roundTimer=setTimeout(()=>this.finishRound(),1300);
+};
+NET.finishRound=function(){
+  if(!fourPlayer)return NET2.finishRound();
+  if(!this.isHost||this.phase!=="battle")return;
+  const moves=state.players.map((_,owner)=>{const reveal=this.reveals.get(owner),hash=this.commitments.get(owner);return reveal&&hash&&sealHash(movePlain(reveal.move,owner),reveal.nonce)===hash?new Move(movePlain(reveal.move,owner)):Move.wait(owner)});
+  const prevSelected=selected,prevReserved=reserved;
+  const droppedId=prevReserved.kind==="drop"?state.players[myOwner()]?.hand[prevReserved.handIndex]?.id:null;
+  const result=resolver.resolve(state,moves);recordResearchEvents(result.events,0);selected=selectionAfterTurn(prevSelected,prevReserved,droppedId);reserved=Move.wait(0);locked=true;renderBattle();showEvents(result.events);
+  const packet={type:"roundResult",v:++this.stateVer,roundId:this.roundId,game:packState(state),commits:Object.fromEntries(this.commitments),reveals:Object.fromEntries(this.reveals)};
+  netSendAll(packet);if(state.result.over){this.phase="ended";showResult();return}setTimeout(()=>this.startRound(),650);
+};
+NET.resign=function(){
+  if(!fourPlayer)return NET2.resign();
+  if(!this.active||this.phase!=="battle")return;
+  if(!this.isHost){this.sendAction("resign",{matchId:this.matchId});return}
+  const king=state.board.list(0).find(p=>p.type==="king");if(king)state.board.remove(king.id);state.result=rules.winner(state);this.sendState("state");
+};
+NET.guestDropped=function(conn){
+  if(!fourPlayer)return NET2.guestDropped(conn);
+  const seat=conn?.__seat;if(!seat||this.guestConns?.get(seat)!==conn)return;
+  this.guestConns.delete(seat);this.guests[seat].connected=false;
+  if(this.phase==="battle"){this.paused=true;locked=true;clearTimeout(this._roundTimer);clearInterval(this._roundClock);this.showOverlay("再接続待ち",`${this.guests[seat].name}の復帰を待っています。`)}
+  else this.lobbyBroadcast();
+};
+NET.resumeGuest=function(conn){
+  if(!fourPlayer)return NET2.resumeGuest();
+  if(!this.isHost||!conn)return;this.send(conn,{type:"resume"});
+  if(this.phase==="setup"){
+    const seat=conn.__seat;
+    this.send(conn,this.placements?.[seat]
+      ?{type:"autoSetupWait",matchId:this.matchId,rosters:this.rosters}
+      :{type:"setupStart",matchId:this.matchId,rosters:this.rosters,queue:this.queues[seat]});
+  }
+  if((this.phase==="battle"||this.phase==="ended")&&state)this.send(conn,{type:"state",v:++this.stateVer,matchId:this.matchId,phase:this.phase,game:packState(state),rosters:this.rosters});
+  const allBack=[1,2,3].every(i=>this.guests[i]?.connected);this.paused=!allBack;if(allBack)this.closeOverlay();
+  if(this.phase==="battle"&&allBack)setTimeout(()=>this.startRound(),500);
+};
+NET.startHeartbeat=function(){
+  if(!fourPlayer)return NET2.startHeartbeat();
+  clearInterval(this._hb);this._hb=setInterval(()=>{if(!this.active||!this.isHost)return;const now=Date.now();for(const conn of this.guestConns.values()){this.send(conn,{type:"ping",t:now});if(conn.__rx&&now-conn.__rx>NET_ZOMBIE){try{conn.close()}catch{}this.guestDropped(conn)}}},NET_HB);
+};
+NET.returnLobby=function(){
+  if(!fourPlayer)return NET2.returnLobby();
+  if(!this.active)return;if(!this.isHost){this.sendAction("requestLobby");return}
+  clearTimeout(this._roundTimer);clearInterval(this._roundClock);this.phase="lobby";state=null;for(let i=1;i<4;i++)this.guests[i].ready=false;$("#result-overlay").classList.remove("show");
+  netSendAll({type:"lobbyReset"});this.lobbyBroadcast();show("lobby-screen");
+};
+NET.leave=function(){
+  if(!fourPlayer)return NET2.leave();
+  if(this.isHost)netSendAll({type:"hostClosed"});this.reset();gameMode="cpu";state=null;show("title-screen");
+};
+
+document.addEventListener("click",e=>{
+  const action=e.target.closest("[data-action]")?.dataset.action;
+  if(!action)return;
+  const actions={
+    new:()=>{if(NET.active)NET.reset();newSetup()},online:()=>NET.open(),"four-toggle":()=>{fourPlayer=!fourPlayer;localStorage.setItem("l-shogi-four-player",fourPlayer?"1":"0");renderFourToggle();tone(fourPlayer?760:340)},custom:openCustom,research:openResearch,guide:()=>openModal("#guide-modal"),settings:()=>openModal("#settings-modal"),
+    "online-back":()=>NET.leave(),"net-leave":()=>NET.leave(),
+    "net-host":()=>{const kw=$("#net-keyword").value.trim();if(!kw)return NET.message("合言葉を入力してください");NET.host(kw,$("#net-name").value.trim())},
+    "net-join":()=>{const kw=$("#net-keyword").value.trim();if(!kw)return NET.message("合言葉を入力してください");NET.join(kw,$("#net-name").value.trim())},
+    "net-ready":()=>NET.setReady(),"net-start":()=>NET.startMatch(),
+    "close-modal":closeModals,"auto-setup":autoSetup,start:startGame,title:()=>{timer.stop();if(NET.active)NET.leave();else show("title-screen")},
+    "clear-move":clearMove,"hand-overview":()=>{handViewOwner=null;renderHand();tone(420)},resign,rematch:()=>gameMode==="online"?NET.returnLobby():newSetup(),"result-research":openResearch,"custom-save":saveCustom,
+    "custom-clear":clearCustomDirections,"custom-restore":restoreCustomEntry,"research-back":()=>show("title-screen")
+  };actions[action]?.();
+});
+$("#sound-toggle").onclick=()=>{settings.sound=!settings.sound;$("#sound-toggle").textContent=settings.sound?"ON":"OFF";saveSettings();tone()};
+$("#coord-toggle").onclick=()=>{settings.coords=!settings.coords;$("#coord-toggle").textContent=settings.coords?"ON":"OFF";saveSettings();renderSetup();if(state)renderBattle()};
+$("#turn-sec-down").onclick=()=>{settings.turnSeconds=clampTurnSeconds(settings.turnSeconds-1);renderTurnSecondsSetting();saveSettings();tone(360)};
+$("#turn-sec-up").onclick=()=>{settings.turnSeconds=clampTurnSeconds(settings.turnSeconds+1);renderTurnSecondsSetting();saveSettings();tone(680)};
+$("#sound-toggle").textContent=settings.sound?"ON":"OFF";$("#coord-toggle").textContent=settings.coords?"ON":"OFF";renderTurnSecondsSetting();
+
+addEventListener("keydown",e=>{
+  if(e.key==="Escape"){if(document.querySelector(".modal.show"))closeModals();else clearMove();return}
+  if(!$("#battle-screen").classList.contains("active")||locked)return;
+  const delta={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
+  if(delta){e.preventDefault();keyboardCell.x=Math.max(0,Math.min(6,keyboardCell.x+delta[0]));keyboardCell.y=Math.max(0,Math.min(6,keyboardCell.y+delta[1]));markKeyboardCell()}
+  if(e.key==="Enter"||e.key===" "){e.preventDefault();const [x,y]=viewToWorld(keyboardCell.x,keyboardCell.y);boardClick(x,y);markKeyboardCell()}
+});
+function markKeyboardCell(){
+  const [x,y]=viewToWorld(keyboardCell.x,keyboardCell.y);
+  document.querySelectorAll("#battle-board .cell").forEach(c=>c.classList.toggle("focused",+c.dataset.x===x&&+c.dataset.y===y));
+}
+let lastPad=0;
+function padLoop(now){
+  const pad=navigator.getGamepads?.()[0];
+  if(pad&&now-lastPad>180){
+    const press=(i)=>pad.buttons[i]?.pressed;
+    let key=null;
+    if(press(12))key="ArrowUp";else if(press(13))key="ArrowDown";else if(press(14))key="ArrowLeft";else if(press(15))key="ArrowRight";else if(press(0))key="Enter";else if(press(1))key="Escape";
+    if(key){dispatchEvent(new KeyboardEvent("keydown",{key}));lastPad=now}
+  }
+  requestAnimationFrame(padLoop);
+}
+requestAnimationFrame(padLoop);
+addEventListener("offline",()=>{if(NET.active){if(NET.isHost){NET.paused=true;locked=true;clearTimeout(NET._roundTimer);clearInterval(NET._roundClock)}NET.showOverlay("オフライン","ネットワーク接続の復旧を待っています。",[["退室",()=>NET.leave()]])}});
+addEventListener("online",()=>{if(NET.active&&!NET.isHost)NET.hostLost();else if(NET.active&&NET.isHost){NET.paused=false;NET.closeOverlay();if(NET.phase==="battle")setTimeout(()=>NET.startRound(),400)}});
+addEventListener("beforeunload",()=>{if(NET.active)NET.reset()});
+
+</script>
+<script>
+(function(){
+  if(location.protocol.indexOf("http")!==0)return;
+  const SW_URL="./sw.js";
+  const INDEX_URL="./index.html";
+  window.LSHOGI_PWA_STATUS={registered:false,ready:false,scope:"",cacheNames:[]};
+  function showUpdateNotice(text){
+    let el=document.getElementById("pwa-update-notice");
+    if(!el){
+      el=document.createElement("div");
+      el.id="pwa-update-notice";
+      el.style.cssText="position:fixed;left:50%;bottom:18px;z-index:99999;transform:translateX(-50%);padding:12px 18px;border:4px solid #24345f;border-radius:14px;background:#fff8d6;color:#172144;font:900 18px/1.2 'Segoe UI','Yu Gothic UI','Meiryo',sans-serif;box-shadow:0 8px 0 rgba(0,0,0,.25)";
+      document.body.appendChild(el);
+    }
+    el.textContent=text;
+  }
+  function activeScreenId(){
+    return [...document.querySelectorAll(".screen")].find(s=>s.classList.contains("active"))?.id||"";
+  }
+  function reloadWhenSafe(text){
+    const key="lshogi-pending-reload";
+    if(activeScreenId()==="title-screen"){
+      showUpdateNotice(text);
+      setTimeout(()=>location.reload(),250);
+      return;
+    }
+    sessionStorage.setItem(key,"1");
+    showUpdateNotice("更新があります。タイトルに戻ると反映します。");
+  }
+  function applyPendingReload(){
+    const key="lshogi-pending-reload";
+    if(sessionStorage.getItem(key)==="1"&&activeScreenId()==="title-screen"){
+      sessionStorage.removeItem(key);
+      reloadWhenSafe("更新を反映中...");
+    }
+  }
+  document.addEventListener("click",()=>setTimeout(applyPendingReload,0),true);
+  async function textSignature(text){
+    if(window.crypto&&crypto.subtle){
+      const data=new TextEncoder().encode(text);
+      const hash=await crypto.subtle.digest("SHA-256",data);
+      return Array.from(new Uint8Array(hash)).map(v=>v.toString(16).padStart(2,"0")).join("");
+    }
+    return [text.length,text.slice(0,80),text.slice(-80)].join("|");
+  }
+  async function checkHtmlUpdate(){
+    try{
+      const res=await fetch(INDEX_URL,{cache:"no-store"});
+      if(!res.ok)return;
+      const sig=await textSignature(await res.text());
+      const key="lshogi-html-signature";
+      const old=localStorage.getItem(key);
+      localStorage.setItem(key,sig);
+      if(old&&old!==sig&&sessionStorage.getItem(key)!==sig){
+        sessionStorage.setItem(key,sig);
+        reloadWhenSafe("更新を反映中...");
+      }
+    }catch(e){}
+  }
+  if("serviceWorker" in navigator){
+    addEventListener("load",()=>{
+      navigator.serviceWorker.register(SW_URL,{updateViaCache:"none"}).then(reg=>{
+        window.LSHOGI_PWA_STATUS.registered=true;
+        window.LSHOGI_PWA_STATUS.scope=reg.scope||"";
+        document.documentElement.dataset.pwaRegistered="1";
+        reg.addEventListener("updatefound",()=>{
+          const worker=reg.installing;
+          if(!worker)return;
+          worker.addEventListener("statechange",()=>{
+            if(worker.state==="installed"&&navigator.serviceWorker.controller){
+              try{worker.postMessage({type:"skipWaiting"})}catch(e){}
+            }
+          });
+        });
+        try{reg.update()}catch(e){}
+      }).catch(()=>{});
+      navigator.serviceWorker.ready.then(reg=>{
+        window.LSHOGI_PWA_STATUS.ready=true;
+        window.LSHOGI_PWA_STATUS.scope=reg.scope||window.LSHOGI_PWA_STATUS.scope;
+        document.documentElement.dataset.pwaReady="1";
+        if(window.caches)caches.keys().then(names=>{
+          window.LSHOGI_PWA_STATUS.cacheNames=names;
+          document.documentElement.dataset.pwaCaches=names.join(",");
+        }).catch(()=>{});
+      }).catch(()=>{});
+      let reloaded=false;
+      navigator.serviceWorker.addEventListener("controllerchange",()=>{
+        if(reloaded)return;
+        reloaded=true;
+        reloadWhenSafe("アプリ更新を反映中...");
+      });
+      checkHtmlUpdate();
+      setInterval(checkHtmlUpdate,5*60*1000);
+    });
+  }else{
+    addEventListener("load",checkHtmlUpdate);
+  }
+})();
+</script></body></html>
+

@@ -1,0 +1,19 @@
+{
+  "name": "L-SHOGI",
+  "short_name": "L-SHOGI",
+  "description": "リアルタイム同時解決で遊ぶ、親しみやすいL-将棋。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#070a16",
+  "theme_color": "#263c70",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
