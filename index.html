@@ -39,6 +39,11 @@ button{font:inherit}
 .cell.swap-legal{background:linear-gradient(135deg,#4b3b72,#29254f);box-shadow:inset 0 0 0 6px #c691ff}.cell.swap-legal:after{content:"⇄";position:absolute;right:3px;bottom:1px;z-index:5;color:#fff;font-size:30px;font-weight:1000;text-shadow:0 0 9px #bb74ff}
 .cell.attack-target{box-shadow:inset 0 0 0 7px #ffb84a,0 0 18px #ff9f2e}.cell.attack-target:after{content:"撃";position:absolute;right:4px;bottom:0;z-index:7;color:#241100;background:#ffca5b;border:3px solid #fff;border-radius:10px;padding:0 8px;font-size:28px;font-weight:1000}.cell.attack-king{box-shadow:inset 0 0 0 8px #ff2f5f,0 0 25px #ff2f5fcc!important}.cell.attack-king:after{content:"王";position:absolute;right:4px;bottom:0;z-index:7;color:#fff;background:#ff2f5f;border:3px solid #fff;border-radius:10px;padding:0 8px;font-size:30px;font-weight:1000;text-shadow:0 2px 0 #8a1028}.cell.own-threat:not(.king-check){box-shadow:inset 0 0 0 6px #ff5d4a,0 0 16px #ff5d4a88}.cell.own-threat:not(.king-check):before{content:"危";position:absolute;left:4px;top:3px;z-index:7;border:3px solid #fff;border-radius:8px;background:#ff5d4a;color:#fff;padding:0 7px;font-size:22px;font-weight:1000;text-shadow:0 2px 0 #882015}
 .cell.king-check{background:linear-gradient(135deg,#6a1824,#2a0d18)!important;box-shadow:inset 0 0 0 8px #ff416d,0 0 24px #ff416dcc;animation:checkPulse .72s infinite alternate}.cell.king-check:before{content:"王手";position:absolute;left:4px;top:3px;z-index:8;border:3px solid #fff;border-radius:8px;background:#ff2f5f;color:#fff;padding:1px 7px;font-size:23px;font-weight:1000;text-shadow:0 2px 0 #8a1028}.cell.king-check .piece{animation:kingShake .24s infinite alternate;filter:drop-shadow(0 0 16px #ffec6a)}
+.king-danger-screen:after{content:"";position:absolute;inset:0;z-index:38;pointer-events:none;background:radial-gradient(circle at 50% 50%,#0000 42%,#ff174477 82%,#ff1744bb 100%);animation:dangerWash .42s infinite alternate}
+.king-danger-banner{display:none;position:absolute;left:50%;top:52px;z-index:47;transform:translateX(-50%);min-width:760px;border:8px solid #fff;border-radius:18px;background:linear-gradient(180deg,#ff1744,#7a061b);color:#fff;text-align:center;padding:13px 34px;box-shadow:0 12px 0 #2a0610,0 0 36px #ff1744;font-weight:1000;text-shadow:0 4px 0 #520713;pointer-events:none}
+.king-danger-banner.show{display:block;animation:dangerBanner .3s infinite alternate}
+.king-danger-banner b{display:block;font-size:60px;line-height:.95}
+.king-danger-banner span{display:block;font-size:28px;margin-top:5px}
 .piece{position:relative;width:92%;height:92%;display:grid;place-items:center;border-radius:22px;border:4px solid #fff;box-shadow:0 5px 0 #28334e,0 0 18px #fff6;font-family:"Segoe UI Emoji","Yu Gothic UI",sans-serif;font-weight:900;color:#10182c;z-index:2}.piece.owner-0{background:linear-gradient(145deg,#e7f8ff,#559aca);border-color:#9ce8ff;box-shadow:0 5px 0 #23516f,0 0 18px #4edbff99}.piece.owner-1{background:linear-gradient(145deg,#ffe9ee,#c65c72);border-color:#ff9cb1;box-shadow:0 5px 0 #732c3c,0 0 18px #ff527899}.piece.owner-2{background:linear-gradient(145deg,#e6ffe9,#55aa70);border-color:#8dffaa;box-shadow:0 5px 0 #24613a,0 0 18px #55ef8599}.piece.owner-3{background:linear-gradient(145deg,#fff8cf,#d7a82d);border-color:#ffe878;box-shadow:0 5px 0 #765a16,0 0 18px #ffd84eaa}.piece.king{outline:5px double #fff2a4;outline-offset:-9px}.piece.selected{outline:8px solid #fff;outline-offset:4px;filter:drop-shadow(0 0 14px #fff)}.piece.reserved{filter:drop-shadow(0 0 13px #fff)}
 .move-map{position:absolute;inset:3px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);align-items:center;justify-items:center}.move-arrow{font-family:"Segoe UI Symbol",sans-serif;font-size:25px;line-height:1;font-weight:1000;text-shadow:0 0 3px #fff,0 0 9px currentColor}.owner-0 .move-arrow{color:#004b70}.owner-1 .move-arrow{color:#76132b}.owner-2 .move-arrow{color:#075b2b}.owner-3 .move-arrow{color:#694c00}.move-avatar{font-size:43px;line-height:1;filter:drop-shadow(0 2px 1px #fff)}.king .move-arrow{text-shadow:0 0 3px #fff,0 0 8px #fff0a0}
 .direction-key{border:4px solid #4d638c;border-radius:16px;background:#101a33;color:#fff;padding:12px 15px;font-size:24px;font-weight:900;line-height:1.32}.faction-key{display:grid;grid-template-columns:1fr 1fr;gap:5px}.faction-key span,.faction-pill{border-radius:8px;padding:5px 8px;color:#10182c;font-weight:1000}.f0{background:#73d9ff}.f1{background:#ff7995}.f2{background:#70e995}.f3{background:#ffe063}.faction-status{display:grid;grid-template-columns:1fr 1fr;gap:8px}.faction-pill{position:relative;min-height:104px;border:3px solid #ffffffaa;cursor:pointer;text-align:left;display:grid;grid-template-rows:auto auto 1fr;gap:2px}.faction-pill .fp-name{font-size:22px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.faction-pill .fp-state{font-size:24px;line-height:1.1}.faction-pill .fp-metrics{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:3px}.faction-pill .fp-metrics span{background:#ffffff99;border-radius:7px;padding:2px 5px;font-size:18px;text-align:center}.faction-pill.active{outline:5px solid #fff;box-shadow:0 0 15px #fff}.faction-pill.dead{filter:grayscale(1);opacity:.45}.faction-pill.input-ready{outline:5px solid #73ff9a;box-shadow:0 0 18px #50ff84}.faction-pill.input-ready:before{content:"入力済";position:absolute;left:6px;top:-12px;border:3px solid #fff;border-radius:10px;background:#26c95d;color:#fff;padding:1px 7px;font-size:20px;font-weight:1000;text-shadow:0 2px 0 #0d682b}.faction-pill.check{background:linear-gradient(#ffec70,#ff315f)!important;color:#fff;text-shadow:0 2px 0 #8a1028;border-color:#fff;box-shadow:0 0 22px #ff416d;animation:checkPulse .72s infinite alternate}.faction-pill.check .fp-metrics span{background:#ffffffcc;color:#771328;text-shadow:none}.faction-pill.check:after{content:"王手!";position:absolute;right:6px;top:-12px;border:3px solid #fff;border-radius:10px;background:#ff2f5f;color:#fff;padding:1px 7px;font-size:22px;font-weight:1000}
@@ -98,6 +103,8 @@ button{font:inherit}
 @keyframes eventFeed{from{transform:translateX(22px);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes checkPulse{from{filter:saturate(1);opacity:.88}to{filter:saturate(1.45);opacity:1}}
 @keyframes kingShake{from{transform:translateX(-2px)}to{transform:translateX(2px)}}
+@keyframes dangerWash{from{opacity:.48}to{opacity:1}}
+@keyframes dangerBanner{from{transform:translateX(-50%) scale(.985)}to{transform:translateX(-50%) scale(1.025)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* Readability pass: restore the darker board feel and remove text from board cells. */
@@ -343,6 +350,43 @@ button{font:inherit}
 .screen>.topbar{display:none!important}
 #online-screen .net-wrap{inset:28px 250px 70px}
 #lobby-screen .lobby-wrap{inset:42px 170px 70px}
+.move-arrow.power2,.board .move-arrow.power2,.hand-piece .move-arrow.power2{transform:scale(1.18);text-shadow:0 0 4px #fff,0 0 12px currentColor,0 0 18px currentColor}
+.dirbtn.power2{background:linear-gradient(#ffe978,#ffb84a)!important;box-shadow:0 0 18px #ffcf4d!important}
+
+#title-screen{overflow:hidden;background:radial-gradient(circle at 78% 18%,#2f86ff66 0%,transparent 30%),radial-gradient(circle at 18% 86%,#ffcf4d4d 0%,transparent 28%),linear-gradient(135deg,#071126 0%,#111b3c 45%,#2b1846 100%)}
+#title-screen:before{content:"";position:absolute;inset:-90px;opacity:.22;background-image:linear-gradient(#ffffff22 2px,transparent 2px),linear-gradient(90deg,#ffffff22 2px,transparent 2px);background-size:86px 86px;transform:rotate(-7deg) scale(1.05)}
+#title-screen:after{content:"";position:absolute;left:0;right:0;bottom:0;height:320px;background:linear-gradient(0deg,#050711 0%,transparent 100%);pointer-events:none}
+#title-screen .title-scene{position:absolute;inset:70px 92px 270px;display:grid;grid-template-columns:minmax(0,1fr) 760px;gap:70px;align-items:center;z-index:2}
+#title-screen .title-copy{min-width:0}
+#title-screen .title-kicker{display:inline-grid;place-items:center;min-height:58px;padding:0 24px;border:4px solid #ffe978;border-radius:14px;background:#101a33cc;color:#ffe978;font-size:30px;font-weight:1000;box-shadow:0 6px 0 #050711,0 0 22px #ffe97855;text-shadow:0 2px 0 #0008}
+#title-screen .title-logo{position:relative;top:auto;left:auto;right:auto;text-align:left;margin-top:26px;color:#fff}
+#title-screen .title-logo h1{font-size:156px;letter-spacing:2px;line-height:.88;text-shadow:0 9px 0 #050711,0 22px 38px #000a}
+#title-screen .title-logo h1 span{color:#ffe978}
+#title-screen .title-logo p{font-size:33px;letter-spacing:5px;margin-top:24px;color:#d8e7ff;text-shadow:0 3px 0 #050711}
+#title-screen .title-tags{display:flex;gap:16px;flex-wrap:wrap;margin-top:34px}
+#title-screen .title-tags span{border:4px solid #ffffffaa;border-radius:12px;background:#ffffff12;color:#fff;padding:10px 18px;font-size:28px;font-weight:1000;box-shadow:inset 0 2px 0 #ffffff44;text-shadow:0 2px 0 #0008}
+#title-screen .title-showcase{position:relative;height:700px}
+#title-screen .show-board{position:absolute;right:0;top:20px;width:660px;height:660px;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(7,1fr);gap:5px;padding:18px;border:8px solid #ffe978;border-radius:28px;background:#111a30;box-shadow:0 18px 0 #050711,0 30px 60px #0009,0 0 40px #4d8eea55;transform:rotate(3deg)}
+#title-screen .show-board i{display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,#1d2948,#0d162d);border:2px solid #3e527e}
+#title-screen .show-board i:nth-child(even){background:linear-gradient(135deg,#24365f,#101b34)}
+#title-screen .show-board i.danger{box-shadow:inset 0 0 0 5px #ff416d,0 0 18px #ff416d;background:#351323}
+#title-screen .show-board .p{font-style:normal;font-size:54px;border:5px solid #fff;box-shadow:0 6px 0 #050711;filter:drop-shadow(0 0 10px #ffffff55)}
+#title-screen .show-board .blue{background:linear-gradient(#e7f8ff,#559aca)}
+#title-screen .show-board .red{background:linear-gradient(#ffe9ee,#c65c72)}
+#title-screen .show-board .green{background:linear-gradient(#e6ffe9,#55aa70)}
+#title-screen .show-board .yellow{background:linear-gradient(#fff8cf,#d7a82d)}
+#title-screen .show-board .king{background:linear-gradient(#fff7bf,#e7b52e);box-shadow:0 6px 0 #7a5510,0 0 0 5px #fff176,0 0 24px #ffe978}
+#title-screen .show-arrow{position:absolute;height:16px;border-radius:999px;background:linear-gradient(90deg,#fff,#ffe978);box-shadow:0 0 24px #ffe978,0 6px 0 #050711;transform-origin:0 50%;z-index:3}
+#title-screen .show-arrow:after{content:"";position:absolute;right:-24px;top:50%;transform:translateY(-50%);border-left:32px solid #ffe978;border-top:20px solid transparent;border-bottom:20px solid transparent}
+#title-screen .show-arrow.a1{width:270px;right:338px;top:310px;transform:rotate(24deg)}
+#title-screen .show-arrow.a2{width:240px;right:126px;top:414px;transform:rotate(156deg);background:linear-gradient(90deg,#fff,#ff7190);box-shadow:0 0 24px #ff7190,0 6px 0 #050711}
+#title-screen .show-arrow.a2:after{border-left-color:#ff7190}
+#title-screen .show-burst{position:absolute;right:246px;top:248px;z-index:4;min-width:220px;text-align:center;border:7px solid #fff;border-radius:18px;background:linear-gradient(#ff416d,#7b1230);color:#fff;font-size:34px;font-weight:1000;padding:12px 20px;box-shadow:0 10px 0 #050711,0 0 30px #ff416d;text-shadow:0 3px 0 #5b0d22;transform:rotate(-6deg)}
+#title-screen .menu{position:absolute;z-index:4;left:92px;right:92px;bottom:64px;top:auto;width:auto;transform:none;display:grid;grid-template-columns:1.25fr 1.25fr repeat(5,1fr);gap:14px}
+#title-screen .menu .btn{min-height:88px;padding:0 18px;border-radius:16px;font-size:28px;white-space:nowrap}
+#title-screen .menu .primary{grid-column:auto;min-height:108px;font-size:35px}
+#title-screen .menu .primary span{display:block}
+#title-screen .menu .mode-on{background:linear-gradient(#eaffef,#7ee9a0);border-color:#2d9b62;color:#123d25}
 
 </style></head>
 <body><div id="enter-gate">
@@ -352,10 +396,30 @@ button{font:inherit}
   <div class="eg-note">タップで全画面・横向きにします。できない端末でも自動で横画面表示します。</div>
 </div><div id="fit"><main id="stage">
   <section id="title-screen" class="screen active">
-    <div class="title-logo"><h1><span>L-</span>SHOGI</h1><p>REALTIME SIMULTANEOUS SHOGI</p></div>
+    <div class="title-scene">
+      <section class="title-copy">
+        <div class="title-kicker">同時予約・一斉解決</div>
+        <div class="title-logo"><h1><span>L-</span>SHOGI</h1><p>REALTIME SIMULTANEOUS SHOGI</p></div>
+        <div class="title-tags"><span>2マス強化</span><span>場所替え</span><span>4人対戦</span></div>
+      </section>
+      <section class="title-showcase" aria-hidden="true">
+        <div class="show-board">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          <i></i><i class="danger"></i><i></i><i></i><i></i><i></i><i></i>
+          <i></i><i></i><i class="p blue">🤖</i><i></i><i class="p red">🦊</i><i></i><i></i>
+          <i></i><i></i><i></i><i class="p king">👑</i><i></i><i></i><i></i>
+          <i></i><i></i><i class="p green">🐲</i><i></i><i class="p yellow">⚡</i><i></i><i></i>
+          <i></i><i></i><i></i><i></i><i></i><i class="danger"></i><i></i>
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="show-arrow a1"></div>
+        <div class="show-arrow a2"></div>
+        <div class="show-burst">同時決着</div>
+      </section>
+    </div>
     <div class="menu">
-      <button class="btn primary nav" data-action="new">CPU対戦</button>
-      <button class="btn primary nav" data-action="online">オンライン対戦</button>
+      <button class="btn primary nav" data-action="new"><span>CPU対戦</span></button>
+      <button class="btn primary nav" data-action="online"><span>オンライン対戦</span></button>
       <button id="four-toggle" class="btn nav" data-action="four-toggle">4人対戦：OFF</button>
       <button class="btn nav" data-action="custom">駒カスタム</button>
       <button class="btn nav" data-action="research">駒研究</button>
@@ -424,6 +488,7 @@ button{font:inherit}
       </aside>
     </div>
     <div id="count-flash" class="count-flash">GO</div>
+    <div id="king-danger-banner" class="king-danger-banner"><b>王が危険！</b><span id="king-danger-text">次に取られる可能性があります</span></div>
     <div id="research-toast" class="research-toast"></div>
     <div id="result-overlay" class="result-overlay"><div class="panel result-card"><h2 id="result-title">勝利</h2><p id="result-text"></p><div id="result-stats" class="result-stats"></div><div id="result-research" class="result-research"></div><button class="btn primary" data-action="rematch">もう一度</button><button class="btn" data-action="result-research">研究を見る</button><button class="btn" data-action="title">タイトルへ</button></div></div>
   </section>
@@ -579,9 +644,14 @@ class Rules {
     const def=this.catalog[piece.type];
     if(!def) return [];
     const out=[];
-    for(const vector of def.steps) {
+    const grouped=new Map();
+    for(const vector of def.steps||[]){
+      const key=`${vector[0]},${vector[1]}`;
+      grouped.set(key,{vector,count:(grouped.get(key)?.count||0)+1});
+    }
+    for(const {vector,count} of grouped.values()) {
       const [dx,dy]=this.orient(vector,piece.owner);
-      const max=def.slide ? board.size-1 : 1;
+      const max=def.slide ? board.size-1 : Math.min(2,count);
       for(let n=1;n<=max;n++) {
         const x=piece.x+dx*n, y=piece.y+dy*n;
         if(!inside(x,y,board.size)) break;
@@ -594,7 +664,6 @@ class Rules {
         }
         out.push({x,y,swap:false});
         if(occupant) break;
-        if(!def.slide) break;
       }
     }
     return out;
@@ -671,6 +740,33 @@ class SimultaneousResolver {
     actors.filter(a=>a.move.kind==="drop").forEach(a=>state.players[a.player].hand.splice(a.move.handIndex,1));
 
     for(const group of arrivals.values()) if(group.length>1) {
+      const arrivalTarget=before.at(group[0].move.to.x,group[0].move.to.y);
+      const arrivalTargetLeaves=arrivalTarget&&actors.some(actor=>actor.move.kind==="move"&&actor.piece.id===arrivalTarget.id);
+      if(arrivalTarget?.type==="king"&&!arrivalTargetLeaves&&group.some(actor=>actor.player!==arrivalTarget.owner)){
+        const attackers=group.filter(actor=>actor.player!==arrivalTarget.owner);
+        next.remove(arrivalTarget.id);
+        attackers.forEach(actor=>events.push({
+          type:"capture",
+          player:actor.player,
+          piece:actor.piece,
+          captured:[arrivalTarget],
+          from:actor.move.kind==="move"?{x:actor.piece.x,y:actor.piece.y}:null,
+          to:actor.move.to
+        }));
+        if(attackers.length>=3){
+          attackers.forEach(actor=>events.push({type:"annihilation",player:actor.player,piece:actor.piece,captured:[],from:{x:actor.piece.x,y:actor.piece.y},to:actor.move.to,count:attackers.length}));
+        }else{
+          const capturedBy=new Map(attackers.map(actor=>[actor,[]]));
+          attackers.forEach((victim,index)=>{
+            const captor=Array.from({length:attackers.length},(_,step)=>attackers[(index+step+1)%attackers.length])
+              .find(actor=>actor.player!==victim.player);
+            const held=toHand(victim.piece,captor?.player);
+            if(captor&&held){state.players[captor.player].hand.push(held);capturedBy.get(captor).push(victim.piece)}
+          });
+          attackers.forEach(actor=>events.push({type:"collision",player:actor.player,piece:actor.piece,captured:capturedBy.get(actor),from:{x:actor.piece.x,y:actor.piece.y},to:actor.move.to}));
+        }
+        continue;
+      }
       if(group.length>=3){
         group.forEach(actor=>events.push({type:"annihilation",player:actor.player,piece:actor.piece,captured:[],from:{x:actor.piece.x,y:actor.piece.y},to:actor.move.to,count:group.length}));
         continue;
@@ -689,6 +785,43 @@ class SimultaneousResolver {
     for(const actor of actors.filter(a=>!collided.has(a))) {
       const targetBefore=before.at(actor.move.to.x,actor.move.to.y);
       const targetLeaves=targetBefore && actors.some(a=>a.move.kind==="move" && a.piece.id===targetBefore.id);
+      if(actor.swap&&targetBefore&&!targetLeaves&&targetBefore.owner!==actor.player) {
+        next.remove(targetBefore.id);
+        if(targetBefore.type==="king"){
+          const placed=new Piece({...actor.piece,owner:actor.player,x:actor.move.to.x,y:actor.move.to.y});
+          next.add(placed);
+          events.push({
+            type:"capture",
+            player:actor.player,
+            piece:placed,
+            captured:[targetBefore],
+            from:{x:actor.piece.x,y:actor.piece.y},
+            to:actor.move.to
+          });
+          continue;
+        }
+        const heldForTarget=toHand(actor.piece,targetBefore.owner);
+        const heldForActor=toHand(targetBefore,actor.player);
+        if(heldForTarget)state.players[targetBefore.owner].hand.push(heldForTarget);
+        if(heldForActor)state.players[actor.player].hand.push(heldForActor);
+        events.push({
+          type:"collision",
+          player:actor.player,
+          piece:actor.piece,
+          captured:heldForActor?[targetBefore]:[],
+          from:{x:actor.piece.x,y:actor.piece.y},
+          to:actor.move.to
+        });
+        events.push({
+          type:"collision",
+          player:targetBefore.owner,
+          piece:targetBefore,
+          captured:heldForTarget?[actor.piece]:[],
+          from:{x:targetBefore.x,y:targetBefore.y},
+          to:actor.move.to
+        });
+        continue;
+      }
       if(targetBefore && !targetLeaves && targetBefore.owner!==actor.player) {
         next.remove(targetBefore.id);
         const held=toHand(targetBefore,actor.player);
@@ -1013,20 +1146,20 @@ const BONUS_AVATARS=[
   {avatar:"⚡",req:36},{avatar:"🔥",req:36},{avatar:"❄️",req:36},{avatar:"🌌",req:36}
 ];
 const DIRECTIONS=[
-  {id:"ul",mark:"↖",name:"左上",vector:[-1,-1],stock:6},
-  {id:"up",mark:"↑",name:"上",vector:[0,-1],stock:6},
-  {id:"ur",mark:"↗",name:"右上",vector:[1,-1],stock:6},
-  {id:"left",mark:"←",name:"左",vector:[-1,0],stock:3},
+  {id:"ul",mark:"↖",name:"左上",vector:[-1,-1],stock:5},
+  {id:"up",mark:"↑",name:"上",vector:[0,-1],stock:5},
+  {id:"ur",mark:"↗",name:"右上",vector:[1,-1],stock:5},
+  {id:"left",mark:"←",name:"左",vector:[-1,0],stock:4},
   {id:"dl",mark:"↙",name:"左下",vector:[-1,1],stock:2},
-  {id:"down",mark:"↓",name:"下",vector:[0,1],stock:4},
+  {id:"down",mark:"↓",name:"下",vector:[0,1],stock:3},
   {id:"dr",mark:"↘",name:"右下",vector:[1,1],stock:2},
-  {id:"right",mark:"→",name:"右",vector:[1,0],stock:3}
+  {id:"right",mark:"→",name:"右",vector:[1,0],stock:4}
 ];
 function defaultRoster(){
   const sets=[
-    ["up","left"],["up","right"],["up","ul"],["up","ur"],
+    ["up","left"],["ur","right"],["up","ul","right"],["up","ur"],
     ["up","down"],["up","ul","ur"],["ul","left","dl"],["ul","down"],
-    ["ul","dr"],["ul","ur"],["ur","right","dl"],["ur","right","down","dr"]
+    ["left","dr"],["left","ur"],["ur","right","dl"],["right","down","dr"]
   ];
   return sets.map((dirs,i)=>({id:`c${i}`,name:`ユニット ${String(i+1).padStart(2,"0")}`,avatar:AVATARS[i],dirs}));
 }
@@ -1087,6 +1220,26 @@ function showResearchToast(entry){
 }
 function avatarUnlocked(avatar){const bonus=BONUS_AVATARS.find(x=>x.avatar===avatar);return !bonus||researchTotal()>=bonus.req}
 function allAllowedAvatars(){return [...AVATARS,...BONUS_AVATARS.map(x=>x.avatar)]}
+function directionById(id){return DIRECTIONS.find(d=>d.id===id)}
+function directionByVector(vector){return DIRECTIONS.find(d=>d.vector[0]===vector[0]&&d.vector[1]===vector[1])}
+function directionCounts(ids=[]){
+  const counts=new Map();
+  for(const id of ids||[])if(directionById(id))counts.set(id,(counts.get(id)||0)+1);
+  return counts;
+}
+function directionMark(id,count=1){
+  const dir=directionById(id);
+  if(!dir)return "";
+  if(count>=2)return {ul:"⇖",up:"⇑",ur:"⇗",left:"⇐",dl:"⇙",down:"⇓",dr:"⇘",right:"⇒"}[id]||dir.mark;
+  return dir.mark;
+}
+function directionMarksFromIds(ids=[]){
+  const counts=directionCounts(ids);
+  return [...counts.entries()].map(([id,count])=>directionMark(id,count)).join(" ");
+}
+function dirsToSteps(ids=[]){
+  return (ids||[]).map(id=>directionById(id)?.vector).filter(Boolean);
+}
 function beginResearchMatch(s,owner){
   researchMatch={deployed:new Set(),finalized:false,newUnlocks:[],totalBefore:researchTotal()};
   if(!s?.board)return;
@@ -1131,9 +1284,9 @@ const CPU_ROSTER=[
 function normalizeRoster(roster){
   const left=Object.fromEntries(DIRECTIONS.map(d=>[d.id,d.stock]));
   return roster.slice(0,12).map((unit,i)=>{
-    const dirs=[];
+    const dirs=[],unitCounts=new Map();
     for(const id of Array.isArray(unit.dirs)?unit.dirs:[]){
-      if(left[id]>0&&!dirs.includes(id)){dirs.push(id);left[id]--}
+      if(left[id]>0&&(unitCounts.get(id)||0)<2){dirs.push(id);left[id]--;unitCounts.set(id,(unitCounts.get(id)||0)+1)}
     }
     const avatar=allAllowedAvatars().includes(unit.avatar)&&avatarUnlocked(unit.avatar)?unit.avatar:AVATARS[i];
     return {id:`c${i}`,name:unit.name||`ユニット ${String(i+1).padStart(2,"0")}`,avatar,dirs};
@@ -1149,11 +1302,11 @@ function loadRoster(){
 let customRoster=loadRoster();
 function installCustomCatalog(){
   customRoster.forEach((unit,i)=>{
-    const steps=unit.dirs.map(id=>DIRECTIONS.find(d=>d.id===id)?.vector).filter(Boolean);
+    const steps=dirsToSteps(unit.dirs);
     PIECE_CATALOG[`c${i}`]={id:`c${i}`,name:unit.name,label:unit.avatar,avatar:unit.avatar,slide:false,steps};
   });
   ["e","f","g"].forEach((prefix,seat)=>CPU_ROSTER.forEach((unit,i)=>{
-    const steps=unit.dirs.map(id=>DIRECTIONS.find(d=>d.id===id)?.vector).filter(Boolean);
+    const steps=dirsToSteps(unit.dirs);
     const id=`${prefix}${i}`;
     PIECE_CATALOG[id]={id,name:`CPU ${seat+1}・${unit.name}`,label:unit.avatar,avatar:unit.avatar,slide:false,steps};
   }));
@@ -1162,8 +1315,8 @@ function cleanRoster(roster,prefix){
   const left=Object.fromEntries(DIRECTIONS.map(d=>[d.id,d.stock]));
   const source=(Array.isArray(roster)&&roster.length===12?roster:defaultRoster()).slice(0,12);
   return source.map((unit,i)=>{
-    const dirs=[];
-    for(const id of Array.isArray(unit.dirs)?unit.dirs:[])if(left[id]>0&&!dirs.includes(id)){dirs.push(id);left[id]--}
+    const dirs=[],unitCounts=new Map();
+    for(const id of Array.isArray(unit.dirs)?unit.dirs:[])if(left[id]>0&&(unitCounts.get(id)||0)<2){dirs.push(id);left[id]--;unitCounts.set(id,(unitCounts.get(id)||0)+1)}
     const avatar=allAllowedAvatars().includes(unit.avatar)?unit.avatar:AVATARS[i%AVATARS.length];
     return {id:`${prefix}${i}`,name:String(unit.name||`ユニット ${i+1}`).slice(0,20),avatar,dirs};
   });
@@ -1173,7 +1326,7 @@ function installOnlineCatalog(...inputRosters){
   const both=inputRosters.map((roster,owner)=>cleanRoster(roster,prefixes[owner]));
   both.forEach((roster,owner)=>roster.forEach((unit,i)=>{
     const type=`${prefixes[owner]}${i}`;
-    PIECE_CATALOG[type]={id:type,name:unit.name,label:unit.avatar,avatar:unit.avatar,slide:false,steps:unit.dirs.map(id=>DIRECTIONS.find(d=>d.id===id).vector)};
+    PIECE_CATALOG[type]={id:type,name:unit.name,label:unit.avatar,avatar:unit.avatar,slide:false,steps:dirsToSteps(unit.dirs)};
   }));
 }
 installCustomCatalog();
@@ -1189,6 +1342,7 @@ let state=null, selected=null, reserved=Move.wait(0), locked=false, keyboardCell
 let handViewOwner=null;
 let lastTimerTone=null;
 let lastCheckAlertKey="";
+let dangerAlertTimer=null;
 let customEntrySnapshot=null;
 let gameMode="cpu",setupOwner=0;
 let matchStats={turns:0,captures:0,collisions:0,annihilations:0,drops:0,swaps:0,compressions:0};
@@ -1244,6 +1398,7 @@ renderFourToggle();
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));
   document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
+  if(id!=="battle-screen")clearKingDangerAlert();
 }
 function openModal(id){ $(id).classList.add("show"); }
 function closeModals(){ document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show")); }
@@ -1251,6 +1406,11 @@ function closeModals(){ document.querySelectorAll(".modal").forEach(m=>m.classLi
 function tone(freq=520,duration=.07){
   if(!settings.sound) return;
   try{ const c=new AudioContext(),o=c.createOscillator(),g=c.createGain(); o.frequency.value=freq; g.gain.value=.05;o.connect(g);g.connect(c.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,c.currentTime+duration);o.stop(c.currentTime+duration); }catch{}
+}
+function clearKingDangerAlert(){
+  $("#battle-screen")?.classList.remove("king-danger-screen");
+  $("#king-danger-banner")?.classList.remove("show");
+  clearTimeout(dangerAlertTimer);dangerAlertTimer=null;
 }
 function kingThreatMap(s=state){
   const map=new Map();
@@ -1281,6 +1441,8 @@ function moveWouldPressureKing(piece,to,s=state){
   const board=s.board.copy();
   const moving=board.get(piece.id)||new Piece({...piece,id:piece.id||`ghost-${piece.type}`,x:piece.x??null,y:piece.y??null});
   if(!board.get(moving.id))board.add(moving);
+  const target=board.at(to.x,to.y);
+  if(target&&target.id!==moving.id&&target.owner!==piece.owner)board.remove(target.id);
   moving.x=to.x;moving.y=to.y;
   return s.board.list().some(target=>
     target.owner!==piece.owner&&target.type==="king"&&hasKing(s,target.owner)&&
@@ -1289,11 +1451,22 @@ function moveWouldPressureKing(piece,to,s=state){
 }
 function playCheckAlert(threats){
   const mine=myOwner();
-  if(!threats?.has(mine))return;
+  const screen=$("#battle-screen"),banner=$("#king-danger-banner"),text=$("#king-danger-text");
+  const danger=!!threats?.has(mine);
+  screen?.classList.toggle("king-danger-screen",danger);
+  banner?.classList.toggle("show",danger);
+  if(text&&danger)text.textContent=`${threats.get(mine)}方向から王が狙われています`;
+  if(!danger){
+    clearTimeout(dangerAlertTimer);dangerAlertTimer=null;
+    return;
+  }
   const key=`${state?.turn||0}:${mine}:${threats.get(mine)}`;
   if(key===lastCheckAlertKey)return;
   lastCheckAlertKey=key;
-  tone(190,.16);setTimeout(()=>tone(120,.18),105);
+  clearTimeout(dangerAlertTimer);
+  const seq=[0,140,280,560,700,840];
+  seq.forEach((delay,i)=>setTimeout(()=>tone(i%2?120:220,.13),delay));
+  dangerAlertTimer=setTimeout(()=>{dangerAlertTimer=null},1000);
 }
 function onlineCommittedOwners(){
   const set=new Set();
@@ -1430,7 +1603,12 @@ function startGame(){
   show("battle-screen");renderBattle();flash("GO");setTimeout(()=>timer.start(),450);
 }
 function directionMarks(steps){
-  return steps.map(step=>DIRECTIONS.find(d=>d.vector[0]===step[0]&&d.vector[1]===step[1])?.mark).filter(Boolean).join(" ");
+  const counts=new Map();
+  for(const step of steps||[]){
+    const dir=directionByVector(step);
+    if(dir)counts.set(dir.id,(counts.get(dir.id)||0)+1);
+  }
+  return [...counts.entries()].map(([id,count])=>directionMark(id,count)).join(" ");
 }
 
 function cellElement(x,y,extra=""){
@@ -1440,23 +1618,27 @@ function cellElement(x,y,extra=""){
 }
 function pieceElement(type,owner,isSelected){
   const def=PIECE_CATALOG[type];
-  const actual=new Map(def.steps.map(vector=>{
+  const actual=new Map();
+  for(const vector of def.steps||[]){
     let [dx,dy]=rules.orient(vector,owner);
     [dx,dy]=worldVectorToView([dx,dy]);
-    return [`${dx},${dy}`,DIRECTIONS.find(d=>d.vector[0]===dx&&d.vector[1]===dy)?.mark||""];
-  }));
+    const key=`${dx},${dy}`;
+    const dir=directionByVector([dx,dy]);
+    const count=(actual.get(key)?.count||0)+1;
+    actual.set(key,{id:dir?.id,mark:dir?directionMark(dir.id,count):"",count});
+  }
   const positions=[[-1,-1],[0,-1],[1,-1],[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1]];
   const map=positions.map(([dx,dy])=>{
     if(dx===0&&dy===0)return `<span class="move-avatar">${def.label}</span>`;
-    const mark=actual.get(`${dx},${dy}`);
-    return `<span class="move-arrow">${mark||""}</span>`;
+    const info=actual.get(`${dx},${dy}`);
+    return `<span class="move-arrow ${info?.count>=2?"power2":""}">${info?.mark||""}</span>`;
   }).join("");
   const el=document.createElement("div");
   const researchIndex=localTypeIndex(type);
   const mastery=researchIndex>=0?`mastery-${masteryLevel(researchIndex)}`:"";
   el.className=`piece owner-${owner} ${type==="king"?"king":""} ${isSelected?"selected":""} ${mastery}`;
   el.innerHTML=`<span class="move-map">${map}</span>`;
-  el.title=`${def.name}：${[...actual.values()].join(" ")||"移動なし"}`;
+  el.title=`${def.name}：${[...actual.values()].map(info=>info.mark).join(" ")||"移動なし"}`;
   return el;
 }
 function renderReservationOverlay(board){
@@ -1902,7 +2084,7 @@ function renderResultStats(){
   ].map(([label,value])=>`<div class="result-stat"><b>${value}</b><span>${label}</span></div>`).join("");
 }
 function showResult(){
-  timer.stop();const r=state.result;
+  timer.stop();clearKingDangerAlert();const r=state.result;
   finalizeResearchMatch(state,myOwner());
   const win=r.winner===myOwner();
   $("#result-title").textContent=r.draw?"引き分け":win?"勝利！":"敗北";
@@ -1926,8 +2108,8 @@ function openCustom(){
 }
 function stockRemaining(id){
   const max=DIRECTIONS.find(d=>d.id===id).stock;
-  const used=customRoster.reduce((n,u)=>n+(u.dirs.includes(id)?1:0),0);
-  return max-used;
+  const used=customRoster.reduce((n,u)=>n+(u.dirs||[]).filter(dir=>dir===id).length,0);
+  return Math.max(0,max-used);
 }
 function clampScore(n){return Math.max(0,Math.min(100,Math.round(n)))}
 function deckEvaluation(roster=customRoster){
@@ -1955,7 +2137,7 @@ function scoreHTML(label,value,cls=""){
 }
 function renderCustom(){
   $("#roster-grid").innerHTML=customRoster.map((unit,i)=>{
-    const marks=unit.dirs.map(id=>DIRECTIONS.find(d=>d.id===id).mark).join(" ");
+    const marks=directionMarksFromIds(unit.dirs);
     return `<button class="roster-card mastery-${masteryLevel(i)} ${i===editingUnit?"active":""}" data-unit="${i}"><span class="avatar">${unit.avatar}</span><span class="name">${unit.name}</span><span class="dirs">${marks||"移動なし"} ・ ${masteryTitle(i)}</span></button>`;
   }).join("");
   document.querySelectorAll("[data-unit]").forEach(card=>card.onclick=()=>{editingUnit=+card.dataset.unit;renderCustom();tone()});
@@ -1965,8 +2147,8 @@ function renderCustom(){
   const order=["ul","up","ur","left","center","right","dl","down","dr"];
   $("#dirpad").innerHTML=order.map(id=>{
     if(id==="center")return `<button class="dirbtn center" disabled>${customRoster[editingUnit].avatar}</button>`;
-    const dir=DIRECTIONS.find(d=>d.id===id),on=customRoster[editingUnit].dirs.includes(id);
-    return `<button class="dirbtn ${on?"on":""}" data-dir="${id}">${dir.mark}</button>`;
+    const count=(customRoster[editingUnit].dirs||[]).filter(dir=>dir===id).length;
+    return `<button class="dirbtn ${count?"on":""} ${count>=2?"power2":""}" data-dir="${id}">${directionMark(id,count||1)}</button>`;
   }).join("");
   document.querySelectorAll("[data-dir]").forEach(button=>button.onclick=()=>toggleDirection(button.dataset.dir));
   $("#avatar-grid").innerHTML=allAllowedAvatars().map(avatar=>{
@@ -1992,9 +2174,12 @@ function renderResearch(){
   $("#research-legend").innerHTML=ACHIEVEMENTS.map(a=>`<span>${a.icon} ${a.name}</span>`).join("");
 }
 function toggleDirection(id){
-  const unit=customRoster[editingUnit],index=unit.dirs.indexOf(id);
-  if(index>=0){unit.dirs.splice(index,1);tone(340)}
-  else if(stockRemaining(id)>0){unit.dirs.push(id);tone(700)}
+  const unit=customRoster[editingUnit];
+  unit.dirs=Array.isArray(unit.dirs)?unit.dirs:[];
+  const count=unit.dirs.filter(dir=>dir===id).length;
+  if(count>=2){unit.dirs=unit.dirs.filter(dir=>dir!==id);tone(340)}
+  else if(stockRemaining(id)>0){unit.dirs.push(id);tone(count?820:700)}
+  else if(count===1){unit.dirs=unit.dirs.filter(dir=>dir!==id);tone(340)}
   else{tone(180,.14)}
   renderCustom();
 }
