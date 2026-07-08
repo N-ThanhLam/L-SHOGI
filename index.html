@@ -2078,13 +2078,14 @@ const NET={
   loadReco(){try{const d=JSON.parse((globalThis.sessionStorage||localStorage).getItem(`lshogi-reconnect-${this.roomId}`)||"null");return d&&d.roomId===this.roomId&&Date.now()-d.ts<NET_RECO_TTL?d:null}catch{return null}},
   reset(){
     this._intentional=true;this.active=false;this.phase="idle";this.paused=false;
-    clearInterval(this._hb);clearInterval(this._watch);clearInterval(this._roundClock);clearTimeout(this._roundTimer);
+    clearInterval(this._hb);clearInterval(this._watch);clearInterval(this._roundClock);clearTimeout(this._roundTimer);clearTimeout(this._cpuTakeoverTimer);
     if(this.guestConns)for(const conn of this.guestConns.values())try{conn.close()}catch{}
     this.guestConns?.clear?.();
     try{this.guestConn?.close()}catch{}try{this.hostConn?.close()}catch{}
     try{if(this.peer&&!this.peer.destroyed)this.peer.destroy()}catch{}
     this.peer=this.hostConn=this.guestConn=null;this.commitments.clear();this.reveals.clear();this.inputReady.clear();this.closeOverlay();
-    this._hb=this._watch=this._roundClock=this._roundTimer=null;this._latency=null;
+    this.guests=null;this.guestConns=null;this.remoteSeats=null;this.cpuSeats=new Set();this.rosters=null;
+    this._hb=this._watch=this._roundClock=this._roundTimer=this._cpuTakeoverTimer=null;this._latency=null;
   },
   open(){
     this.reset();gameMode="online";this._intentional=false;
@@ -2266,10 +2267,10 @@ const NET={
     if(m.type==="welcome"){
       fourPlayer=m.playerCount===4;localStorage.setItem("l-shogi-four-player",fourPlayer?"1":"0");renderFourToggle();
       this.myIdx=Number.isInteger(m.idx)?m.idx:1;this.token=m.token;this.hostSession=m.session;this.hostName=m.hostName;this.saveReco();this._reco=false;this._tries=0;this.closeOverlay();this.startWatch();
-      if(!m.reconnected){this.phase="lobby";show("lobby-screen")}this.renderLobby();return;
+      if(!m.reconnected||m.phase==="idle"||m.phase==="lobby"){this.phase="lobby";show("lobby-screen")}this.renderLobby();return;
     }
     if(m.type==="lobby"){this.hostName=m.hostName;this.remoteSeats=m.seats||null;this.ready=m.seats?!!m.seats[this.myIdx]?.ready:!!m.guest?.ready;this.renderLobby();return}
-    if(m.type==="lobbyReset"){this.phase="lobby";this.ready=false;state=null;$("#result-overlay").classList.remove("show");show("lobby-screen");this.renderLobby();return}
+    if(m.type==="lobbyReset"){this.phase="lobby";this.ready=false;this.cpuSeats=new Set();state=null;$("#result-overlay").classList.remove("show");show("lobby-screen");this.renderLobby();return}
     if(m.type==="autoSetupWait"){
       this.matchId=m.matchId;this.lastVer=0;this.phase="setup";this.rosters=m.rosters;this.cpuSeats=new Set(m.cpuSeats||[]);installOnlineCatalog(...m.rosters);gameMode="online";
       $("#lobby-hint").textContent="あなたの配置は完了しました。ほかのプレイヤーを待っています。";return;
@@ -2304,8 +2305,8 @@ const NET={
       const droppedId=prevReserved.kind==="drop"?state?.players?.[myOwner()]?.hand[prevReserved.handIndex]?.id:null;
       state=unpackState(m.game);recordResearchEvents(state.lastEvents||[],this.myIdx);selected=selectionAfterTurn(prevSelected,prevReserved,droppedId);locked=true;renderBattle();showEvents(state.lastEvents||[]);if(state.result.over){this.phase="ended";showResult()}return;
     }
-    if(m.type==="pause"){this.paused=true;locked=true;clearInterval(this._roundClock);this.showOverlay("通信待機","相手の再接続を待っています。",[["退室",()=>this.leave()]])}
-    if(m.type==="resume"){this.paused=false;this.closeOverlay()}
+    if(m.type==="pause"){this.paused=true;locked=true;clearInterval(this._roundClock);this.showOverlay("通信待機",`${m.name||"参加者"}の再接続を待っています。`,[["退室",()=>this.leave()]])}
+    if(m.type==="resume"){this.paused=false;if(m.cpuSeats)this.cpuSeats=new Set(m.cpuSeats);this.closeOverlay()}
   },
   resumeGuest(){
     if(!this.isHost||!this.guestConn)return;
@@ -2365,6 +2366,9 @@ function netFourSeats(){
 function netSendAll(message,except=null){
   for(const conn of NET.guestConns?.values?.()||[])if(conn!==except)NET.send(conn,message);
 }
+function netOpenHumanSeats(){
+  return [1,2,3].filter(i=>NET.guests?.[i]?.connected&&!NET.cpuSeats?.has(i));
+}
 function fourConnectedSeats(){return [1,2,3].filter(i=>NET.guests?.[i]?.connected)}
 function fourReadySeats(){return [1,2,3].filter(i=>NET.guests?.[i]?.connected&&NET.guests?.[i]?.ready)}
 function fourCanStart(){
@@ -2403,9 +2407,9 @@ NET.handleHost=function(conn,m){
   if(m.type==="pong"){conn.__latency=Date.now()-(+m.t||Date.now());renderOnlineInputStatus();return}
   if(m.type==="hello"){
     if(m.ver!==NET_VER){this.send(conn,{type:"reject",reason:"ゲームのバージョンが違います"});return}
-    let seat=[1,2,3].find(i=>this.guests[i]?.token&&m.token===this.guests[i].token);
+    let seat=[1,2,3].find(i=>!this.cpuSeats?.has(i)&&this.guests[i]?.token&&m.token===this.guests[i].token&&(!m.session||m.session===this.hostSession));
     const reconnect=!!seat;
-    if(!seat){const open=shuffle([1,2,3].filter(i=>!this.guests[i]?.connected));seat=open[0]}
+    if(!seat){const open=shuffle([1,2,3].filter(i=>!this.guests[i]?.connected&&!this.cpuSeats?.has(i)));seat=open[0]}
     if(!seat){this.send(conn,{type:"reject",reason:"4人揃っています"});return}
     if(this.phase!=="idle"&&this.phase!=="lobby"&&!reconnect){this.send(conn,{type:"reject",reason:"対戦はすでに始まっています"});return}
     const old=this.guests[seat]||{};
@@ -2429,7 +2433,7 @@ NET.handleHost=function(conn,m){
   }
   else if(m.kind==="commit"&&this.phase==="battle"&&m.roundId===this.roundId&&Date.now()<=(this.roundDeadline||0)+300){this.commitments.set(seat,String(m.hash));if(m.input)this.inputReady.add(seat);netSendAll({type:"commitNotice",roundId:this.roundId,owner:seat,hash:String(m.hash),input:!!m.input});renderBattle();}
   else if(m.kind==="reveal"&&this.phase==="battle"&&m.roundId===this.roundId)this.reveals.set(seat,{move:movePlain(m.move,seat),nonce:String(m.nonce||"")});
-  else if(m.kind==="resign"&&this.phase==="battle"){const king=state.board.list(seat).find(p=>p.type==="king");if(king)state.board.remove(king.id);state.result=rules.winner(state);this.sendState("state");if(state.result.over){this.phase="ended";showResult()}}
+  else if(m.kind==="resign"&&this.phase==="battle"){const king=state.board.list(seat).find(p=>p.type==="king");if(king)state.board.remove(king.id);state.result=rules.winner(state);if(state.result.over)this.phase="ended";this.sendState("state");if(state.result.over)showResult()}
   else if(m.kind==="requestLobby"&&this.phase==="ended")this.returnLobby();
   else if(m.kind==="resync")this.resumeGuest(conn);
 };
@@ -2513,18 +2517,48 @@ NET.resign=function(){
   if(!fourPlayer)return NET2.resign();
   if(!this.active||this.phase!=="battle")return;
   if(!this.isHost){this.sendAction("resign",{matchId:this.matchId});return}
-  const king=state.board.list(0).find(p=>p.type==="king");if(king)state.board.remove(king.id);state.result=rules.winner(state);this.sendState("state");
+  const king=state.board.list(0).find(p=>p.type==="king");if(king)state.board.remove(king.id);state.result=rules.winner(state);if(state.result.over)this.phase="ended";this.sendState("state");if(state.result.over)showResult();
+};
+NET.cpuTakeoverSeat=function(seat,reason="通信切断"){
+  if(!fourPlayer||!this.isHost||!seat||seat<1||seat>3)return;
+  this.cpuSeats=this.cpuSeats||new Set();
+  if(this.cpuSeats.has(seat))return;
+  this.cpuSeats.add(seat);
+  const guest=this.guests?.[seat];
+  if(guest){guest.connected=false;guest.ready=false;guest.name=`CPU ${seat}`;}
+  try{this.guestConns?.get(seat)?.close()}catch{}
+  this.guestConns?.delete(seat);
+  clearTimeout(this._cpuTakeoverTimer);
+  if(this.phase==="setup"){
+    if(!this.placements?.[seat])this.placements[seat]=randomPlacementFor(seat,this.queues[seat]);
+    const done=this.placements.map((placement,index)=>placement?index:null).filter(index=>index!==null);
+    netSendAll({type:"placementProgress",done,total:4,cpuSeats:[...this.cpuSeats]});
+    this.paused=false;this.closeOverlay();this.maybeBeginBattle();return;
+  }
+  if(this.phase==="battle"&&state){
+    if(state.players?.[seat])state.players[seat].name=`CPU ${seat}`;
+    this.paused=false;locked=true;clearTimeout(this._roundTimer);clearInterval(this._roundClock);
+    netSendAll({type:"resume",reason,cpuSeats:[...this.cpuSeats]});
+    this.closeOverlay();this.sendState("state");
+    if(!state.result.over)setTimeout(()=>this.startRound(),500);
+  }
 };
 NET.guestDropped=function(conn){
   if(!fourPlayer)return NET2.guestDropped(conn);
   const seat=conn?.__seat;if(!seat||this.guestConns?.get(seat)!==conn)return;
   this.guestConns.delete(seat);this.guests[seat].connected=false;
-  if(this.phase==="battle"){this.paused=true;locked=true;clearTimeout(this._roundTimer);clearInterval(this._roundClock);this.showOverlay("再接続待ち",`${this.guests[seat].name}の復帰を待っています。`)}
+  if(this.phase==="battle"||this.phase==="setup"){
+    this.paused=true;locked=true;clearTimeout(this._roundTimer);clearInterval(this._roundClock);
+    netSendAll({type:"pause",seat,name:this.guests[seat].name});
+    this.showOverlay("再接続待ち",`${this.guests[seat].name}の復帰を待っています。CPUで続行もできます。`,[["CPUで続行",()=>this.cpuTakeoverSeat(seat)],["退室",()=>this.leave()]]);
+    clearTimeout(this._cpuTakeoverTimer);
+    this._cpuTakeoverTimer=setTimeout(()=>{if(this.active&&this.isHost&&this.paused&&this.guests?.[seat]&&!this.guests[seat].connected)this.cpuTakeoverSeat(seat,"自動CPU交代")},10000);
+  }
   else this.lobbyBroadcast();
 };
 NET.resumeGuest=function(conn){
   if(!fourPlayer)return NET2.resumeGuest();
-  if(!this.isHost||!conn)return;this.send(conn,{type:"resume"});
+  if(!this.isHost||!conn)return;this.send(conn,{type:"resume",cpuSeats:[...(this.cpuSeats||[])]});
   if(this.phase==="setup"){
     const seat=conn.__seat;
     this.send(conn,this.placements?.[seat]
@@ -2532,7 +2566,9 @@ NET.resumeGuest=function(conn){
       :{type:"setupStart",matchId:this.matchId,rosters:this.rosters,queue:this.queues[seat],cpuSeats:[...(this.cpuSeats||[])]});
   }
   if((this.phase==="battle"||this.phase==="ended")&&state)this.send(conn,{type:"state",v:++this.stateVer,matchId:this.matchId,phase:this.phase,game:packState(state),rosters:this.rosters,cpuSeats:[...(this.cpuSeats||[])]});
-  const allBack=[1,2,3].every(i=>this.cpuSeats?.has(i)||this.guests[i]?.connected);this.paused=!allBack;if(allBack)this.closeOverlay();
+  const allBack=[1,2,3].every(i=>this.cpuSeats?.has(i)||this.guests[i]?.connected);
+  this.paused=!allBack;
+  if(allBack){clearTimeout(this._cpuTakeoverTimer);this.closeOverlay();netSendAll({type:"resume",cpuSeats:[...(this.cpuSeats||[])]})}
   if(this.phase==="battle"&&allBack)setTimeout(()=>this.startRound(),500);
 };
 NET.startHeartbeat=function(){
@@ -2542,7 +2578,7 @@ NET.startHeartbeat=function(){
 NET.returnLobby=function(){
   if(!fourPlayer)return NET2.returnLobby();
   if(!this.active)return;if(!this.isHost){this.sendAction("requestLobby");return}
-  clearTimeout(this._roundTimer);clearInterval(this._roundClock);this.phase="lobby";state=null;for(let i=1;i<4;i++)this.guests[i].ready=false;$("#result-overlay").classList.remove("show");
+  clearTimeout(this._roundTimer);clearTimeout(this._cpuTakeoverTimer);clearInterval(this._roundClock);this.phase="lobby";state=null;this.cpuSeats=new Set();for(let i=1;i<4;i++)if(this.guests[i])this.guests[i].ready=false;$("#result-overlay").classList.remove("show");
   netSendAll({type:"lobbyReset"});this.lobbyBroadcast();show("lobby-screen");
 };
 NET.leave=function(){
