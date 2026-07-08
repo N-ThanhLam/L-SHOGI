@@ -1299,6 +1299,7 @@ function onlineCommittedOwners(){
   const set=new Set();
   if(gameMode!=="online"||typeof NET==="undefined"||NET.phase!=="battle")return set;
   NET.inputReady?.forEach(owner=>set.add(+owner));
+  NET.cpuSeats?.forEach(owner=>set.add(+owner));
   return set;
 }
 function netLatency(){
@@ -2270,7 +2271,7 @@ const NET={
     if(m.type==="lobby"){this.hostName=m.hostName;this.remoteSeats=m.seats||null;this.ready=m.seats?!!m.seats[this.myIdx]?.ready:!!m.guest?.ready;this.renderLobby();return}
     if(m.type==="lobbyReset"){this.phase="lobby";this.ready=false;state=null;$("#result-overlay").classList.remove("show");show("lobby-screen");this.renderLobby();return}
     if(m.type==="autoSetupWait"){
-      this.matchId=m.matchId;this.lastVer=0;this.phase="setup";this.rosters=m.rosters;installOnlineCatalog(...m.rosters);gameMode="online";
+      this.matchId=m.matchId;this.lastVer=0;this.phase="setup";this.rosters=m.rosters;this.cpuSeats=new Set(m.cpuSeats||[]);installOnlineCatalog(...m.rosters);gameMode="online";
       $("#lobby-hint").textContent="あなたの配置は完了しました。ほかのプレイヤーを待っています。";return;
     }
     if(m.type==="placementProgress"){
@@ -2280,12 +2281,13 @@ const NET={
     }
     if(m.type==="setupStart"){
       this.matchId=m.matchId;this.lastVer=0;this.phase="setup";
+      this.cpuSeats=new Set(m.cpuSeats||[]);
       if(m.rosters){this.rosters=m.rosters;installOnlineCatalog(...m.rosters)}
       else{this.hostRoster=m.hostRoster;this.guestRoster=m.guestRoster;installOnlineCatalog(this.hostRoster,this.guestRoster)}
       gameMode="online";beginPlacement(this.myIdx,m.queue);return;
     }
     if(m.type==="battleStart"||m.type==="state"){
-      if(Number.isFinite(m.v)&&m.v<=this.lastVer)return;this.lastVer=m.v||this.lastVer;this.matchId=m.matchId||this.matchId;this.phase=m.phase||this.phase;if(m.rosters)installOnlineCatalog(...m.rosters);state=unpackState(m.game);gameMode="online";if(m.type==="battleStart")beginResearchMatch(state,this.myIdx);this.enterOnlineBattle();if(state.result.over)showResult();return;
+      if(Number.isFinite(m.v)&&m.v<=this.lastVer)return;this.lastVer=m.v||this.lastVer;this.matchId=m.matchId||this.matchId;this.phase=m.phase||this.phase;if(m.rosters)installOnlineCatalog(...m.rosters);if(m.cpuSeats)this.cpuSeats=new Set(m.cpuSeats);state=unpackState(m.game);gameMode="online";if(m.type==="battleStart")beginResearchMatch(state,this.myIdx);this.enterOnlineBattle();if(state.result.over)showResult();return;
     }
     if(m.type==="round"){
       this.roundId=m.id;this.phase="battle";this.commitments.clear();this.reveals.clear();this.beginRoundLocal(m.duration||turnDurationMs());return;
@@ -2363,6 +2365,13 @@ function netFourSeats(){
 function netSendAll(message,except=null){
   for(const conn of NET.guestConns?.values?.()||[])if(conn!==except)NET.send(conn,message);
 }
+function fourConnectedSeats(){return [1,2,3].filter(i=>NET.guests?.[i]?.connected)}
+function fourReadySeats(){return [1,2,3].filter(i=>NET.guests?.[i]?.connected&&NET.guests?.[i]?.ready)}
+function fourCanStart(){
+  const connected=fourConnectedSeats();
+  return connected.length>=1&&connected.every(i=>NET.guests[i].ready);
+}
+function cpuRosterForSeat(seat){return cleanRoster(CPU_ROSTER,fourPrefix(seat))}
 NET.host=function(keyword,name){
   if(!fourPlayer)return NET2.host(keyword,name);
   NET2.host(keyword,name);this.guests=Array(4).fill(null);this.guestConns=new Map();this.seat={name:this.name,ready:true,connected:true};
@@ -2376,8 +2385,11 @@ NET.renderLobby=function(){
   $("#lobby-ready").style.display=this.isHost?"none":"";
   $("#lobby-ready").textContent=this.ready?"準備を解除":"準備OK";
   $("#lobby-start").style.display=this.isHost?"":"none";
-  $("#lobby-start").disabled=this.isHost&&!seats.slice(1).every(s=>s?.connected&&s?.ready);
-  $("#lobby-hint").textContent=this.isHost?"3人全員の準備後、各自が自分の駒を配置します。":"開始後、抽選された6体を1体ずつ配置します。";
+  $("#lobby-start").disabled=this.isHost&&!fourCanStart();
+  const humans=this.isHost?fourReadySeats().length+1:seats.filter(s=>s?.connected).length;
+  $("#lobby-hint").textContent=this.isHost
+    ?"ゲストが1人以上準備OKなら、不足席をCPUで埋めて開始できます。"
+    :`開始時は不足席をCPUが担当します。現在 ${humans}人参加中。`;
 };
 NET.lobbyBroadcast=function(){
   if(!fourPlayer)return NET2.lobbyBroadcast();
@@ -2411,7 +2423,7 @@ NET.handleHost=function(conn,m){
     if(safe){
       this.placements[seat]=safe;
       const done=this.placements.map((placement,index)=>placement?index:null).filter(index=>index!==null);
-      netSendAll({type:"placementProgress",done,total:4});$("#phase-label").textContent=`配置完了 ${done.length} / 4人`;
+      netSendAll({type:"placementProgress",done,total:4,cpuSeats:[...(this.cpuSeats||[])]});$("#phase-label").textContent=`配置完了 ${done.length} / 4人`;
       this.maybeBeginBattle();
     }
   }
@@ -2423,12 +2435,15 @@ NET.handleHost=function(conn,m){
 };
 NET.startMatch=function(){
   if(!fourPlayer)return NET2.startMatch();
-  if(!this.isHost||![1,2,3].every(i=>this.guests[i]?.connected&&this.guests[i]?.ready))return;
-  this.matchId=`m${Date.now().toString(36)}`;this.phase="setup";this.rosters=[clone(customRoster),...[1,2,3].map(i=>cleanRoster(this.guests[i].roster,fourPrefix(i)))];
+  if(!this.isHost||!fourCanStart())return;
+  const cpuSeats=[1,2,3].filter(i=>!this.guests[i]?.connected);
+  this.cpuSeats=new Set(cpuSeats);
+  this.matchId=`m${Date.now().toString(36)}`;this.phase="setup";this.rosters=[clone(customRoster),...[1,2,3].map(i=>this.cpuSeats.has(i)?cpuRosterForSeat(i):cleanRoster(this.guests[i].roster,fourPrefix(i)))];
   installOnlineCatalog(...this.rosters);
   this.queues=this.rosters.map((roster,owner)=>shuffle(roster.map((_,i)=>`${fourPrefix(owner)}${i}`)).slice(0,6));
   this.placements=[null,null,null,null];
-  for(let seat=1;seat<4;seat++)this.send(this.guestConns.get(seat),{type:"setupStart",matchId:this.matchId,rosters:this.rosters,queue:this.queues[seat]});
+  for(const seat of cpuSeats)this.placements[seat]=randomPlacementFor(seat,this.queues[seat]);
+  for(let seat=1;seat<4;seat++)if(!this.cpuSeats.has(seat))this.send(this.guestConns.get(seat),{type:"setupStart",matchId:this.matchId,rosters:this.rosters,queue:this.queues[seat],cpuSeats});
   gameMode="online";this.myIdx=0;beginPlacement(0,this.queues[0]);$("#battle-title").textContent="L-SHOGI・4人オンライン";
 };
 NET.submitPlacement=function(items){
@@ -2439,7 +2454,7 @@ NET.submitPlacement=function(items){
   if(this.isHost){
     this.placements[0]=safe;
     const done=this.placements.map((placement,index)=>placement?index:null).filter(index=>index!==null);
-    netSendAll({type:"placementProgress",done,total:4});$("#phase-label").textContent=`配置完了 ${done.length} / 4人`;
+    netSendAll({type:"placementProgress",done,total:4,cpuSeats:[...(this.cpuSeats||[])]});$("#phase-label").textContent=`配置完了 ${done.length} / 4人`;
     this.maybeBeginBattle();
   }
   else{this.sendAction("placement",{matchId:this.matchId,items:safe});$("#phase-label").textContent="ほかのプレイヤーを待っています";locked=true}
@@ -2450,18 +2465,19 @@ NET.maybeBeginBattle=function(){
   if(!this.isHost||!this.placements?.every(Boolean))return;
   const pieces=[];this.placements.forEach((list,owner)=>list.forEach((p,i)=>pieces.push(makePiece(p.type,owner,p.x,p.y,i))));
   state=createState({config:{playerCount:4},placements:pieces});
-  state.players.forEach((p,i)=>p.name=i===0?this.name:this.guests[i].name);
+  state.players.forEach((p,i)=>p.name=i===0?this.name:(this.cpuSeats?.has(i)?`CPU ${i}`:this.guests[i].name));
   beginResearchMatch(state,0);this.phase="battle";this.stateVer=0;gameMode="online";this.sendState("battleStart");this.enterOnlineBattle();setTimeout(()=>this.startRound(),700);
 };
 NET.sendState=function(type="state"){
   if(!fourPlayer)return NET2.sendState(type);
   if(!this.isHost||!state)return;this.stateVer++;
-  netSendAll({type,v:this.stateVer,matchId:this.matchId,phase:this.phase,game:packState(state),rosters:type==="battleStart"?this.rosters:undefined});
+  netSendAll({type,v:this.stateVer,matchId:this.matchId,phase:this.phase,game:packState(state),rosters:type==="battleStart"?this.rosters:undefined,cpuSeats:[...(this.cpuSeats||[])]});
 };
 NET.startRound=function(){
   if(!fourPlayer)return NET2.startRound();
   if(!this.isHost||this.paused||this.phase!=="battle"||state?.result?.over)return;
   clearTimeout(this._roundTimer);this.roundId++;this.commitments.clear();this.reveals.clear();this.inputReady.clear();locked=false;selected=normalizeSelection(selected);reserved=Move.wait(0);
+  for(const seat of this.cpuSeats||[])this.inputReady.add(seat);
   const duration=turnDurationMs();this.roundDeadline=Date.now()+duration;netSendAll({type:"round",id:this.roundId,duration});this.beginRoundLocal(duration);
   this._roundTimer=setTimeout(()=>this.requestReveal(),duration);
 };
@@ -2482,7 +2498,11 @@ NET.requestReveal=function(){
 NET.finishRound=function(){
   if(!fourPlayer)return NET2.finishRound();
   if(!this.isHost||this.phase!=="battle")return;
-  const moves=state.players.map((_,owner)=>{const reveal=this.reveals.get(owner),hash=this.commitments.get(owner);return reveal&&hash&&sealHash(movePlain(reveal.move,owner),reveal.nonce)===hash?new Move(movePlain(reveal.move,owner)):Move.wait(owner)});
+  const moves=state.players.map((_,owner)=>{
+    if(this.cpuSeats?.has(owner))return cpu.choose(state,owner);
+    const reveal=this.reveals.get(owner),hash=this.commitments.get(owner);
+    return reveal&&hash&&sealHash(movePlain(reveal.move,owner),reveal.nonce)===hash?new Move(movePlain(reveal.move,owner)):Move.wait(owner);
+  });
   const prevSelected=selected,prevReserved=reserved;
   const droppedId=prevReserved.kind==="drop"?state.players[myOwner()]?.hand[prevReserved.handIndex]?.id:null;
   const result=resolver.resolve(state,moves);recordResearchEvents(result.events,0);selected=selectionAfterTurn(prevSelected,prevReserved,droppedId);reserved=Move.wait(0);locked=true;renderBattle();showEvents(result.events);
@@ -2508,11 +2528,11 @@ NET.resumeGuest=function(conn){
   if(this.phase==="setup"){
     const seat=conn.__seat;
     this.send(conn,this.placements?.[seat]
-      ?{type:"autoSetupWait",matchId:this.matchId,rosters:this.rosters}
-      :{type:"setupStart",matchId:this.matchId,rosters:this.rosters,queue:this.queues[seat]});
+      ?{type:"autoSetupWait",matchId:this.matchId,rosters:this.rosters,cpuSeats:[...(this.cpuSeats||[])]}
+      :{type:"setupStart",matchId:this.matchId,rosters:this.rosters,queue:this.queues[seat],cpuSeats:[...(this.cpuSeats||[])]});
   }
-  if((this.phase==="battle"||this.phase==="ended")&&state)this.send(conn,{type:"state",v:++this.stateVer,matchId:this.matchId,phase:this.phase,game:packState(state),rosters:this.rosters});
-  const allBack=[1,2,3].every(i=>this.guests[i]?.connected);this.paused=!allBack;if(allBack)this.closeOverlay();
+  if((this.phase==="battle"||this.phase==="ended")&&state)this.send(conn,{type:"state",v:++this.stateVer,matchId:this.matchId,phase:this.phase,game:packState(state),rosters:this.rosters,cpuSeats:[...(this.cpuSeats||[])]});
+  const allBack=[1,2,3].every(i=>this.cpuSeats?.has(i)||this.guests[i]?.connected);this.paused=!allBack;if(allBack)this.closeOverlay();
   if(this.phase==="battle"&&allBack)setTimeout(()=>this.startRound(),500);
 };
 NET.startHeartbeat=function(){
