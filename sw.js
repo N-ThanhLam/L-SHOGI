@@ -1,7 +1,7 @@
 // Stable network-first service worker for L-SHOGI.
 // Normal releases can update index.html only; this worker fetches fresh HTML
 // when online and keeps a cached shell for offline launches.
-const CACHE_NAME = "l-shogi-runtime";
+const CACHE_NAME = "l-shogi-runtime-v2";
 const CACHE_PREFIX = "l-shogi-";
 const APP_SHELL = [
   "./",
