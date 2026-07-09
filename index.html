@@ -327,6 +327,15 @@ button{font:inherit}
 .move-from,.move-to{position:absolute;z-index:21;pointer-events:none;width:58px;height:58px;margin:-29px 0 0 -29px;display:grid;place-items:center;border:5px solid #172144;border-radius:10px;background:#fff3a8;color:#172144;font-size:34px;font-weight:1000;box-shadow:0 0 0 3px #fff,0 6px 0 #080d1d}
 .move-to{background:#8fffc8}
 .move-drop{background:#70eaff}
+.king-kill-cinematic{position:absolute;inset:0;z-index:44;pointer-events:none;overflow:hidden;background:radial-gradient(circle at var(--kx,50%) var(--ky,50%),#ffec6a55 0 10%,#ff315f33 18%,#05071199 58%,#050711cc 100%);animation:kingKillFade 1.55s ease-out both}
+.king-kill-cinematic:before{content:"";position:absolute;inset:-20px;background:linear-gradient(90deg,transparent,#ffffff22,transparent);animation:kingKillSlash .32s ease-out 2}
+.king-kill-line{position:absolute;height:22px;border-radius:999px;background:linear-gradient(90deg,#fff,#ffe978,#ff315f);box-shadow:0 0 0 6px #050711,0 0 30px #ff315f,0 0 42px #ffe978;transform-origin:0 50%;animation:kingKillLine .68s ease-out both}
+.king-kill-line:after{content:"";position:absolute;right:-34px;top:50%;transform:translateY(-50%);border-left:46px solid #ff315f;border-top:28px solid transparent;border-bottom:28px solid transparent;filter:drop-shadow(0 0 14px #ff315f)}
+.king-kill-origin,.king-kill-target{position:absolute;display:grid;place-items:center;border:7px solid #fff;border-radius:18px;box-shadow:0 10px 0 #050711,0 0 30px #fff;font-size:54px;font-weight:1000;transform:translate(-50%,-50%);animation:kingKillPop .9s ease-out both}
+.king-kill-origin{width:92px;height:92px;background:#101a33;color:#fff}
+.king-kill-target{width:132px;height:132px;background:linear-gradient(#fff176,#ff315f);color:#fff;text-shadow:0 4px 0 #7a061b;animation:kingKillCrown 1.05s ease-out both}
+.king-kill-burst{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);min-width:520px;text-align:center;border:9px solid #fff;border-radius:22px;background:linear-gradient(180deg,#ff315f,#7a061b);color:#fff;padding:18px 38px;font-size:68px;font-weight:1000;letter-spacing:0;text-shadow:0 6px 0 #4d0615;box-shadow:0 14px 0 #050711,0 0 42px #ff315f;animation:kingKillBanner 1.2s ease-out both}
+.king-kill-vs{display:block;margin-top:8px;color:#ffe978;font-size:34px;text-shadow:0 3px 0 #050711}
 .board .piece.selected{outline:8px solid #fff!important;outline-offset:5px;box-shadow:0 0 0 7px #57dfff,0 0 24px #57dfff,0 5px 0 #10182c!important;transform:scale(.96)}
 .board .cell.own-threat:not(.king-check):before{content:"危"!important;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:7;width:44px;height:44px;display:grid;place-items:center;border:3px solid #fff;border-radius:50%;background:#ff5d4a;color:#fff;padding:0;font-size:24px;font-weight:1000;text-shadow:0 2px 0 #882015;box-shadow:0 0 0 3px #882015,0 0 13px #ff5d4a}
 #setup-screen>.topbar{display:none}
@@ -352,6 +361,12 @@ button{font:inherit}
 #lobby-screen .lobby-wrap{inset:42px 170px 70px}
 .move-arrow.power2,.board .move-arrow.power2,.hand-piece .move-arrow.power2{transform:scale(1.18);text-shadow:0 0 4px #fff,0 0 12px currentColor,0 0 18px currentColor}
 .dirbtn.power2{background:linear-gradient(#ffe978,#ffb84a)!important;box-shadow:0 0 18px #ffcf4d!important}
+@keyframes kingKillFade{0%{opacity:0}10%,82%{opacity:1}100%{opacity:0}}
+@keyframes kingKillLine{0%{transform:scaleX(.03) rotate(var(--angle));opacity:0}15%,86%{opacity:1}100%{transform:scaleX(1) rotate(var(--angle));opacity:0}}
+@keyframes kingKillPop{0%{transform:translate(-50%,-50%) scale(.35);opacity:0}18%,82%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(.92);opacity:0}}
+@keyframes kingKillCrown{0%{transform:translate(-50%,-50%) scale(.3) rotate(-12deg);opacity:0}24%{transform:translate(-50%,-50%) scale(1.2) rotate(8deg);opacity:1}52%{transform:translate(-50%,-50%) scale(1) rotate(-4deg);opacity:1}100%{transform:translate(-50%,-50%) scale(1.35) rotate(0);opacity:0}}
+@keyframes kingKillBanner{0%,20%{transform:translate(-50%,-50%) scale(.7);opacity:0}36%,82%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(1.08);opacity:0}}
+@keyframes kingKillSlash{from{transform:translateX(-70%) skewX(-18deg)}to{transform:translateX(70%) skewX(-18deg)}}
 
 #title-screen{overflow:hidden;background:radial-gradient(circle at 78% 18%,#2f86ff66 0%,transparent 30%),radial-gradient(circle at 18% 86%,#ffcf4d4d 0%,transparent 28%),linear-gradient(135deg,#071126 0%,#111b3c 45%,#2b1846 100%)}
 #title-screen:before{content:"";position:absolute;inset:-90px;opacity:.22;background-image:linear-gradient(#ffffff22 2px,transparent 2px),linear-gradient(90deg,#ffffff22 2px,transparent 2px);background-size:86px 86px;transform:rotate(-7deg) scale(1.05)}
@@ -387,6 +402,19 @@ button{font:inherit}
 #title-screen .menu .primary{grid-column:auto;min-height:108px;font-size:35px}
 #title-screen .menu .primary span{display:block}
 #title-screen .menu .mode-on{background:linear-gradient(#eaffef,#7ee9a0);border-color:#2d9b62;color:#123d25}
+#guide-modal .modal-card{overflow:hidden}
+#guide-modal .guide-grid{gap:16px;margin:20px 0}
+#guide-modal .guide-item{min-height:132px;padding:18px 20px;background:linear-gradient(180deg,#f8fbff,#dfe8f8);border-color:#52658c;color:#172144;font-size:25px;line-height:1.28;text-shadow:none}
+#guide-modal .guide-item b{color:#22578f;font-size:30px;line-height:1.12;margin-bottom:7px;text-shadow:none}
+#battle-screen .hud-box:has(#event-log){max-height:none;min-height:214px;flex:0 0 232px;padding:13px 14px}
+#battle-screen #event-log{overflow:hidden!important;font-size:22px!important;line-height:1.25!important}
+#battle-screen .event-summary{gap:9px}
+#battle-screen .event-main{font-size:31px!important;line-height:1.08;color:#ffe978;text-shadow:0 3px 0 #050711}
+#battle-screen .event-lines{gap:6px}
+#battle-screen .event-line{border-left-width:8px;border-color:#57dfff;background:#101a33;color:#edf3ff;border-radius:9px;padding:5px 9px;font-size:20px!important;line-height:1.18;font-weight:1000}
+#battle-screen .event-line.important{border-color:#ff416d;background:#3c1723;color:#fff}
+#battle-screen .event-line.system{border-color:#ffd35a;background:#2b2540;color:#fff3b0}
+#battle-screen .event-more{font-size:17px;color:#c4cde6}
 
 </style></head>
 <body><div id="enter-gate">
@@ -494,14 +522,14 @@ button{font:inherit}
   </section>
 
   <div id="guide-modal" class="modal"><div class="panel modal-card"><h2>遊び方</h2><div class="guide-grid">
-    <div class="guide-item"><b>① 12体をカスタム</b>キャラクターと1マス移動できる方向を設定します。方向ストックは12体で共有します。</div>
-    <div class="guide-item"><b>② 3秒で予約</b>駒→移動先の順に選択。時間内なら何度でも変更できます。</div>
-    <div class="guide-item"><b>③ 同時に実行</b>互いの行動は時間終了まで見えません。移動経路の交差や交換は無視します。</div>
-    <div class="guide-item"><b>場所替え</b>移動先の味方を選ぶと位置を交換。押し出された味方も、敵と同じマスなら相打ちになります。</div>
-    <div class="guide-item"><b>④ ランダム配置</b>王は固定。12体から重複なしで選ばれた6体を、1体ずつ自陣へ配置します。</div>
-    <div class="guide-item"><b>⑤ 衝突と捕獲</b>2駒衝突は互いの通常駒を獲得。3駒以上なら全消滅し、誰の持ち駒にもなりません。王は何も捕れません。</div>
-    <div class="guide-item"><b>⑥ 最後の王が勝利</b>王手は警告表示のみで、強制応手はありません。王を失った勢力の残存駒は停止し、敵に取られると再利用されます。</div>
-    <div class="guide-item"><b>操作</b>クリックまたは方向キー＋決定。Escで予約を取り消します。</div>
+    <div class="guide-item"><b>① 駒を作る</b>12体にキャラと移動方向を割り振ります。同じ方向を重ねた駒は、その方向へ最大2マス進めます。</div>
+    <div class="guide-item"><b>② ランダム配置</b>王は自陣中央に固定。選ばれた6体を1体ずつ置き、全員の配置が終わるまで相手の配置は見えません。</div>
+    <div class="guide-item"><b>③ 行動を予約</b>駒を選び、行き先を選ぶと予約完了。時間内なら取消して選び直せます。</div>
+    <div class="guide-item"><b>④ 同時解決</b>全員の予約を同時に実行します。動いた元のマスは空き、到着したマスで捕獲・衝突・場所替えを判定します。</div>
+    <div class="guide-item"><b>⑤ 場所替え</b>移動先が味方なら、その味方と位置を交換します。2マス先の味方でも、選んだ相手とそのまま入れ替わります。</div>
+    <div class="guide-item"><b>⑥ 衝突と王</b>2勢力の通常駒が同じマスなら互いに持ち駒へ。3勢力以上なら全消滅。王は敵を捕れません。</div>
+    <div class="guide-item"><b>⑦ 王を失った後</b>勝利権は失いますが、盤上の駒は移動だけできます。敵マスへの移動、捕獲、持ち駒の使用はできません。</div>
+    <div class="guide-item"><b>⑧ 勝利と圧縮</b>最後に王が残った陣営が勝利。ターンが進むと盤面外側が圧縮され、範囲外の駒は消えます。</div>
   </div><div class="modal-actions"><button class="btn primary" data-action="close-modal">わかった</button></div></div></div>
 
   <div id="settings-modal" class="modal"><div class="panel modal-card"><h2>設定</h2>
@@ -671,15 +699,17 @@ class Rules {
   isLegal(state,move) {
     if(!move || move.kind==="wait") return true;
     if(move.player<0 || move.player>=state.players.length || !inside(move.to?.x,move.to?.y,state.board.size)) return false;
-    // 王を失った陣営は盤上に駒を残すが、一切行動できない。
-    if(!hasKing(state,move.player)) return false;
+    const alive=hasKing(state,move.player);
     if(move.kind==="drop") {
+      if(!alive)return false;
       return this.config.allowDrops && Number.isInteger(move.handIndex) &&
         !!state.players[move.player].hand[move.handIndex] && !state.board.at(move.to.x,move.to.y);
     }
     const piece=state.board.get(move.pieceId);
-    return !!piece && piece.owner===move.player &&
-      this.destinations(state.board,piece).some(pos=>pos.x===move.to.x && pos.y===move.to.y);
+    if(!piece||piece.owner!==move.player)return false;
+    const target=state.board.at(move.to.x,move.to.y);
+    if(!alive&&target&&target.owner!==move.player)return false;
+    return this.destinations(state.board,piece).some(pos=>pos.x===move.to.x && pos.y===move.to.y);
   }
   winner(state) {
     const alive=state.players.map((_,owner)=>hasKing(state,owner));
@@ -760,7 +790,7 @@ class SimultaneousResolver {
           attackers.forEach((victim,index)=>{
             const captor=Array.from({length:attackers.length},(_,step)=>attackers[(index+step+1)%attackers.length])
               .find(actor=>actor.player!==victim.player);
-            const held=toHand(victim.piece,captor?.player);
+            const held=toHand(victim.piece,captor?.player,state);
             if(captor&&held){state.players[captor.player].hand.push(held);capturedBy.get(captor).push(victim.piece)}
           });
           attackers.forEach(actor=>events.push({type:"collision",player:actor.player,piece:actor.piece,captured:capturedBy.get(actor),from:{x:actor.piece.x,y:actor.piece.y},to:actor.move.to}));
@@ -776,7 +806,7 @@ class SimultaneousResolver {
       group.forEach((victim,index)=>{
         const captor=Array.from({length:group.length},(_,step)=>group[(index+step+1)%group.length])
           .find(actor=>actor.player!==victim.player);
-        const held=toHand(victim.piece,captor?.player);
+        const held=toHand(victim.piece,captor?.player,state);
         if(captor&&held){state.players[captor.player].hand.push(held);capturedBy.get(captor).push(victim.piece)}
       });
       group.forEach(actor=>events.push({type:"collision",player:actor.player,piece:actor.piece,captured:capturedBy.get(actor),from:{x:actor.piece.x,y:actor.piece.y},to:actor.move.to}));
@@ -800,8 +830,8 @@ class SimultaneousResolver {
           });
           continue;
         }
-        const heldForTarget=toHand(actor.piece,targetBefore.owner);
-        const heldForActor=toHand(targetBefore,actor.player);
+        const heldForTarget=toHand(actor.piece,targetBefore.owner,state);
+        const heldForActor=toHand(targetBefore,actor.player,state);
         if(heldForTarget)state.players[targetBefore.owner].hand.push(heldForTarget);
         if(heldForActor)state.players[actor.player].hand.push(heldForActor);
         events.push({
@@ -824,7 +854,7 @@ class SimultaneousResolver {
       }
       if(targetBefore && !targetLeaves && targetBefore.owner!==actor.player) {
         next.remove(targetBefore.id);
-        const held=toHand(targetBefore,actor.player);
+        const held=toHand(targetBefore,actor.player,state);
         if(held)state.players[actor.player].hand.push(held);
         events.push({type:"capture",player:actor.player,piece:actor.piece,captured:[targetBefore],from:actor.move.kind==="move"?{x:actor.piece.x,y:actor.piece.y}:null,to:actor.move.to});
       }
@@ -841,8 +871,9 @@ class SimultaneousResolver {
   }
 }
 
-function toHand(piece,newOwner) {
+function toHand(piece,newOwner,state=null) {
   if(!piece||piece.type==="king"||!Number.isInteger(newOwner))return null;
+  if(state&&!hasKing(state,newOwner))return null;
   return {id:`h-${piece.type}-${cryptoId()}`,type:piece.type,owner:newOwner,x:null,y:null};
 }
 function cryptoId() {
@@ -897,17 +928,16 @@ class TacticalCPU {
     return 170+directions*155;
   }
   legalMoves(state,player) {
-    if(!hasKing(state,player))return [Move.wait(player)];
     const legal=[];
     for(const piece of state.board.list(player)) {
       for(const to of this.rules.destinations(state.board,piece)) legal.push(new Move({player,kind:"move",pieceId:piece.id,to}));
     }
-    state.players[player].hand.forEach((_,handIndex)=>{
+    if(hasKing(state,player))state.players[player].hand.forEach((_,handIndex)=>{
       for(let y=0;y<state.board.size;y++) for(let x=0;x<state.board.size;x++)
         if(!state.board.at(x,y)) legal.push(new Move({player,kind:"drop",handIndex,to:{x,y}}));
     });
     legal.push(Move.wait(player));
-    return legal;
+    return legal.filter(move=>this.rules.isLegal(state,move));
   }
   copyState(state) {
     return {
@@ -1081,7 +1111,7 @@ class TacticalCPU {
       .map(item=>item.move);
   }
   choose(state,player=1) {
-    if(!hasKing(state,player))return Move.wait(player);
+    if(!hasKing(state,player))return this.chooseFleeMove(state,player);
     const actionable=this.legalMoves(state,player).filter(move=>move.kind!=="wait");
     if(!actionable.length)return Move.wait(player);
     const emergency=this.emergencyKingMoves(state,player,actionable);
@@ -1108,6 +1138,25 @@ class TacticalCPU {
       if(score>bestScore){bestScore=score;best=move}
     }
     return best;
+  }
+  chooseFleeMove(state,player){
+    const moves=this.legalMoves(state,player).filter(move=>move.kind==="move");
+    if(!moves.length)return Move.wait(player);
+    const enemies=state.board.list().filter(piece=>piece.owner!==player&&hasKing(state,piece.owner));
+    const rule=this.compressionRuleForThinking(state);
+    const scoreMove=move=>{
+      const piece=state.board.get(move.pieceId);
+      if(!piece)return -Infinity;
+      let nearest=enemies.length?Math.min(...enemies.map(enemy=>Math.abs(move.to.x-enemy.x)+Math.abs(move.to.y-enemy.y))):4;
+      let score=nearest*120;
+      if(rule)score-=compressionDistance(move.to,rule)*260;
+      if(rule&&insideCompression(move.to,rule))score+=180;
+      const target=state.board.at(move.to.x,move.to.y);
+      if(target?.owner===player)score+=25;
+      score+=this.random()*.01;
+      return score;
+    };
+    return moves.sort((a,b)=>scoreMove(b)-scoreMove(a))[0]||Move.wait(player);
   }
 }
 
@@ -1352,9 +1401,10 @@ function normalizeSelection(sel=selected, s=state, owner=myOwner()){
   if(!sel||!s||!s.players?.[owner])return null;
   if(sel.kind==="board"){
     const piece=s.board.get(sel.pieceId);
-    return piece&&piece.owner===owner&&hasKing(s,owner)?{kind:"board",pieceId:piece.id}:null;
+    return piece&&piece.owner===owner?{kind:"board",pieceId:piece.id}:null;
   }
   if(sel.kind==="hand"){
+    if(!hasKing(s,owner))return null;
     return s.players[owner].hand[sel.handIndex]?{kind:"hand",handIndex:sel.handIndex}:null;
   }
   return null;
@@ -1500,6 +1550,12 @@ function renderOnlineInputStatus(){
   committed.forEach(owner=>document.querySelector(`[data-hand-owner="${owner}"]`)?.classList.add("input-ready"));
   const alive=state.players.map((_,owner)=>hasKing(state,owner)).filter(Boolean).length;
   if(NET.phase==="battle"&&!locked)$("#phase-label").textContent=phaseText(`入力受付中 ${committed.size} / ${alive}`);
+}
+function clearOnlineRuntimeCache(){
+  try{
+    if(window.caches)caches.keys().then(names=>Promise.all(names.map(name=>caches.delete(name)))).then(()=>{window.LSHOGI_PWA_STATUS&&(window.LSHOGI_PWA_STATUS.cacheNames=[])}).catch(()=>{});
+    navigator.serviceWorker?.getRegistrations?.().then(regs=>regs.forEach(reg=>{try{reg.update()}catch{}})).catch(()=>{});
+  }catch{}
 }
 function renderFactionStatus(threats){
   const box=$("#faction-status"),mine=myOwner(),colors=["青","赤","緑","黄"];
@@ -1797,6 +1853,7 @@ function renderEventOverlay(board){
       cell.append(el);
     }
     cell.onclick=()=>boardClick(x,y);
+    cell.onpointerup=e=>{if(e.pointerType==="touch"){e.preventDefault();boardClick(x,y)}};
     board.append(cell);
   }
   $("#turn-label").textContent=`第${state.turn}ターン`;
@@ -1840,8 +1897,9 @@ function renderHand(){
     const b=document.createElement("button");
     b.className=`hand-piece ${owner===mine&&selected?.kind==="hand"&&selected.handIndex===index?"selected":""}`;
     b.append(pieceElement(p.type,owner,false));
-    if(owner===mine)b.onclick=()=>{if(!locked){selected={kind:"hand",handIndex:index};tone(520);renderBattle()}};
-    else{b.disabled=true;b.title=`${colors[owner]}勢力の持ち駒（確認専用）`}
+    const pickHand=()=>{if(!locked){selected={kind:"hand",handIndex:index};tone(520);renderBattle()}};
+    if(owner===mine&&hasKing(state,mine)){b.onclick=pickHand;b.onpointerup=e=>{if(e.pointerType==="touch"){e.preventDefault();pickHand()}}}
+    else{b.disabled=true;b.title=owner===mine?"王を失ったため持ち駒は使えません":`${colors[owner]}勢力の持ち駒（確認専用）`}
     parent.append(b);
   };
   if(handViewOwner===null){
@@ -1977,9 +2035,9 @@ function logLineForEvent(event){
   return {text:`${actor}の${piece}が${route}へ移動`,important:false};
 }
 function eventMainText(events){
+  if(events.some(e=>eventKind(e)==="king"))return "王が撃破されました";
   const compression=events.find(e=>e.type==="compression");
   if(compression)return `圧縮で${compression.count}駒が消滅`;
-  if(events.some(e=>eventKind(e)==="king"))return "王が撃破されました";
   const captures=events.filter(e=>e.type==="capture").length;
   const collisions=new Set(events.filter(e=>e.type==="collision").map(e=>eventPos(e.to))).size;
   const annihilations=new Set(events.filter(e=>e.type==="annihilation").map(e=>eventPos(e.to))).size;
@@ -1996,7 +2054,7 @@ function eventMainText(events){
 function renderEventLog(events){
   const box=$("#event-log");
   if(!events?.length){
-    box.textContent="両者とも待機しました。";
+    box.innerHTML=`<div class="event-summary"><div class="event-main">待機</div><div class="event-lines"><div class="event-line">全員がその場で様子を見ました</div></div></div>`;
     return;
   }
   const seen=new Set(),lines=[];
@@ -2006,10 +2064,53 @@ function renderEventLog(events){
     seen.add(line.text);
     lines.push(line);
   }
-  const visible=lines.slice(0,5);
+  const priority=line=>line.important?0:line.system?1:2;
+  const visible=[...lines].sort((a,b)=>priority(a)-priority(b)).slice(0,4);
   const rows=visible.map(line=>`<div class="event-line ${line.important?"important":line.system?"system":""}">${line.text}</div>`).join("");
   const more=lines.length>visible.length?`<div class="event-more">ほか ${lines.length-visible.length} 件</div>`:"";
   box.innerHTML=`<div class="event-summary"><div class="event-main">${eventMainText(events)}</div><div class="event-lines">${rows}</div>${more}</div>`;
+}
+function showKingKillCinematic(events){
+  const event=(events||[]).find(e=>eventKind(e)==="king");
+  const board=$("#battle-board");
+  if(!event||!board||!event.to)return false;
+  board.querySelector(".king-kill-cinematic")?.remove();
+  const cellSize=(board.clientWidth||1000)/7;
+  const center=({x,y})=>{
+    const [vx,vy]=worldToView(x,y);
+    return {x:vx*cellSize+cellSize/2,y:vy*cellSize+cellSize/2};
+  };
+  const to=center(event.to);
+  const from=event.from?center(event.from):{x:to.x,y:to.y+cellSize*1.35};
+  const dx=to.x-from.x,dy=to.y-from.y,len=Math.max(1,Math.hypot(dx,dy));
+  const trim=Math.min(cellSize*.42,len/3);
+  const sx=from.x+dx/len*trim,sy=from.y+dy/len*trim;
+  const layer=document.createElement("div");
+  layer.className="king-kill-cinematic";
+  layer.style.setProperty("--kx",`${to.x}px`);
+  layer.style.setProperty("--ky",`${to.y}px`);
+  const line=document.createElement("div");
+  line.className="king-kill-line";
+  line.style.left=`${sx}px`;line.style.top=`${sy-11}px`;
+  line.style.width=`${Math.max(42,len-trim*2)}px`;
+  line.style.setProperty("--angle",`${Math.atan2(dy,dx)}rad`);
+  const origin=document.createElement("div");
+  origin.className=`king-kill-origin owner-${event.player??0}`;
+  origin.textContent=pieceName(event.piece);
+  origin.style.left=`${from.x}px`;origin.style.top=`${from.y}px`;
+  const target=document.createElement("div");
+  target.className="king-kill-target";
+  target.textContent="👑";
+  target.style.left=`${to.x}px`;target.style.top=`${to.y}px`;
+  const burst=document.createElement("div");
+  const victim=event.captured?.find(piece=>piece.type==="king");
+  burst.className="king-kill-burst";
+  burst.innerHTML=`王撃破<span class="king-kill-vs">${pieceName(event.piece)} → ${eventOwnerName(victim?.owner??0).split(" ")[0]}王</span>`;
+  layer.append(line,origin,target,burst);
+  board.append(layer);
+  [180,300,420,620].forEach((delay,i)=>setTimeout(()=>tone(i%2?140:520,.12),delay));
+  setTimeout(()=>layer.remove(),1700);
+  return true;
 }
 function recordTurnSummary(events){
   matchStats.turns=Math.max(matchStats.turns,state?.turn?state.turn-1:matchStats.turns+1);
@@ -2027,21 +2128,17 @@ function resolveTurn(){
   const moves=[reserved,...state.players.slice(1).map((_,owner)=>cpu.choose(state,owner+1))];
   const result=resolver.resolve(state,moves);
   recordResearchEvents(result.events,0);
-  selected=selectionAfterTurn(prevSelected,prevReserved,droppedId);reserved=Move.wait(0);renderBattle();showEvents(result.events);flash("GO");
-  if(result.result.over){setTimeout(showResult,700);return}
+  selected=selectionAfterTurn(prevSelected,prevReserved,droppedId);reserved=Move.wait(0);renderBattle();showEvents(result.events);
+  const kingKilled=result.events.some(e=>eventKind(e)==="king");
+  if(!kingKilled)flash("GO");
+  if(result.result.over){setTimeout(showResult,kingKilled?1500:700);return}
   locked=false;$("#phase-label").textContent="入力受付中";
   setTimeout(()=>{if(!locked&&!state.result.over)timer.start()},650);
 }
 function showEvents(events){
   recordTurnSummary(events||[]);
-  const compression=events.find(e=>e.type==="compression");
-  if(compression){$("#event-log").textContent=`圧縮エリア外の${compression.count}駒が消滅しました。`;return}
-  if(!events.length){$("#event-log").textContent="両者とも待機しました。";return}
-  const annihilation=events.find(e=>e.type==="annihilation");
-  const collision=events.some(e=>e.type==="collision");
-  const capture=events.find(e=>e.type==="capture");
-  const swap=events.some(e=>e.type==="swap");
-  $("#event-log").textContent=annihilation?`${annihilation.count}駒が集中衝突！ 全駒が消滅しました。`:collision?"2駒が衝突！ 互いの通常駒が持ち駒になります。":capture?`${PIECE_CATALOG[capture.captured[0].type].name}を取りました。`:swap?"味方同士が場所替えしました。":"予約した手が同時に実行されました。";
+  renderEventLog(events||[]);
+  showKingKillCinematic(events||[]);
 }
 function renderResultResearch(){
   const box=$("#result-research");if(!box)return;
@@ -2273,6 +2370,7 @@ const NET={
     this._hb=this._watch=this._roundClock=this._roundTimer=this._cpuTakeoverTimer=null;this._latency=null;
   },
   open(){
+    clearOnlineRuntimeCache();
     this.reset();gameMode="online";this._intentional=false;
     show("online-screen");this.message("");
     try{const s=JSON.parse(localStorage.getItem("lshogi-net-prefs")||"{}");$("#net-keyword").value=s.keyword||"";$("#net-name").value=s.name||""}catch{}
@@ -2408,7 +2506,7 @@ const NET={
     const droppedId=prevReserved.kind==="drop"?state.players[myOwner()]?.hand[prevReserved.handIndex]?.id:null;
     const result=resolver.resolve(state,moves);recordResearchEvents(result.events,0);selected=selectionAfterTurn(prevSelected,prevReserved,droppedId);reserved=Move.wait(0);locked=true;renderBattle();showEvents(result.events);
     this.send(this.guestConn,{type:"roundResult",v:++this.stateVer,roundId:this.roundId,game:packState(state),commits:Object.fromEntries(this.commitments),reveals:Object.fromEntries(this.reveals)});
-    if(state.result.over){this.phase="ended";showResult();return}
+    if(state.result.over){this.phase="ended";setTimeout(showResult,result.events.some(e=>eventKind(e)==="king")?1500:0);return}
     setTimeout(()=>this.startRound(),650);
   },
   resign(){
@@ -2437,7 +2535,7 @@ const NET={
     if(Number.isFinite(m.seq)){if(m.seq<=this.guest.lastSeq)return;this.guest.lastSeq=m.seq}
     if(m.kind==="ready"&&(this.phase==="idle"||this.phase==="lobby")){this.phase="lobby";this.guest.ready=!!m.ready;this.guest.roster=cleanRoster(m.roster,"e");this.lobbyBroadcast()}
     else if(m.kind==="placement"&&this.phase==="setup"&&m.matchId===this.matchId){const safe=validPlacement(m.items,1,this.queues[1]);if(safe){this.placements[1]=safe;this.maybeBeginBattle()}}
-    else if(m.kind==="commit"&&this.phase==="battle"&&m.roundId===this.roundId&&Date.now()<=(this.roundDeadline||0)+300){this.commitments.set(1,String(m.hash));if(m.input)this.inputReady.add(1);this.send(this.guestConn,{type:"commitNotice",roundId:this.roundId,owner:1,hash:String(m.hash),input:!!m.input});renderBattle();}
+    else if(m.kind==="commit"&&this.phase==="battle"&&m.roundId===this.roundId&&Date.now()<=(this.roundDeadline||0)+300){this.commitments.set(1,String(m.hash));if(m.input)this.inputReady.add(1);this.send(this.guestConn,{type:"commitNotice",roundId:this.roundId,owner:1,hash:String(m.hash),input:!!m.input});renderOnlineInputStatus();}
     else if(m.kind==="reveal"&&this.phase==="battle"&&m.roundId===this.roundId){this.reveals.set(1,{move:movePlain(m.move,1),nonce:String(m.nonce||"")})}
     else if(m.kind==="resign"&&this.phase==="battle"){state.result={over:true,winner:0,draw:false};this.phase="ended";this.sendState("state");showResult()}
     else if(m.kind==="requestLobby"&&this.phase==="ended")this.returnLobby();
@@ -2478,7 +2576,7 @@ const NET={
     if(m.type==="round"){
       this.roundId=m.id;this.phase="battle";this.commitments.clear();this.reveals.clear();this.beginRoundLocal(m.duration||turnDurationMs());return;
     }
-    if(m.type==="commitNotice"&&!locked&&m.roundId===this.roundId){this.commitments.set(m.owner,m.hash);if(m.input)this.inputReady.add(+m.owner);renderBattle();return}
+    if(m.type==="commitNotice"&&m.roundId===this.roundId){this.commitments.set(m.owner,m.hash);if(m.input)this.inputReady.add(+m.owner);renderOnlineInputStatus();return}
     if(m.type==="revealRequest"){
       if(m.roundId!==this.roundId)return;locked=true;clearInterval(this._roundClock);$("#phase-label").textContent="手を開示中";this.revealLocal();return;
     }
@@ -2488,7 +2586,7 @@ const NET={
       if(hostReveal&&hostCommit&&sealHash(movePlain(hostReveal.move,0),hostReveal.nonce)!==hostCommit)this.showOverlay("同期エラー","ホストの封印手を検証できませんでした。",[["退室",()=>this.leave()]]);
       const prevSelected=selected,prevReserved=reserved;
       const droppedId=prevReserved.kind==="drop"?state?.players?.[myOwner()]?.hand[prevReserved.handIndex]?.id:null;
-      state=unpackState(m.game);recordResearchEvents(state.lastEvents||[],this.myIdx);selected=selectionAfterTurn(prevSelected,prevReserved,droppedId);locked=true;renderBattle();showEvents(state.lastEvents||[]);if(state.result.over){this.phase="ended";showResult()}return;
+      state=unpackState(m.game);recordResearchEvents(state.lastEvents||[],this.myIdx);selected=selectionAfterTurn(prevSelected,prevReserved,droppedId);locked=true;renderBattle();showEvents(state.lastEvents||[]);if(state.result.over){this.phase="ended";setTimeout(showResult,(state.lastEvents||[]).some(e=>eventKind(e)==="king")?1500:0)}return;
     }
     if(m.type==="pause"){this.paused=true;locked=true;clearInterval(this._roundClock);this.showOverlay("通信待機",`${m.name||"参加者"}の再接続を待っています。`,[["退室",()=>this.leave()]])}
     if(m.type==="resume"){this.paused=false;if(m.cpuSeats)this.cpuSeats=new Set(m.cpuSeats);this.closeOverlay()}
@@ -2592,13 +2690,15 @@ NET.handleHost=function(conn,m){
   if(m.type==="pong"){conn.__latency=Date.now()-(+m.t||Date.now());renderOnlineInputStatus();return}
   if(m.type==="hello"){
     if(m.ver!==NET_VER){this.send(conn,{type:"reject",reason:"ゲームのバージョンが違います"});return}
-    let seat=[1,2,3].find(i=>!this.cpuSeats?.has(i)&&this.guests[i]?.token&&m.token===this.guests[i].token&&(!m.session||m.session===this.hostSession));
+    let seat=[1,2,3].find(i=>this.guests[i]?.token&&m.token===this.guests[i].token&&(!m.session||m.session===this.hostSession));
     const reconnect=!!seat;
+    if(reconnect)this.cpuSeats?.delete(seat);
     if(!seat){const open=shuffle([1,2,3].filter(i=>!this.guests[i]?.connected&&!this.cpuSeats?.has(i)));seat=open[0]}
     if(!seat){this.send(conn,{type:"reject",reason:"4人揃っています"});return}
     if(this.phase!=="idle"&&this.phase!=="lobby"&&!reconnect){this.send(conn,{type:"reject",reason:"対戦はすでに始まっています"});return}
     const old=this.guests[seat]||{};
     this.guests[seat]={...old,name:String(m.name||`ゲスト${seat}`).slice(0,12),ready:reconnect?!!old.ready:false,connected:true,token:reconnect?old.token:netToken(),roster:cleanRoster(m.roster,fourPrefix(seat)),lastSeq:0};
+    if(reconnect&&state?.players?.[seat])state.players[seat].name=this.guests[seat].name;
     conn.__seat=seat;this.guestConns.set(seat,conn);conn.__rx=Date.now();
     this.send(conn,{type:"welcome",playerCount:4,idx:seat,token:this.guests[seat].token,session:this.hostSession,reconnected:reconnect,phase:this.phase,hostName:this.name});
     this.lobbyBroadcast();if(reconnect)this.resumeGuest(conn);return;
@@ -2616,7 +2716,7 @@ NET.handleHost=function(conn,m){
       this.maybeBeginBattle();
     }
   }
-  else if(m.kind==="commit"&&this.phase==="battle"&&m.roundId===this.roundId&&Date.now()<=(this.roundDeadline||0)+300){this.commitments.set(seat,String(m.hash));if(m.input)this.inputReady.add(seat);netSendAll({type:"commitNotice",roundId:this.roundId,owner:seat,hash:String(m.hash),input:!!m.input});renderBattle();}
+  else if(m.kind==="commit"&&this.phase==="battle"&&m.roundId===this.roundId&&Date.now()<=(this.roundDeadline||0)+300){this.commitments.set(seat,String(m.hash));if(m.input)this.inputReady.add(seat);netSendAll({type:"commitNotice",roundId:this.roundId,owner:seat,hash:String(m.hash),input:!!m.input});renderOnlineInputStatus();}
   else if(m.kind==="reveal"&&this.phase==="battle"&&m.roundId===this.roundId)this.reveals.set(seat,{move:movePlain(m.move,seat),nonce:String(m.nonce||"")});
   else if(m.kind==="resign"&&this.phase==="battle"){const king=state.board.list(seat).find(p=>p.type==="king");if(king)state.board.remove(king.id);state.result=rules.winner(state);if(state.result.over)this.phase="ended";this.sendState("state");if(state.result.over)showResult()}
   else if(m.kind==="requestLobby"&&this.phase==="ended")this.returnLobby();
@@ -2696,7 +2796,7 @@ NET.finishRound=function(){
   const droppedId=prevReserved.kind==="drop"?state.players[myOwner()]?.hand[prevReserved.handIndex]?.id:null;
   const result=resolver.resolve(state,moves);recordResearchEvents(result.events,0);selected=selectionAfterTurn(prevSelected,prevReserved,droppedId);reserved=Move.wait(0);locked=true;renderBattle();showEvents(result.events);
   const packet={type:"roundResult",v:++this.stateVer,roundId:this.roundId,game:packState(state),commits:Object.fromEntries(this.commitments),reveals:Object.fromEntries(this.reveals)};
-  netSendAll(packet);if(state.result.over){this.phase="ended";showResult();return}setTimeout(()=>this.startRound(),650);
+  netSendAll(packet);if(state.result.over){this.phase="ended";setTimeout(showResult,result.events.some(e=>eventKind(e)==="king")?1500:0);return}setTimeout(()=>this.startRound(),650);
 };
 NET.resign=function(){
   if(!fourPlayer)return NET2.resign();
