@@ -44,6 +44,11 @@ button{font:inherit}
 .king-danger-banner.show{display:block;animation:dangerBanner .3s infinite alternate}
 .king-danger-banner b{display:block;font-size:60px;line-height:.95}
 .king-danger-banner span{display:block;font-size:28px;margin-top:5px}
+.compression-alert-screen:before{content:"";position:absolute;inset:0;z-index:36;pointer-events:none;background:radial-gradient(circle at 50% 50%,transparent 42%,#ffb84a44 62%,#ff315f66 100%);animation:compressionWash .62s infinite alternate}
+.compression-alert-banner{display:none;position:absolute;left:50%;top:182px;z-index:46;transform:translateX(-50%);min-width:700px;border:7px solid #fff;border-radius:18px;background:linear-gradient(180deg,#ffcf4d,#bd5b18);color:#241100;text-align:center;padding:11px 30px;box-shadow:0 10px 0 #4b250b,0 0 34px #ffcf4d;font-weight:1000;text-shadow:0 2px 0 #fff6;pointer-events:none}
+.compression-alert-banner.show{display:block;animation:compressionBanner .38s infinite alternate}
+.compression-alert-banner b{display:block;font-size:50px;line-height:.95}
+.compression-alert-banner span{display:block;font-size:27px;margin-top:5px}
 .piece{position:relative;width:92%;height:92%;display:grid;place-items:center;border-radius:22px;border:4px solid #fff;box-shadow:0 5px 0 #28334e,0 0 18px #fff6;font-family:"Segoe UI Emoji","Yu Gothic UI",sans-serif;font-weight:900;color:#10182c;z-index:2}.piece.owner-0{background:linear-gradient(145deg,#e7f8ff,#559aca);border-color:#9ce8ff;box-shadow:0 5px 0 #23516f,0 0 18px #4edbff99}.piece.owner-1{background:linear-gradient(145deg,#ffe9ee,#c65c72);border-color:#ff9cb1;box-shadow:0 5px 0 #732c3c,0 0 18px #ff527899}.piece.owner-2{background:linear-gradient(145deg,#e6ffe9,#55aa70);border-color:#8dffaa;box-shadow:0 5px 0 #24613a,0 0 18px #55ef8599}.piece.owner-3{background:linear-gradient(145deg,#fff8cf,#d7a82d);border-color:#ffe878;box-shadow:0 5px 0 #765a16,0 0 18px #ffd84eaa}.piece.king{outline:5px double #fff2a4;outline-offset:-9px}.piece.selected{outline:8px solid #fff;outline-offset:4px;filter:drop-shadow(0 0 14px #fff)}.piece.reserved{filter:drop-shadow(0 0 13px #fff)}
 .move-map{position:absolute;inset:3px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);align-items:center;justify-items:center}.move-arrow{font-family:"Segoe UI Symbol",sans-serif;font-size:25px;line-height:1;font-weight:1000;text-shadow:0 0 3px #fff,0 0 9px currentColor}.owner-0 .move-arrow{color:#004b70}.owner-1 .move-arrow{color:#76132b}.owner-2 .move-arrow{color:#075b2b}.owner-3 .move-arrow{color:#694c00}.move-avatar{font-size:43px;line-height:1;filter:drop-shadow(0 2px 1px #fff)}.king .move-arrow{text-shadow:0 0 3px #fff,0 0 8px #fff0a0}
 .direction-key{border:4px solid #4d638c;border-radius:16px;background:#101a33;color:#fff;padding:12px 15px;font-size:24px;font-weight:900;line-height:1.32}.faction-key{display:grid;grid-template-columns:1fr 1fr;gap:5px}.faction-key span,.faction-pill{border-radius:8px;padding:5px 8px;color:#10182c;font-weight:1000}.f0{background:#73d9ff}.f1{background:#ff7995}.f2{background:#70e995}.f3{background:#ffe063}.faction-status{display:grid;grid-template-columns:1fr 1fr;gap:8px}.faction-pill{position:relative;min-height:104px;border:3px solid #ffffffaa;cursor:pointer;text-align:left;display:grid;grid-template-rows:auto auto 1fr;gap:2px}.faction-pill .fp-name{font-size:22px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.faction-pill .fp-state{font-size:24px;line-height:1.1}.faction-pill .fp-metrics{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:3px}.faction-pill .fp-metrics span{background:#ffffff99;border-radius:7px;padding:2px 5px;font-size:18px;text-align:center}.faction-pill.active{outline:5px solid #fff;box-shadow:0 0 15px #fff}.faction-pill.dead{filter:grayscale(1);opacity:.45}.faction-pill.input-ready{outline:5px solid #73ff9a;box-shadow:0 0 18px #50ff84}.faction-pill.input-ready:before{content:"入力済";position:absolute;left:6px;top:-12px;border:3px solid #fff;border-radius:10px;background:#26c95d;color:#fff;padding:1px 7px;font-size:20px;font-weight:1000;text-shadow:0 2px 0 #0d682b}.faction-pill.check{background:linear-gradient(#ffec70,#ff315f)!important;color:#fff;text-shadow:0 2px 0 #8a1028;border-color:#fff;box-shadow:0 0 22px #ff416d;animation:checkPulse .72s infinite alternate}.faction-pill.check .fp-metrics span{background:#ffffffcc;color:#771328;text-shadow:none}.faction-pill.check:after{content:"王手!";position:absolute;right:6px;top:-12px;border:3px solid #fff;border-radius:10px;background:#ff2f5f;color:#fff;padding:1px 7px;font-size:22px;font-weight:1000}
@@ -105,6 +110,8 @@ button{font:inherit}
 @keyframes kingShake{from{transform:translateX(-2px)}to{transform:translateX(2px)}}
 @keyframes dangerWash{from{opacity:.48}to{opacity:1}}
 @keyframes dangerBanner{from{transform:translateX(-50%) scale(.985)}to{transform:translateX(-50%) scale(1.025)}}
+@keyframes compressionWash{from{opacity:.42}to{opacity:.9}}
+@keyframes compressionBanner{from{transform:translateX(-50%) scale(.99)}to{transform:translateX(-50%) scale(1.018)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* Readability pass: restore the darker board feel and remove text from board cells. */
@@ -517,6 +524,7 @@ button{font:inherit}
     </div>
     <div id="count-flash" class="count-flash">GO</div>
     <div id="king-danger-banner" class="king-danger-banner"><b>王が危険！</b><span id="king-danger-text">次に取られる可能性があります</span></div>
+    <div id="compression-alert-banner" class="compression-alert-banner"><b>盤面縮小！</b><span id="compression-alert-text">外周が消えます</span></div>
     <div id="research-toast" class="research-toast"></div>
     <div id="result-overlay" class="result-overlay"><div class="panel result-card"><h2 id="result-title">勝利</h2><p id="result-text"></p><div id="result-stats" class="result-stats"></div><div id="result-research" class="result-research"></div><button class="btn primary" data-action="rematch">もう一度</button><button class="btn" data-action="result-research">研究を見る</button><button class="btn" data-action="title">タイトルへ</button></div></div>
   </section>
@@ -1396,6 +1404,7 @@ let customEntrySnapshot=null;
 let gameMode="cpu",setupOwner=0;
 let matchStats={turns:0,captures:0,collisions:0,annihilations:0,drops:0,swaps:0,compressions:0};
 let fourPlayer=localStorage.getItem("l-shogi-four-player")==="1";
+let lastCompressionAlertKey="";
 const myOwner=()=>gameMode==="online"&&typeof NET!=="undefined"?NET.myIdx:0;
 function normalizeSelection(sel=selected, s=state, owner=myOwner()){
   if(!sel||!s||!s.players?.[owner])return null;
@@ -1460,6 +1469,8 @@ function tone(freq=520,duration=.07){
 function clearKingDangerAlert(){
   $("#battle-screen")?.classList.remove("king-danger-screen");
   $("#king-danger-banner")?.classList.remove("show");
+  $("#battle-screen")?.classList.remove("compression-alert-screen");
+  $("#compression-alert-banner")?.classList.remove("show");
   clearTimeout(dangerAlertTimer);dangerAlertTimer=null;
 }
 function kingThreatMap(s=state){
@@ -1517,6 +1528,20 @@ function playCheckAlert(threats){
   const seq=[0,140,280,560,700,840];
   seq.forEach((delay,i)=>setTimeout(()=>tone(i%2?120:220,.13),delay));
   dangerAlertTimer=setTimeout(()=>{dangerAlertTimer=null},1000);
+}
+function playCompressionAlert(){
+  const screen=$("#battle-screen"),banner=$("#compression-alert-banner"),text=$("#compression-alert-text");
+  const active=compressionRuleAt(state?.turn||0),warning=compressionWarningAt(state?.turn||0);
+  const show=!!(active||warning);
+  screen?.classList.toggle("compression-alert-screen",show);
+  banner?.classList.toggle("show",show);
+  if(!show)return;
+  const remain=warning?warning.turn-state.turn:0;
+  if(text)text.textContent=active?`${active.label}だけが安全地帯です`:remain>0?`あと${remain}ターンで外周が消えます`:"次の解決で外周が消えます";
+  const key=`${state.turn}:${active?.label||warning?.label||""}:${remain}`;
+  if(key===lastCompressionAlertKey)return;
+  lastCompressionAlertKey=key;
+  if(warning||active)[0,180,360].forEach((delay,i)=>setTimeout(()=>tone(i%2?360:520,.1),delay));
 }
 function onlineCommittedOwners(){
   const set=new Set();
@@ -1860,9 +1885,10 @@ function renderEventOverlay(board){
   renderEventOverlay(board);
   renderReservationOverlay(board);
   const activeCompression=compressionRuleAt(state.turn),warningCompression=compressionWarningAt(state.turn);
-  const compressionText=activeCompression?` / 圧縮 ${activeCompression.label}`:warningCompression?` / 圧縮まで${warningCompression.turn-state.turn}T`:"";
+  const compressionText=activeCompression?` / 縮小中 ${activeCompression.label}`:warningCompression?` / 縮小警告 あと${warningCompression.turn-state.turn}T`:"";
   $("#turn-label").textContent=`第${state.turn}ターン${compressionText}`;
   renderFactionStatus(threats);
+  playCompressionAlert();
   playCheckAlert(threats);
   renderHand();
 }
